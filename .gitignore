@@ -1,0 +1,15 @@
+/*
+
+!.gitignore
+!*.xpr
+!/*.srcs/
+!/*.wcfg/
+!/*.sch/
+!/*notes*/
+/*notes*/.obsidian/
+
+# except .wdb files inside .sim directories
+!/*.sim/
+!/*.sim/**/
+/*.sim/**/*
+!/*.sim/**/*.wdb
