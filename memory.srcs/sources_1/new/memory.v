@@ -21,8 +21,8 @@ module tb;
 			mem_write <= 0;
 			address <= 0;
 			write_data <= 0;
-			valToWrite <= 1;
-			adrsToWrite <= 1;
+			valToWrite <= 0;
+			adrsToWrite <= 0;
 			state <= 0;
 		end else begin
 			case (state)
@@ -38,8 +38,8 @@ module tb;
 				await_read_st: begin
 					if (mem_operation_done) begin
 						mem_operation = 0;
-						valToWrite = read_data;
-						state = read_init_st;
+						valToWrite = read_data+1;
+						state = write_init_st;
 					end
 				end
 				write_init_st: begin
@@ -180,30 +180,43 @@ module virtual_memory
     );
    reg [7:0] mem [size:0] [3:0]; // 4 bytes in each word
    integer i;
+	// state machine vars
+	localparam idle_st = 0, read_st = 1, write_st = 2, done_st = 3;
+	reg [$clog2(done_st)-1:0] state;
+
+
 	always @(posedge i_clk) begin
 		if (i_rst) begin
 			i <= 0;
+			state <= 0;
 			o_read_data <= 0;
 			o_mem_operation_done <= 1;
 			for (i=0; i<=size; i=i+1) begin
 				{mem[i][3], mem[i][2], mem[i][1], mem[i][0]} <= 0;
 			end
 		end else begin
-			if (i_mem_operation && o_mem_operation_done) begin
-				if (i_mem_write) begin
-					// write operation
-					o_mem_operation_done <= 0;
+			case(state)
+				idle_st: begin
+					if (i_mem_operation) begin
+						o_mem_operation_done <= 0;
+						state <= i_mem_write ? write_st : read_st;
+					end
+				end
+				read_st: begin
+					o_read_data <= #20000 mem[i_address[31:2]][i_address[1:0]];
 					#20000;
-					mem[i_address[31:2]][i_address[1:0]] <= i_write_data;
-					o_mem_operation_done 					 <= 1;
-		 		end else begin
-					// read operation
-					o_mem_operation_done <= 0;
+					state <= done_st;
+				end
+				write_st: begin
+					mem[i_address[31:2]][i_address[1:0]] <= #20000 i_write_data;
 					#20000;
-					o_read_data 			<= mem[i_address[31:2]][i_address[1:0]];
+					state <= done_st;
+				end
+				done_st: begin
 					o_mem_operation_done <= 1;
-		 		end
-			end
+					state <= idle_st;
+				end
+			endcase
 		end
 	end
 endmodule
