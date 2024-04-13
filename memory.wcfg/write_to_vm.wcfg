@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="294.657750000 ms"></ZoomStartTime>
+      <ZoomEndTime time="421.068450001 ms"></ZoomEndTime>
+      <Cursor1Time time="400.000000000 ms"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="240"></NameColumnWidth>
+      <ValueColumnWidth column_width="72"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="8" />
+   <wvobject fp_name="/tb/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/mem_operation" type="logic">
+      <obj_property name="ElementShortName">mem_operation</obj_property>
+      <obj_property name="ObjectShortName">mem_operation</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/mem_write" type="logic">
+      <obj_property name="ElementShortName">mem_write</obj_property>
+      <obj_property name="ObjectShortName">mem_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/address" type="array">
+      <obj_property name="ElementShortName">address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">address[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/write_data" type="array">
+      <obj_property name="ElementShortName">write_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">write_data[7:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/mem/v_mem/o_mem_operation_done" type="logic">
+      <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
+      <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb/mem/v_mem/mem" type="array">
+      <obj_property name="ElementShortName">mem[32:0][3:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">mem[32:0][3:0][7:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb/mem/v_mem/mem[32]" type="array">
+         <obj_property name="ElementShortName">[32][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[32][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[31]" type="array">
+         <obj_property name="ElementShortName">[31][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[31][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[30]" type="array">
+         <obj_property name="ElementShortName">[30][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[30][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[29]" type="array">
+         <obj_property name="ElementShortName">[29][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[29][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[28]" type="array">
+         <obj_property name="ElementShortName">[28][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[28][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[27]" type="array">
+         <obj_property name="ElementShortName">[27][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[27][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[26]" type="array">
+         <obj_property name="ElementShortName">[26][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[26][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[25]" type="array">
+         <obj_property name="ElementShortName">[25][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[25][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[24]" type="array">
+         <obj_property name="ElementShortName">[24][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[24][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[23]" type="array">
+         <obj_property name="ElementShortName">[23][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[23][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[22]" type="array">
+         <obj_property name="ElementShortName">[22][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[22][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[21]" type="array">
+         <obj_property name="ElementShortName">[21][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[21][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[20]" type="array">
+         <obj_property name="ElementShortName">[20][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[20][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[19]" type="array">
+         <obj_property name="ElementShortName">[19][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[19][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[18]" type="array">
+         <obj_property name="ElementShortName">[18][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[18][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[17]" type="array">
+         <obj_property name="ElementShortName">[17][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[17][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[16]" type="array">
+         <obj_property name="ElementShortName">[16][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[16][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[15]" type="array">
+         <obj_property name="ElementShortName">[15][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[15][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[14]" type="array">
+         <obj_property name="ElementShortName">[14][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[14][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[13]" type="array">
+         <obj_property name="ElementShortName">[13][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[13][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[12]" type="array">
+         <obj_property name="ElementShortName">[12][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[12][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[11]" type="array">
+         <obj_property name="ElementShortName">[11][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[11][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[10]" type="array">
+         <obj_property name="ElementShortName">[10][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[10][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[9]" type="array">
+         <obj_property name="ElementShortName">[9][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[9][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[8]" type="array">
+         <obj_property name="ElementShortName">[8][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[8][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[7]" type="array">
+         <obj_property name="ElementShortName">[7][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[7][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[6]" type="array">
+         <obj_property name="ElementShortName">[6][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[6][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[5]" type="array">
+         <obj_property name="ElementShortName">[5][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[5][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[4]" type="array">
+         <obj_property name="ElementShortName">[4][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[4][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[3]" type="array">
+         <obj_property name="ElementShortName">[3][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[3][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[2]" type="array">
+         <obj_property name="ElementShortName">[2][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[2][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[1]" type="array">
+         <obj_property name="ElementShortName">[1][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <wvobject fp_name="/tb/mem/v_mem/mem[1][3]" type="array">
+            <obj_property name="ElementShortName">[3][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[3][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb/mem/v_mem/mem[1][2]" type="array">
+            <obj_property name="ElementShortName">[2][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[2][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb/mem/v_mem/mem[1][1]" type="array">
+            <obj_property name="ElementShortName">[1][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[1][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb/mem/v_mem/mem[1][0]" type="array">
+            <obj_property name="ElementShortName">[0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[0][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/tb/mem/v_mem/mem[0]" type="array">
+         <obj_property name="ElementShortName">[0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <wvobject fp_name="/tb/mem/v_mem/mem[0][3]" type="array">
+            <obj_property name="ElementShortName">[3][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[3][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb/mem/v_mem/mem[0][2]" type="array">
+            <obj_property name="ElementShortName">[2][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[2][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb/mem/v_mem/mem[0][1]" type="array">
+            <obj_property name="ElementShortName">[1][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[1][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb/mem/v_mem/mem[0][0]" type="array">
+            <obj_property name="ElementShortName">[0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[0][7:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+</wave_config>

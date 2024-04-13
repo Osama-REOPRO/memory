@@ -1,0 +1,24 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+address	memory.v	/^	reg [31:0] address;$/;"	r
+clk	memory.v	/^	reg clk, rst;$/;"	r
+i	memory.v	/^   integer i;$/;"	r
+i_address	memory.v	/^   input		  [31:0] i_address,$/;"	p
+i_clk	memory.v	/^	input         		i_clk, $/;"	p
+i_mem_operation	memory.v	/^   input         		i_mem_operation,$/;"	p
+input	memory.v	/^   input  	  [31:0] i_write_data,$/;"	p
+input	memory.v	/^   input      		   i_mem_write,$/;"	p
+input	memory.v	/^   input         		i_rst,$/;"	p
+mem	memory.v	/^   reg [31:0] mem [31:0];$/;"	r
+mem_operation	memory.v	/^	reg mem_operation;$/;"	r
+mem_write	memory.v	/^	reg mem_write;$/;"	r
+read_data	memory.v	/^	wire [31:0] read_data;$/;"	n
+reg	memory.v	/^   output reg [31:0] o_read_data$/;"	p
+rst	memory.v	/^	reg clk, rst;$/;"	r
+tb	memory.v	/^module tb;$/;"	m
+virtual_memory	memory.v	/^module virtual_memory($/;"	m
+write_data	memory.v	/^	reg [31:0] write_data;$/;"	r
