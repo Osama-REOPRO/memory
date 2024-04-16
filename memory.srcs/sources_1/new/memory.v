@@ -95,6 +95,19 @@ module memory(
     
    assign o_read_data = /* cache_hit_1? cache_read_data_1 : cache_hit_2? cache_read_data_2 : cache_hit_physical? cache_read_data_physical : */ virtual_memory_read_data;
    wire hit_occurred = cache_hit_1 || cache_hit_2 || cache_hit_physical;
+
+
+	cache #(.C(8), .b(1), .N(1)) 
+		cache_direct_mapped_l_1 (
+		.i_clk(clk),
+		.i_rst(rst),
+		.i_mem_operation(mem_operation),
+		.i_mem_write(mem_write), // later
+		.i_address(i_address),
+		.o_cache_hit(cache_hit_1),
+		.i_write_data(write_data),
+		.o_read_data(cache_read_data_1)
+		);
    
 //   cache cache_level_1 (
 //		.i_clk(clk),
@@ -143,9 +156,9 @@ endmodule
 
 module cache
 	#(
-		parameter C = 8,   // capacity
-		parameter b = 2,    // block size
-		parameter N = 2  // degree of associativity
+		parameter C = 8,   // capacity (words)
+		parameter b = 2,   // block size
+		parameter N = 2    // degree of associativity
 	)
 	(
 		input         		i_clk, 
