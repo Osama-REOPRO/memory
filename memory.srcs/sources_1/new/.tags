@@ -1,0 +1,73 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+C	memory.v	/^		parameter C = 8,   \/\/ capacity (words)$/;"	c
+N	memory.v	/^		parameter N = 2    \/\/ degree of associativity$/;"	c
+address	memory.v	/^	reg  [31:0] address;$/;"	r
+adrsToWrite	memory.v	/^	integer adrsToWrite = 1;$/;"	r
+block_offset_adrs	memory.v	/^	wire [Block_offset_nbytes-1:0] block_offset_adrs = i_address[Byte_offset_nbytes	+:	Block_offset_nbytes-1	];$/;"	n
+byte_offset_adrs	memory.v	/^	wire [Byte_offset_nbytes-1:0]  byte_offset_adrs  =	i_address[						 0 +:	Byte_offset_nbytes-1		]; $/;"	n
+cache	memory.v	/^module cache$/;"	m
+cache_hit_1	memory.v	/^   wire 		 	cache_hit_1, 		 cache_hit_2, 		  cache_hit_physical;$/;"	n
+cache_hit_2	memory.v	/^   wire 		 	cache_hit_1, 		 cache_hit_2, 		  cache_hit_physical;$/;"	n
+cache_hit_physical	memory.v	/^   wire 		 	cache_hit_1, 		 cache_hit_2, 		  cache_hit_physical;$/;"	n
+cache_read_data_1	memory.v	/^   wire [31:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;$/;"	n
+cache_read_data_2	memory.v	/^   wire [31:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;$/;"	n
+cache_read_data_physical	memory.v	/^   wire [31:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;$/;"	n
+clk	memory.v	/^	reg  			clk, rst;$/;"	r
+data_mem	memory.v	/^	reg [7:0] 				data_mem  [N-1:0] [S-1:0] [b-1:0] [3:0];$/;"	r
+dirty_mem	memory.v	/^	reg 						dirty_mem [N-1:0] [S-1:0];$/;"	r
+hit_N	memory.v	/^	reg [$clog2(N)-1:0] hit_N;$/;"	r
+hit_occurred	memory.v	/^   wire hit_occurred = cache_hit_1 || cache_hit_2 || cache_hit_physical;$/;"	n
+i	memory.v	/^   integer i;$/;"	r
+i0	memory.v	/^	integer i0, i1, i2, i3;$/;"	r
+i1	memory.v	/^	integer i0, i1, i2, i3;$/;"	r
+i2	memory.v	/^	integer i0, i1, i2, i3;$/;"	r
+i3	memory.v	/^	integer i0, i1, i2, i3;$/;"	r
+i_clk	memory.v	/^	input         i_clk, $/;"	p
+i_mem_operation	memory.v	/^		input         		i_mem_operation,$/;"	p
+i_mem_operation	memory.v	/^   input         		i_mem_operation,$/;"	p
+i_mem_operation	memory.v	/^   input         i_mem_operation,$/;"	p
+i_mem_write	memory.v	/^		input      		   i_mem_write,$/;"	p
+i_mem_write	memory.v	/^   input  		  i_mem_write,$/;"	p
+i_mem_write	memory.v	/^   input      		   i_mem_write,$/;"	p
+i_write_data	memory.v	/^		input  	  [7:0]  i_write_data,$/;"	p
+i_write_data	memory.v	/^   input  	  [7:0]  i_write_data,$/;"	p
+i_write_data	memory.v	/^   input  [7:0]  i_write_data,$/;"	p
+input	memory.v	/^		input		  [31:0] i_address,$/;"	p
+input	memory.v	/^		input         		i_rst,$/;"	c
+input	memory.v	/^   input		  [31:0] i_address,$/;"	p
+input	memory.v	/^   input	 [31:0] i_address,$/;"	p
+input	memory.v	/^   input         		i_rst,$/;"	c
+input	memory.v	/^   input         i_rst,$/;"	p
+mem	memory.v	/^   reg [7:0] mem [size:0] [3:0]; \/\/ 4 bytes in each word$/;"	r
+mem_operation	memory.v	/^	reg  			mem_operation;$/;"	r
+mem_operation_done	memory.v	/^	wire 			mem_operation_done;$/;"	n
+mem_write	memory.v	/^	reg  			mem_write;$/;"	r
+memory	memory.v	/^module memory($/;"	m
+output	memory.v	/^		output reg			o_mem_operation_done,$/;"	p
+output	memory.v	/^		output reg [7:0]  o_read_data$/;"	p
+output	memory.v	/^   output        o_mem_operation_done,$/;"	p
+output	memory.v	/^   output [7:0]  o_read_data$/;"	p
+output	memory.v	/^   output reg			o_mem_operation_done,$/;"	p
+output	memory.v	/^   output reg [7:0]  o_read_data$/;"	p
+parameter	memory.v	/^		parameter b = 2,   \/\/ block size$/;"	c
+read_data	memory.v	/^	wire [7:0]  read_data;$/;"	n
+reg	memory.v	/^		output reg			o_cache_hit,$/;"	p
+rst	memory.v	/^	reg  			clk, rst;$/;"	r
+set_adrs	memory.v	/^	wire [Set_nbytes-1:0] 			 set_adrs 			 =	i_address[Block_offset_nbytes	+:	Set_nbytes-1				];$/;"	n
+size	memory.v	/^		parameter size = 32 \/\/ number of words$/;"	c
+state	memory.v	/^	integer state = 0;$/;"	r
+state	memory.v	/^	reg [$clog2(done_st)-1:0] state;$/;"	r
+tag_adrs	memory.v	/^	wire [Tag_nbytes-1:0] 			 tag_adrs 			 =	i_address[Set_nbytes				+:	Tag_nbytes-1				];$/;"	n
+tag_mem	memory.v	/^	reg [Tag_nbytes-1:0] tag_mem   [N-1:0] [S-1:0];$/;"	r
+tb	memory.v	/^module tb;$/;"	m
+use_mem	memory.v	/^	reg 						use_mem   			[S-1:0];$/;"	r
+valToWrite	memory.v	/^	integer valToWrite = 1;$/;"	r
+valid_mem	memory.v	/^	reg 						valid_mem [N-1:0] [S-1:0];$/;"	r
+virtual_memory	memory.v	/^module virtual_memory$/;"	m
+virtual_memory_read_data	memory.v	/^   wire [31:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;$/;"	n
+write_data	memory.v	/^	reg  [7:0]  write_data;$/;"	r

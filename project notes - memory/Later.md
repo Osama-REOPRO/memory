@@ -1,0 +1,1 @@
+- [ ] add delay to [[cach hit]], we can't figure out that we had a hit without a delay
