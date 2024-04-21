@@ -100,6 +100,39 @@ integer valToWrite = 1;
 		output [7:0]  o_read_data
 	);
 
+
+	// state machine vars
+	localparam ready_st = 0, busy_st = 1, valid_st = 2, post_op_st = 3;
+	reg [$clog2(3):0] state;
+	always @(*) begin
+		case (state)
+			ready_st: begin
+				if (i_mem_operation) begin
+					state = busy_st;
+				end
+			end
+			busy_st: begin
+				if (cache_valid) begin
+					state = valid_st;
+				end
+			end
+			valid_st: begin
+				o_mem_operation_done = 1;
+				if (!i_mem_operation) begin
+					state = busy_st;
+				end
+			end
+		endcase
+	end
+
+
+
+
+
+
+
+
+
 	wire 		 	cache_hit_1, 		 cache_hit_2, 		  cache_hit_physical;
 	wire [31:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;
 
