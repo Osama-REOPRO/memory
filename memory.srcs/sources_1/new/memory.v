@@ -10,6 +10,10 @@
 `define MEM_VALID_STATE  2
 `define MEM_READY_STATE  3
 
+
+`define memory_system_state_reg_len 3
+`define cache_state_reg_len 3
+
 module tb;
 reg  			clk, rst;
 reg  			mem_operation;
@@ -102,8 +106,7 @@ integer valToWrite = 1;
 
 	// state machine vars
 	localparam ready_st = 0, busy_st = 1, valid_st = 2, prep_st = 3;
-	localparam memory_state_reg_len = $clog2(3);
-	reg [memory_state_reg_len:0] state;
+	reg [`memory_system_state_reg_len-1:0] state;
 	always @(*) begin
 		case (state)
 			ready_st: begin
@@ -210,23 +213,16 @@ integer valToWrite = 1;
 		parameter N = 2    // degree of associativity
 	)
 	(
-		input         		i_clk, 
-		input         		i_rst,
-		input         		i_mem_operation,
-		output reg [1:0]	o_state,
-		input      		   i_mem_write,
-		input		  [31:0] i_address,
-		// output reg			o_cache_hit,
-		output reg [1:0]	o_lookup_state,
-		input					i_another_cache_hit,
-		input  	  [7:0]  i_write_data,
-		output reg [7:0]  o_read_data
+		input       											  		i_clk, 
+		input         													i_rst,
+		input 	  [`memory_system_state_reg_len-1:0]		i_mem_system_state,
+		input 	  [`cache_state_reg_len-1:0]					i_lower_cache_state,
+		output reg [`cache_state_reg_len-1:0]					o_state,
+		input 											     		   i_mem_write,
+		input		  [31:0]												i_address,
+		input  	  [7:0] 												i_write_data,
+		output reg [7:0]												o_read_data
 	);
-
-	// registers that store inputs while they are in use
-	reg 		  mem_write;
-	reg [31:0] address;
-	reg [7:0]  write_data;
 
 	localparam B = C/b;  // number of blocks
 	localparam S = B/N;  // number of sets
@@ -243,9 +239,6 @@ integer valToWrite = 1;
 	reg 						dirty_mem [N-1:0] [S-1:0];
 	reg 						use_mem   			[S-1:0];
 
-	// reg [Use_bit + ((2+Tag_nbytes+(32*b)) * N) - 1:0] cache_mem [S-1:0]; 
-	// maybe there is no need to combine them into a single thing
-
 	// todo: check if should do -1
 	wire [Byte_offset_nbytes-1:0]  byte_offset_adrs  =	i_address[						 0 +:	Byte_offset_nbytes-1		]; 
 	wire [Block_offset_nbytes-1:0] block_offset_adrs = i_address[Byte_offset_nbytes	+:	Block_offset_nbytes-1	];
@@ -258,16 +251,16 @@ integer valToWrite = 1;
 	always @(*) begin
 		if (i_rst) begin 
 			hit_N = 0;
-			o_lookup_state = `lookup_idle;
+			o_state = `lookup_idle;
 		end else if (i_mem_operation) begin
-			o_lookup_state = `lookup_busy;
+			o_state = `lookup_busy;
 			#200;
-			o_lookup_state = `lookup_miss; // todo: does this work? I remember this was problematic
+			o_state = `lookup_miss; // todo: does this work? I remember this was problematic
 			for (i=0; i<N; i=i+1) begin
 				if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
 					hit_N = i;
 					// o_cache_hit = 1;
-					o_lookup_state = `lookup_hit;
+					o_state = `lookup_hit;
 				end
 			end
 		end
@@ -313,14 +306,14 @@ integer valToWrite = 1;
 			end
 			busy_read_st: begin
 				o_state <= `MEM_BUSY_STATE;
-				if (o_lookup_state == `lookup_hit) begin
+				if (o_state == `lookup_hit) begin
 					o_read_data <= #200 data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
 					#200;
 				end else if (i_another_cache_hit) begin
 					// means this cache is larger, another smaller cache hit first
 					// simply go back to idle
 					o_state <= invalid_st;
-				end else if (o_lookup_state == `lookup_miss) begin
+				end else if (o_state == `lookup_miss) begin
 				end
 			end
 			busy_write_st: begin
