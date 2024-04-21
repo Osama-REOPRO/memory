@@ -1,1 +1,3 @@
 - [ ] add delay to [[cach hit]], we can't figure out that we had a hit without a delay
+- [ ] lookup how memory capacity correlates with latency, then implement memory delay based on the capacity parameter
+- [ ] if received address is already being output, do nothing

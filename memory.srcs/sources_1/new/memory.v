@@ -178,7 +178,7 @@ integer valToWrite = 1;
 		input      		   i_mem_write,
 		input		  [31:0] i_address,
 		// output reg			o_cache_hit,
-		output reg [1:0]	o_lookup_state;
+		output reg [1:0]	o_lookup_state,
 		input					i_another_cache_hit,
 		input  	  [7:0]  i_write_data,
 		output reg [7:0]  o_read_data

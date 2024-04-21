@@ -1,0 +1,29 @@
+{ 
+signal : [
+  { "name": "clk", 						"wave": "P.............." }, 
+  { "name": "i_mem_operation", 			"wave": "01............." },
+  { "name": "i_mem_write", 				"wave": "x0.............", "data": ["read data"] },
+  { "name": "i_write_data", 			"wave": "x..............", "data": ["read data"] },
+  { "name": "o_read_data", 				"wave": "x.....=........", "data": ["read data"] },
+  { "name": "o_state", 	 				"wave": "43.....5......7", "data": ['invalid','busy', 'valid', 'ready'] },
+  {},
+  ['L0', 
+   	{ "name": "o_state", 	 			"wave": "439........6...", "data": ['invalid','lookup', 'miss', 'external_hit'] },
+   	{ "name": "valid", 					"wave": "0.............."},
+    { "name": "o_read_data", 			"wave": "x..............", "data": ["read data"] },
+   	{ "name": "i_another_cache_hit", 	"wave": "x.0...1........"}
+  ], {},
+  ['L1', 
+   	{ "name": "o_state", 	 			"wave": "43.7.......5...", "data": ['invalid','lookup', 'hit', 'valid'] },
+    { "name": "o_read_data", 			"wave": "x..........2...", "data": ["read data"] },
+   	{ "name": "i_another_cache_hit", 	"wave": "x0............."}
+  ], {},
+  ['Physical', 
+   	{ "name": "o_state", 	 			"wave": "43.5...........", "data": ['invalid','lookup', 'valid'] },
+    { "name": "o_read_data", 			"wave": "x..............", "data": ["read data"] },
+   	{ "name": "i_another_cache_hit", 	"wave": "x.0...1........"}
+  ], {},
+],
+head: {text: ['tspan', {class:'h1'}, 'Read Operation']},
+config: { hscale: 2 }
+}
