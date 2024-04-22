@@ -1,10 +1,5 @@
 `timescale 1us / 1ns
 
-`define lookup_idle 		 0
-`define lookup_busy 		 1
-`define lookup_hit  		 2
-`define lookup_miss 		 3
-
 `define MEM_INVALID_STATE 0
 `define MEM_BUSY_STATE   1
 `define MEM_VALID_STATE  2
@@ -13,6 +8,17 @@
 
 `define memory_system_state_reg_len 3
 `define cache_state_reg_len 3
+
+
+`define ready_st_mem_sys 0
+`define busy_st_mem_sys 1
+`define valid_st_mem_sys 2
+`define prep_st_mem_sys 3
+
+
+`define valid_st_cache 0
+`define miss_st_cache 1
+`define hit_st_cache 2
 
 module tb;
 reg  			clk, rst;
@@ -115,12 +121,14 @@ integer valToWrite = 1;
 				end
 			end
 			busy_st: begin
-				if (cache_valid) begin
+				if (cache_valid) begin /* todo */
 					state = valid_st;
 				end
 			end
 			valid_st: begin
-				if (!i_mem_operation) begin
+				if (all_caches_valid) begin /* todo */
+					state = ready_st;
+				end else if (!i_mem_operation) begin
 					state = prep_st;
 				end
 			end
@@ -245,35 +253,79 @@ integer valToWrite = 1;
 	wire [Set_nbytes-1:0] 			 set_adrs 			 =	i_address[Block_offset_nbytes	+:	Set_nbytes-1				];
 	wire [Tag_nbytes-1:0] 			 tag_adrs 			 =	i_address[Set_nbytes				+:	Tag_nbytes-1				];
 
+	// internal state
+	localparam valid_st = 0, lookup_st = 1, hit_st = 2, miss_st = 3, load_missing_st = 4;
+	reg [$clog2(5)-1:0] state;
+	always @(*) begin
+		if(i_rst) state = valid_st;
+		else begin
+			case (state) begin
+				valid_st: begin
+					if(i_mem_system_state==`busy_st_mem_sys && i_lower_cache_state == `miss_st_cache) begin
+						state = lookup_st;
+					end
+				end
+				// lookup_st: begin
+					// handlede elsewhere
+				// end
+				// hit_st: begin
+					// handlede elsewhere
+				// end
+				miss_st: begin
+					if (i_mem_system_state == `valid_st_mem_sys) begin
+						state = load_missing_st;
+					end
+				end
+			endcase
+		end
+	end
+
+	// external state
+	always @(*) begin
+		if(i_rst) o_state = `valid_st_cache;
+		else begin
+			case (o_state) begin
+				`valid_st_cache: begin
+					if				(state == hit_st)		o_state = `hit_st_cache;
+					end else if (state == miss_st)	o_state = `miss_st_cache;
+					end else									o_state = `valid_st_cache;
+				end
+				`hit_st_cache: begin
+					if (state == valid_st) begin
+						o_state = `valid_st_cache;
+					end
+				end
+				`miss_st_cache: begin
+					if (state == valid_st) begin
+						o_state = `valid_st_cache;
+					end
+				end
+			endcase
+		end
+	end
+
+	// hit test
 	integer i;
-	// todo: test hit
-	reg [$clog2(N)-1:0] hit_N;
+	reg [$clog2(N)-1:0] hit_N; // which of the N-ways the hit occurred in
 	always @(*) begin
 		if (i_rst) begin 
 			hit_N = 0;
-			o_state = `lookup_idle;
-		end else if (i_mem_operation) begin
-			o_state = `lookup_busy;
+		end else if (state == lookup_st) begin
 			#200;
-			o_state = `lookup_miss; // todo: does this work? I remember this was problematic
+			state = miss_st; // todo: does this work? I remember this was problematic
 			for (i=0; i<N; i=i+1) begin
 				if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
 					hit_N = i;
-					// o_cache_hit = 1;
-					o_state = `lookup_hit;
+					state = hit_st;
 				end
 			end
 		end
 	end
 
-	// state machine vars
-	localparam idle_st = 0, read_st = 1, write_st = 2, done_st = 3;
-	reg [$clog2(done_st)-1:0] state;
-
+	// actual read/write operations
 	integer i0, i1, i2, i3;
 	always @(posedge i_clk) begin
 		if (i_rst) begin
-			o_state <= 0;
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
 
@@ -292,50 +344,22 @@ integer valToWrite = 1;
 				end
 			end
 		end else begin
-			case(state)
-				invalid_st: begin
-					o_state <= `MEM_INVALID_STATE;
-					if (i_mem_operation) begin
-						// store data for whole operation
-						mem_write <= i_mem_write;
-						address <= i_address;
-						if (i_mem_write) write_data <= i_write_data;
-
-						state <= i_mem_write ? busy_write_st : busy_read_st;
+			if (state == hit_st || state == load_missing_st) begin // todo: then why the two states?
+				if (i_mem_write) begin
+					// write operation (todo)
+					// mem[i_address[31:2]][i_address[1:0]] <= #20000 i_write_data; 
+					// todo: this is completely outdated, it comes from virtual memory, it was copied from there
+					// #20000;
+					state <= valid_st;
+				end else begin
+					// read operation
+					#20000
+					o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
+					state <= valid_st;
 				end
 			end
-			busy_read_st: begin
-				o_state <= `MEM_BUSY_STATE;
-				if (o_state == `lookup_hit) begin
-					o_read_data <= #200 data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
-					#200;
-				end else if (i_another_cache_hit) begin
-					// means this cache is larger, another smaller cache hit first
-					// simply go back to idle
-					o_state <= invalid_st;
-				end else if (o_state == `lookup_miss) begin
-				end
-			end
-			busy_write_st: begin
-				o_state <= `MEM_BUSY_STATE;
-				if (o_cache_hit) begin
-					o_read_data <= #200 data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
-					#200;
-					state <= done_st;
-				end
-			end
-			write_st: begin
-				mem[i_address[31:2]][i_address[1:0]] <= #20000 i_write_data;
-				#20000;
-				state <= done_st;
-			end
-			done_st: begin
-				o_mem_operation_done <= 1;
-				state <= idle_st;
-			end
-		endcase
+		end
 	end
-end
 endmodule
 
 module virtual_memory
