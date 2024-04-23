@@ -110,64 +110,56 @@ integer valToWrite = 1;
 		output [7:0]  o_read_data
 	);
 
-	// state machine vars
-	localparam ready_st = 0, busy_st = 1, valid_st = 2, prep_st = 3;
 	reg [`memory_system_state_reg_len-1:0] state;
 	always @(*) begin
 		case (state)
-			ready_st: begin
+			`ready_st_mem_sys: begin
 				if (i_mem_operation) begin
-					state = busy_st;
+					state = `busy_st_mem_sys;
 				end
 			end
-			busy_st: begin
+			`busy_st_mem_sys: begin
 				if (cache_valid) begin /* todo */
-					state = valid_st;
+					state = `valid_st_mem_sys;
 				end
 			end
-			valid_st: begin
+			`valid_st_mem_sys: begin
 				if (all_caches_valid) begin /* todo */
-					state = ready_st;
+					state = `ready_st_mem_sys;
 				end else if (!i_mem_operation) begin
-					state = prep_st;
+					state = `prep_st_mem_sys;
 				end
 			end
-			prep_st: begin
+			`prep_st_mem_sys: begin
 				if (all_caches_valid) begin
-					state = ready_st;
+					state = `ready_st_mem_sys;
 				end
 			end
 		endcase
 	end
 
-	assign o_mem_operation_done = state == valid_st ? 1 : 0;
+	assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 
-
-
-
-
-
-
-
-
-	// wire 		 	cache_hit_1, 		 cache_hit_2, 		  cache_hit_physical;
-	// wire [31:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;
+	// cache instantiations
+	// wire [7:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;
 
 	// assign o_read_data = /* cache_hit_1? cache_read_data_1 : cache_hit_2? cache_read_data_2 : cache_hit_physical? cache_read_data_physical : */ virtual_memory_read_data;
-	// wire hit_occurred = cache_hit_1 || cache_hit_2 || cache_hit_physical;
+
+	wire hit_occurred = cache_valid_1 || cache_valid_2 || cache_valid_physical;
 
 
-	// cache #(.C(8), .b(1), .N(1)) 
-	// cache_direct_mapped_l_1 (
-		// .i_clk(clk),
-		// .i_rst(rst),
-		// .i_mem_operation(mem_operation),
-		// .i_mem_write(mem_write), // later
-		// .i_address(i_address),
-		// .o_cache_hit(cache_hit_1),
-		// .i_write_data(write_data),
-		// .o_read_data(cache_read_data_1)
-	// );
+	cache #(.C(8), .b(1), .N(1)) 
+	cache_direct_mapped_l_1 (
+		.i_clk(i_clk),
+		.i_rst(i_rst),
+		.i_mem_system_state(
+		.i_mem_operation(mem_operation),
+		.i_mem_write(mem_write), // later
+		.i_address(i_address),
+		.o_cache_hit(cache_hit_1),
+		.i_write_data(write_data),
+		.o_read_data(cache_read_data_1)
+	);
 
 	//   cache cache_level_1 (
 	//		.i_clk(clk),
@@ -312,13 +304,14 @@ integer valToWrite = 1;
 			hit_N = 0;
 		end else if (state == lookup_st) begin
 			#200;
-			state = miss_st; // todo: does this work? I remember this was problematic
+			// state = miss_st; // todo: does this work? I remember this was problematic
 			for (i=0; i<N; i=i+1) begin
 				if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
 					hit_N = i;
-					state = hit_st;
+					// state = hit_st;
 				end
 			end
+			state = |hit_N ? hit_st : miss_st;
 		end
 	end
 
@@ -347,9 +340,9 @@ integer valToWrite = 1;
 			if (state == hit_st || state == load_missing_st) begin // todo: then why the two states?
 				if (i_mem_write) begin
 					// write operation (todo)
-					// mem[i_address[31:2]][i_address[1:0]] <= #20000 i_write_data; 
 					// todo: this is completely outdated, it comes from virtual memory, it was copied from there
-					// #20000;
+					#20000
+					data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 					state <= valid_st;
 				end else begin
 					// read operation
@@ -361,6 +354,10 @@ integer valToWrite = 1;
 		end
 	end
 endmodule
+
+
+
+
 
 module virtual_memory
 #(
