@@ -1,24 +1,20 @@
 `timescale 1us / 1ns
 
-`define MEM_INVALID_STATE 0
-`define MEM_BUSY_STATE   1
-`define MEM_VALID_STATE  2
-`define MEM_READY_STATE  3
-
-
-`define memory_system_state_reg_len 3
-`define cache_state_reg_len 3
-
-
+// memory system states
 `define ready_st_mem_sys 0
 `define busy_st_mem_sys 1
 `define valid_st_mem_sys 2
 `define prep_st_mem_sys 3
 
+`define memory_system_state_reg_len 4
 
+// cache states
 `define valid_st_cache 0
 `define miss_st_cache 1
 `define hit_st_cache 2
+`define disconnected_st_cache 3
+
+`define cache_state_reg_len 4
 
 module tb;
 reg  			clk, rst;
@@ -110,6 +106,10 @@ integer valToWrite = 1;
 		output [7:0]  o_read_data
 	);
 
+	wire [`cache_state_reg_len-1:0] cache_state_0;
+	wire cache_valid = 		(cache_state_0 == `valid_st_cache) || (mem_operation_done_virtual_memory);
+	wire all_caches_valid = (cache_state_0 == `valid_st_cache);
+
 	reg [`memory_system_state_reg_len-1:0] state;
 	always @(*) begin
 		case (state)
@@ -137,73 +137,37 @@ integer valToWrite = 1;
 			end
 		endcase
 	end
-
+	wire mem_operation_done_virtual_memory; // todo: when is this asserted? it should be deasserted after done
 	assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 
 	// cache instantiations
-	// wire [7:0] cache_read_data_1, cache_read_data_2, cache_read_data_physical, virtual_memory_read_data;
+	wire [7:0] read_data_cache_0, read_data_virtual_mem;
 
-	// assign o_read_data = /* cache_hit_1? cache_read_data_1 : cache_hit_2? cache_read_data_2 : cache_hit_physical? cache_read_data_physical : */ virtual_memory_read_data;
-
-	wire hit_occurred = cache_valid_1 || cache_valid_2 || cache_valid_physical;
-
+	assign o_read_data = (cache_state_0 == `valid_st_cache) ? read_data_cache_0 : read_data_virtual_mem;
 
 	cache #(.C(8), .b(1), .N(1)) 
-	cache_direct_mapped_l_1 (
+	cache_direct_mapped_l_0 (
 		.i_clk(i_clk),
 		.i_rst(i_rst),
-		.i_mem_system_state(
-		.i_mem_operation(mem_operation),
+		.i_mem_system_state(state),
+		.i_lower_cache_state(`disconnected_st_cache), // because lowest cache
+		.o_state(cache_state_0),
 		.i_mem_write(mem_write), // later
 		.i_address(i_address),
-		.o_cache_hit(cache_hit_1),
 		.i_write_data(write_data),
-		.o_read_data(cache_read_data_1)
+		.o_read_data(read_data_cache_0)
 	);
 
-	//   cache cache_level_1 (
-	//		.i_clk(clk),
-	//		.i_rst(rst),
-	//		.i_mem_operation(mem_operation),
-	//		.i_mem_write(mem_write), // later
-	//		.i_address(i_address),
-	//		.o_cache_hit(cache_hit_1),
-	//		.i_write_data(write_data),
-	//		.o_read_data(cache_read_data_1)
-	//		);
-
-	//	cache cache_level_2 (
-	//		.i_clk(clk),
-	//		.i_rst(rst),
-	//		.i_mem_operation(mem_operation && !cache_hit_1),
-	//		.i_mem_write(mem_write), // later
-	//		.i_address(i_address),
-	//		.o_cache_hit(cache_hit_2),
-	//		.i_write_data(write_data),
-	//		.o_read_data(cache_read_data_2)
-	//		);
-
-	//	cache cache_physical_memory (
-	//		.i_clk(clk),
-	//		.i_rst(rst),
-	//		.i_mem_operation(mem_operation && !cache_hit_1 && !cache_hit_2),
-	//		.i_mem_write(mem_write), // later
-	//		.i_address(i_address),
-	//		.o_cache_hit(cache_hit_2),
-	//		.i_write_data(write_data),
-	//		.o_read_data(cache_read_data_physical)
-	//		);
-
-	// virtual_memory v_mem(
-		// .i_clk(i_clk),
-		// .i_rst(i_rst),
-		// .i_mem_operation(i_mem_operation /* && !cache_hit_1 && !cache_hit_2 && !cache_hit_physical*/),
-		// .o_mem_operation_done(o_mem_operation_done),
-		// .i_mem_write(i_mem_write), // later
-		// .i_address(i_address),
-		// .i_write_data(i_write_data),
-		// .o_read_data(virtual_memory_read_data)
-	// );
+	virtual_memory v_mem(
+		.i_clk(i_clk),
+		.i_rst(i_rst),
+		.i_mem_operation(i_mem_operation && (cache_state_0 == `miss_st_cache)),
+		.o_mem_operation_done(mem_operation_done_virtual_memory), /*todo*/
+		.i_mem_write(i_mem_write), // later
+		.i_address(i_address),
+		.i_write_data(i_write_data),
+		.o_read_data(read_data_virtual_mem)
+		);
 	endmodule
 
 	module cache
@@ -251,7 +215,7 @@ integer valToWrite = 1;
 	always @(*) begin
 		if(i_rst) state = valid_st;
 		else begin
-			case (state) begin
+			case (state)
 				valid_st: begin
 					if(i_mem_system_state==`busy_st_mem_sys && i_lower_cache_state == `miss_st_cache) begin
 						state = lookup_st;
@@ -276,11 +240,11 @@ integer valToWrite = 1;
 	always @(*) begin
 		if(i_rst) o_state = `valid_st_cache;
 		else begin
-			case (o_state) begin
+			case (o_state)
 				`valid_st_cache: begin
-					if				(state == hit_st)		o_state = `hit_st_cache;
-					end else if (state == miss_st)	o_state = `miss_st_cache;
-					end else									o_state = `valid_st_cache;
+					if			(state == hit_st)		o_state = `hit_st_cache;
+					else if  (state == miss_st)	o_state = `miss_st_cache;
+					else									o_state = `valid_st_cache;
 				end
 				`hit_st_cache: begin
 					if (state == valid_st) begin
@@ -304,14 +268,13 @@ integer valToWrite = 1;
 			hit_N = 0;
 		end else if (state == lookup_st) begin
 			#200;
-			// state = miss_st; // todo: does this work? I remember this was problematic
+			state = miss_st; // todo: does this work? I remember this was problematic
 			for (i=0; i<N; i=i+1) begin
 				if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
 					hit_N = i;
-					// state = hit_st;
+					state = hit_st;
 				end
 			end
-			state = |hit_N ? hit_st : miss_st;
 		end
 	end
 
@@ -384,7 +347,7 @@ always @(posedge i_clk) begin
 		i <= 0;
 		state <= 0;
 		o_read_data <= 0;
-		o_mem_operation_done <= 1;
+		o_mem_operation_done <= 1; // todo: change this behavior, it should be 0
 		for (i=0; i<=size; i=i+1) begin
 			{mem[i][3], mem[i][2], mem[i][1], mem[i][0]} <= 0;
 		end
