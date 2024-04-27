@@ -93,52 +93,52 @@ integer valToWrite = 1;
 		#1
 		rst = 0;
 	end
-	endmodule
+endmodule
 
-	module memory(
-		input         i_clk, 
-		input         i_rst,
-		input         i_mem_operation,
-		output        o_mem_operation_done,
-		input  		  i_mem_write,
-		input	 [31:0] i_address,
-		input  [7:0]  i_write_data,
-		output [7:0]  o_read_data
-	);
+module memory(
+	input         i_clk, 
+	input         i_rst,
+	input         i_mem_operation,
+	output        o_mem_operation_done,
+	input  		  i_mem_write,
+	input	 [31:0] i_address,
+	input  [7:0]  i_write_data,
+	output [7:0]  o_read_data
+);
 
-	wire [`cache_state_reg_len-1:0] cache_state_0;
-	wire cache_valid = 		(cache_state_0 == `valid_st_cache) || (mem_operation_done_virtual_memory);
-	wire all_caches_valid = (cache_state_0 == `valid_st_cache);
+wire [`cache_state_reg_len-1:0] cache_state_0;
+wire cache_valid = 		(cache_state_0 == `valid_st_cache) || (mem_operation_done_virtual_memory);
+wire all_caches_valid = (cache_state_0 == `valid_st_cache);
 
-	reg [`memory_system_state_reg_len-1:0] state;
-	always @(*) begin
-		case (state)
-			`ready_st_mem_sys: begin
-				if (i_mem_operation) begin
-					state = `busy_st_mem_sys;
-				end
+reg [`memory_system_state_reg_len-1:0] state;
+always @(*) begin
+	case (state)
+		`ready_st_mem_sys: begin
+			if (i_mem_operation) begin
+				state = `busy_st_mem_sys;
 			end
-			`busy_st_mem_sys: begin
-				if (cache_valid) begin /* todo */
-					state = `valid_st_mem_sys;
-				end
+		end
+		`busy_st_mem_sys: begin
+			if (cache_valid) begin /* todo */
+				state = `valid_st_mem_sys;
 			end
-			`valid_st_mem_sys: begin
-				if (all_caches_valid) begin /* todo */
-					state = `ready_st_mem_sys;
-				end else if (!i_mem_operation) begin
-					state = `prep_st_mem_sys;
-				end
+		end
+		`valid_st_mem_sys: begin
+			if (all_caches_valid) begin /* todo */
+				state = `ready_st_mem_sys;
+			end else if (!i_mem_operation) begin
+				state = `prep_st_mem_sys;
 			end
-			`prep_st_mem_sys: begin
-				if (all_caches_valid) begin
-					state = `ready_st_mem_sys;
-				end
+		end
+		`prep_st_mem_sys: begin
+			if (all_caches_valid) begin
+				state = `ready_st_mem_sys;
 			end
-		endcase
-	end
-	wire mem_operation_done_virtual_memory; // todo: when is this asserted? it should be deasserted after done
-	assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
+		end
+	endcase
+end
+wire mem_operation_done_virtual_memory; // todo: when is this asserted? it should be deasserted after done
+assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 
 	// cache instantiations
 	wire [7:0] read_data_cache_0, read_data_virtual_mem;
@@ -167,7 +167,7 @@ integer valToWrite = 1;
 		.i_address(i_address),
 		.i_write_data(i_write_data),
 		.o_read_data(read_data_virtual_mem)
-		);
+	);
 	endmodule
 
 	module cache
@@ -222,10 +222,10 @@ integer valToWrite = 1;
 					end
 				end
 				// lookup_st: begin
-					// handlede elsewhere
+				// handlede elsewhere
 				// end
 				// hit_st: begin
-					// handlede elsewhere
+				// handlede elsewhere
 				// end
 				miss_st: begin
 					if (i_mem_system_state == `valid_st_mem_sys) begin
@@ -246,76 +246,76 @@ integer valToWrite = 1;
 					else if  (state == miss_st)	o_state = `miss_st_cache;
 					else									o_state = `valid_st_cache;
 				end
-				`hit_st_cache: begin
-					if (state == valid_st) begin
-						o_state = `valid_st_cache;
-					end
+			`hit_st_cache: begin
+				if (state == valid_st) begin
+					o_state = `valid_st_cache;
 				end
-				`miss_st_cache: begin
-					if (state == valid_st) begin
-						o_state = `valid_st_cache;
-					end
+			end
+			`miss_st_cache: begin
+				if (state == valid_st) begin
+					o_state = `valid_st_cache;
 				end
-			endcase
-		end
+			end
+		endcase
 	end
+end
 
-	// hit test
-	integer i;
-	reg [$clog2(N)-1:0] hit_N; // which of the N-ways the hit occurred in
-	always @(*) begin
-		if (i_rst) begin 
-			hit_N = 0;
-		end else if (state == lookup_st) begin
-			#200;
-			state = miss_st; // todo: does this work? I remember this was problematic
-			for (i=0; i<N; i=i+1) begin
-				if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
-					hit_N = i;
-					state = hit_st;
-				end
+// hit test
+integer i;
+reg [$clog2(N)-1:0] hit_N; // which of the N-ways the hit occurred in
+always @(*) begin
+	if (i_rst) begin 
+		hit_N = 0;
+	end else if (state == lookup_st) begin
+		#200;
+		state = miss_st; // todo: does this work? I remember this was problematic
+		for (i=0; i<N; i=i+1) begin
+			if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
+				hit_N = i;
+				state = hit_st;
 			end
 		end
 	end
+end
 
-	// actual read/write operations
-	integer i0, i1, i2, i3;
-	always @(posedge i_clk) begin
-		if (i_rst) begin
-			for (i0=0; i0<N; i0=i0+1) begin
-				for (i1=0; i1<S; i1=i1+1) begin
+// actual read/write operations
+integer i0, i1, i2, i3;
+always @(posedge i_clk) begin
+	if (i_rst) begin
+		for (i0=0; i0<N; i0=i0+1) begin
+			for (i1=0; i1<S; i1=i1+1) begin
 
-					tag_mem	 [i0][i1] <= 0;
-					valid_mem [i0][i1] <= 0;
-					dirty_mem [i0][i1] <= 0;
-					use_mem       [i1] <= 0;
+				tag_mem	 [i0][i1] <= 0;
+				valid_mem [i0][i1] <= 0;
+				dirty_mem [i0][i1] <= 0;
+				use_mem       [i1] <= 0;
 
-					for (i2=0; i2<b; i2=i2+1) begin
-						for (i3=0; i3<4; i3=i3+1) begin
+				for (i2=0; i2<b; i2=i2+1) begin
+					for (i3=0; i3<4; i3=i3+1) begin
 
-							data_mem[i0][i1][i2][i3] <= 0;
+						data_mem[i0][i1][i2][i3] <= 0;
 
-						end
 					end
 				end
 			end
-		end else begin
-			if (state == hit_st || state == load_missing_st) begin // todo: then why the two states?
-				if (i_mem_write) begin
-					// write operation (todo)
-					// todo: this is completely outdated, it comes from virtual memory, it was copied from there
-					#20000
-					data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
-					state <= valid_st;
-				end else begin
-					// read operation
-					#20000
-					o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
-					state <= valid_st;
-				end
+		end
+	end else begin
+		if (state == hit_st || state == load_missing_st) begin // todo: then why the two states?
+			if (i_mem_write) begin
+				// write operation (todo)
+				// todo: this is completely outdated, it comes from virtual memory, it was copied from there
+				#20000
+				data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				state <= valid_st;
+			end else begin
+				// read operation
+				#20000
+				o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
+				state <= valid_st;
 			end
 		end
 	end
+end
 endmodule
 
 
