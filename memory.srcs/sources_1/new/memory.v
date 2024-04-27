@@ -112,30 +112,34 @@ wire all_caches_valid = (cache_state_0 == `valid_st_cache);
 
 reg [`memory_system_state_reg_len-1:0] state;
 always @(*) begin
-	case (state)
-		`ready_st_mem_sys: begin
-			if (i_mem_operation) begin
-				state = `busy_st_mem_sys;
+	if (i_rst) begin
+		state = 0;
+	end else begin
+		case (state)
+			`ready_st_mem_sys: begin
+				if (i_mem_operation) begin
+					state = `busy_st_mem_sys;
+				end
 			end
-		end
-		`busy_st_mem_sys: begin
-			if (cache_valid) begin /* todo */
-				state = `valid_st_mem_sys;
+			`busy_st_mem_sys: begin
+				if (cache_valid) begin /* todo */
+					state = `valid_st_mem_sys;
+				end
 			end
-		end
-		`valid_st_mem_sys: begin
-			if (all_caches_valid) begin /* todo */
-				state = `ready_st_mem_sys;
-			end else if (!i_mem_operation) begin
-				state = `prep_st_mem_sys;
+			`valid_st_mem_sys: begin
+				if (all_caches_valid) begin /* todo */
+					state = `ready_st_mem_sys;
+				end else if (!i_mem_operation) begin
+					state = `prep_st_mem_sys;
+				end
 			end
-		end
-		`prep_st_mem_sys: begin
-			if (all_caches_valid) begin
-				state = `ready_st_mem_sys;
+			`prep_st_mem_sys: begin
+				if (all_caches_valid) begin
+					state = `ready_st_mem_sys;
+				end
 			end
-		end
-	endcase
+		endcase
+	end
 end
 wire mem_operation_done_virtual_memory; // todo: when is this asserted? it should be deasserted after done
 assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
@@ -213,7 +217,7 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 	localparam valid_st = 0, lookup_st = 1, hit_st = 2, miss_st = 3, load_missing_st = 4;
 	reg [$clog2(5)-1:0] state;
 	always @(*) begin
-		if(i_rst) state = valid_st;
+		if(i_rst) state = 0;
 		else begin
 			case (state)
 				valid_st: begin
@@ -300,7 +304,7 @@ always @(posedge i_clk) begin
 			end
 		end
 	end else begin
-		if (state == hit_st || state == load_missing_st) begin // todo: then why the two states?
+		if (state == hit_st || state == load_missing_st) begin // todo: why the two states?, remove one if no other use
 			if (i_mem_write) begin
 				// write operation (todo)
 				// todo: this is completely outdated, it comes from virtual memory, it was copied from there
