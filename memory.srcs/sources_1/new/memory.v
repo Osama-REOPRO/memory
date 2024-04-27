@@ -135,6 +135,8 @@ always @(*) begin
 				end
 			end
 			`prep_st_mem_sys: begin
+				// this state is necessary so that o_mem_operation_done is
+				// deasserted
 				if (all_caches_valid) begin
 					state = `ready_st_mem_sys;
 				end
@@ -156,7 +158,7 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 		.i_mem_system_state(state),
 		.i_lower_cache_state(`disconnected_st_cache), // because lowest cache
 		.o_state(cache_state_0),
-		.i_mem_write(mem_write), // todo
+		.i_mem_write(mem_write),
 		.i_address(i_address),
 		.i_write_data(write_data),
 		.o_read_data(read_data_cache_0)
@@ -168,7 +170,7 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 		.i_mem_system_state(state),
 		.i_lower_cache_state(cache_state_0),
 		.o_mem_operation_done(mem_operation_done_virtual_memory),
-		.i_mem_write(i_mem_write), // todo
+		.i_mem_write(i_mem_write),
 		.i_address(i_address),
 		.i_write_data(i_write_data),
 		.o_read_data(read_data_virtual_mem)
@@ -216,7 +218,7 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 
 	// internal state
 	localparam valid_st = 0, lookup_st = 1, hit_st = 2, miss_st = 3, load_missing_st = 4;
-	reg [$clog2(5)-1:0] state;
+	reg [$clog2(4)-1:0] state;
 	always @(*) begin
 		if(i_rst) state = 0;
 		else begin
@@ -307,10 +309,13 @@ always @(posedge i_clk) begin
 	end else begin
 		if (state == hit_st || state == load_missing_st) begin // todo: why the two states?, remove one if no other use
 			if (i_mem_write) begin
-				// write operation (todo)
-				// todo: this is completely outdated, it comes from virtual memory, it was copied from there
+				// write operation
 				#20000
-				data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				data_mem  [hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				valid_mem [hit_N][set_adrs] <= 1;
+				dirty_mem [hit_N][set_adrs] <= 1;
+				use_mem			  [set_adrs] <= 1;
+
 				state <= valid_st;
 			end else begin
 				// read operation
