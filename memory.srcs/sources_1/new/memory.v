@@ -106,6 +106,7 @@ module memory(
 	output [7:0]  o_read_data
 );
 
+wire mem_operation_done_virtual_memory;
 wire [`cache_state_reg_len-1:0] cache_state_0;
 wire cache_valid = 		(cache_state_0 == `valid_st_cache) || (mem_operation_done_virtual_memory);
 wire all_caches_valid = (cache_state_0 == `valid_st_cache);
@@ -141,7 +142,6 @@ always @(*) begin
 		endcase
 	end
 end
-wire mem_operation_done_virtual_memory; // todo: when is this asserted? it should be deasserted after done
 assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 
 	// cache instantiations
@@ -156,7 +156,7 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 		.i_mem_system_state(state),
 		.i_lower_cache_state(`disconnected_st_cache), // because lowest cache
 		.o_state(cache_state_0),
-		.i_mem_write(mem_write), // later
+		.i_mem_write(mem_write), // todo
 		.i_address(i_address),
 		.i_write_data(write_data),
 		.o_read_data(read_data_cache_0)
@@ -165,9 +165,10 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 	virtual_memory v_mem(
 		.i_clk(i_clk),
 		.i_rst(i_rst),
-		.i_mem_operation(i_mem_operation && (cache_state_0 == `miss_st_cache)),
-		.o_mem_operation_done(mem_operation_done_virtual_memory), /*todo*/
-		.i_mem_write(i_mem_write), // later
+		.i_mem_system_state(state),
+		.i_lower_cache_state(cache_state_0),
+		.o_mem_operation_done(mem_operation_done_virtual_memory),
+		.i_mem_write(i_mem_write), // todo
 		.i_address(i_address),
 		.i_write_data(i_write_data),
 		.o_read_data(read_data_virtual_mem)
@@ -331,27 +332,28 @@ module virtual_memory
 	parameter size = 32 // number of words
 )
 (
-	input         		i_clk, 
-	input         		i_rst,
-	input         		i_mem_operation,
-	output reg			o_mem_operation_done,
-	input      		   i_mem_write,
-	input		  [31:0] i_address,
-	input  	  [7:0]  i_write_data,
-	output reg [7:0]  o_read_data
+	input         													i_clk, 
+	input      											   		i_rst,
+	input 	  [`memory_system_state_reg_len-1:0]		i_mem_system_state,
+	output 															o_mem_operation_done,
+	input      		   											i_mem_write,
+	input		  [31:0] 											i_address,
+	input  	  [7:0]  											i_write_data,
+	output reg [7:0]  											o_read_data
 );
 reg [7:0] mem [size:0] [3:0]; // 4 bytes in each word
 integer i;
 // state machine vars
-localparam idle_st = 0, read_st = 1, write_st = 2, done_st = 3;
+localparam idle_st = 0, read_st = 1, write_st = 2, valid_st = 3;
 reg [$clog2(done_st)-1:0] state;
+
+assign o_mem_operation_done = state == valid_st;
 
 always @(posedge i_clk) begin
 	if (i_rst) begin
 		i <= 0;
 		state <= 0;
 		o_read_data <= 0;
-		o_mem_operation_done <= 1; // todo: change this behavior, it should be 0
 		for (i=0; i<=size; i=i+1) begin
 			{mem[i][3], mem[i][2], mem[i][1], mem[i][0]} <= 0;
 		end
@@ -359,23 +361,23 @@ always @(posedge i_clk) begin
 		case(state)
 			idle_st: begin
 				if (i_mem_operation) begin
-					o_mem_operation_done <= 0;
 					state <= i_mem_write ? write_st : read_st;
 				end
 			end
 			read_st: begin
 				o_read_data <= #20000 mem[i_address[31:2]][i_address[1:0]];
 				#20000;
-				state <= done_st;
+				state <= valid_st;
 			end
 			write_st: begin
 				mem[i_address[31:2]][i_address[1:0]] <= #20000 i_write_data;
 				#20000;
-				state <= done_st;
+				state <= valid_st;
 			end
-			done_st: begin
-				o_mem_operation_done <= 1;
-				state <= idle_st;
+			valid_st: begin
+				if (i_mem_system_state == `ready_st_mem_sys) begin
+					state <= idle_st;
+				end
 			end
 		endcase
 	end
