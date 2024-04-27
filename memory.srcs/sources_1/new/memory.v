@@ -222,10 +222,10 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 					end
 				end
 				// lookup_st: begin
-				// handlede elsewhere
+				// handled elsewhere
 				// end
 				// hit_st: begin
-				// handlede elsewhere
+				// handled elsewhere
 				// end
 				miss_st: begin
 					if (i_mem_system_state == `valid_st_mem_sys) begin
