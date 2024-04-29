@@ -9,10 +9,11 @@
 `define memory_system_state_reg_len 4
 
 // cache states
-`define valid_st_cache 0
-`define miss_st_cache 1
-`define hit_st_cache 2
-`define disconnected_st_cache 3
+`define valid_st_cache 			0
+`define write_done_st_cache 	1
+`define read_miss_st_cache		2
+`define read_hit_st_cache		3
+`define disconnected_st_cache 4
 
 `define cache_state_reg_len 4
 
@@ -224,7 +225,9 @@ module cache
 		else begin
 			case (state)
 				valid_st: begin
-					if(i_mem_system_state==`busy_st_mem_sys && i_lower_cache_state == `miss_st_cache) begin
+					if(i_mem_system_state==`busy_st_mem_sys && 
+						i_lower_cache_state == `read_miss_st_cache || i_lower_cache_state == `disconnected_st_cache) 
+					begin
 						state = lookup_st;
 					end
 				end
@@ -249,16 +252,16 @@ module cache
 		else begin
 			case (o_state)
 				`valid_st_cache: begin
-					if			(state == hit_st)		o_state = `hit_st_cache;
-					else if  (state == miss_st)	o_state = `miss_st_cache;
+					if			(state == hit_st)		o_state = `read_hit_st_cache;
+					else if  (state == miss_st)	o_state = `read_miss_st_cache;
 					else									o_state = `valid_st_cache;
 				end
-				`hit_st_cache: begin
+				`read_hit_st_cache: begin
 					if (state == valid_st) begin
 						o_state = `valid_st_cache;
 					end
 				end
-				`miss_st_cache: begin
+				`read_miss_st_cache: begin
 					if (state == valid_st) begin
 						o_state = `valid_st_cache;
 					end
