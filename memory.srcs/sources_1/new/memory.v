@@ -106,45 +106,45 @@ module memory(
 	output [7:0]  o_read_data
 );
 
-wire mem_operation_done_virtual_memory;
-wire [`cache_state_reg_len-1:0] cache_state_0;
-wire cache_valid = 		(cache_state_0 == `valid_st_cache) || (mem_operation_done_virtual_memory);
-wire all_caches_valid = (cache_state_0 == `valid_st_cache);
+	wire mem_operation_done_virtual_memory;
+	wire [`cache_state_reg_len-1:0] cache_state_0;
+	wire cache_valid = 		(cache_state_0 == `valid_st_cache) || (mem_operation_done_virtual_memory);
+	wire all_caches_valid = (cache_state_0 == `valid_st_cache);
 
-reg [`memory_system_state_reg_len-1:0] state;
-always @(*) begin
-	if (i_rst) begin
-		state = 0;
-	end else begin
-		case (state)
-			`ready_st_mem_sys: begin
-				if (i_mem_operation) begin
-					state = `busy_st_mem_sys;
+	reg [`memory_system_state_reg_len-1:0] state;
+	always @(*) begin
+		if (i_rst) begin
+			state = 0;
+		end else begin
+			case (state)
+				`ready_st_mem_sys: begin
+					if (i_mem_operation) begin
+						state = `busy_st_mem_sys;
+					end
 				end
-			end
-			`busy_st_mem_sys: begin
-				if (cache_valid) begin /* todo */
-					state = `valid_st_mem_sys;
+				`busy_st_mem_sys: begin
+					if (cache_valid) begin /* todo */
+						state = `valid_st_mem_sys;
+					end
 				end
-			end
-			`valid_st_mem_sys: begin
-				if (all_caches_valid) begin /* todo */
-					state = `ready_st_mem_sys;
-				end else if (!i_mem_operation) begin
-					state = `prep_st_mem_sys;
+				`valid_st_mem_sys: begin
+					if (all_caches_valid) begin /* todo */
+						state = `ready_st_mem_sys;
+					end else if (!i_mem_operation) begin
+						state = `prep_st_mem_sys;
+					end
 				end
-			end
-			`prep_st_mem_sys: begin
-				// this state is necessary so that o_mem_operation_done is
-				// deasserted
-				if (all_caches_valid) begin
-					state = `ready_st_mem_sys;
+				`prep_st_mem_sys: begin
+					// this state is necessary so that o_mem_operation_done is
+					// deasserted
+					if (all_caches_valid) begin
+						state = `ready_st_mem_sys;
+					end
 				end
-			end
-		endcase
+			endcase
+		end
 	end
-end
-assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
+	assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 
 	// cache instantiations
 	wire [7:0] read_data_cache_0, read_data_virtual_mem;
@@ -175,25 +175,25 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 		.i_write_data(i_write_data),
 		.o_read_data(read_data_virtual_mem)
 	);
-	endmodule
+endmodule
 
-	module cache
-	#(
-		parameter C = 8,   // capacity (words)
-		parameter b = 2,   // block size
-		parameter N = 2    // degree of associativity
-	)
-	(
-		input       											  		i_clk, 
-		input         													i_rst,
-		input 	  [`memory_system_state_reg_len-1:0]		i_mem_system_state,
-		input 	  [`cache_state_reg_len-1:0]					i_lower_cache_state,
-		output reg [`cache_state_reg_len-1:0]					o_state,
-		input 											     		   i_mem_write,
-		input		  [31:0]												i_address,
-		input  	  [7:0] 												i_write_data,
-		output reg [7:0]												o_read_data
-	);
+module cache
+#(
+	parameter C = 8,   // capacity (words)
+	parameter b = 2,   // block size
+	parameter N = 2    // degree of associativity
+)
+(
+	input       											  		i_clk, 
+	input         													i_rst,
+	input 	  [`memory_system_state_reg_len-1:0]		i_mem_system_state,
+	input 	  [`cache_state_reg_len-1:0]					i_lower_cache_state,
+	output reg [`cache_state_reg_len-1:0]					o_state,
+	input 											     		   i_mem_write,
+	input		  [31:0]												i_address,
+	input  	  [7:0] 												i_write_data,
+	output reg [7:0]												o_read_data
+);
 
 	localparam B = C/b;  // number of blocks
 	localparam S = B/N;  // number of sets
@@ -253,79 +253,79 @@ assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
 					else if  (state == miss_st)	o_state = `miss_st_cache;
 					else									o_state = `valid_st_cache;
 				end
-			`hit_st_cache: begin
-				if (state == valid_st) begin
-					o_state = `valid_st_cache;
+				`hit_st_cache: begin
+					if (state == valid_st) begin
+						o_state = `valid_st_cache;
+					end
 				end
-			end
-			`miss_st_cache: begin
-				if (state == valid_st) begin
-					o_state = `valid_st_cache;
+				`miss_st_cache: begin
+					if (state == valid_st) begin
+						o_state = `valid_st_cache;
+					end
 				end
-			end
-		endcase
+			endcase
+		end
 	end
-end
 
-// hit test
-integer i;
-reg [$clog2(N)-1:0] hit_N; // which of the N-ways the hit occurred in
-always @(*) begin
-	if (i_rst) begin 
-		hit_N = 0;
-	end else if (state == lookup_st) begin
-		#200;
-		state = miss_st; // todo: does this work? I remember this was problematic
-		for (i=0; i<N; i=i+1) begin
-			if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
-				hit_N = i;
-				state = hit_st;
+	// hit test
+	integer i;
+	reg [$clog2(N)-1:0] hit_N; // which of the N-ways the hit occurred in
+	always @(*) begin
+		if (i_rst) begin 
+			hit_N = 0;
+		end else if (state == lookup_st) begin
+			#200;
+			state = miss_st; // todo: does this work? I remember this was problematic
+			for (i=0; i<N; i=i+1) begin
+				if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
+					hit_N = i;
+					state = hit_st;
+				end
 			end
 		end
 	end
-end
 
-// actual read/write operations
-integer i0, i1, i2, i3;
-always @(posedge i_clk) begin
-	if (i_rst) begin
-		for (i0=0; i0<N; i0=i0+1) begin
-			for (i1=0; i1<S; i1=i1+1) begin
+	// actual read/write operations
+	integer i0, i1, i2, i3;
+	always @(posedge i_clk) begin
+		if (i_rst) begin
+			for (i0=0; i0<N; i0=i0+1) begin
+				for (i1=0; i1<S; i1=i1+1) begin
 
-				tag_mem	 [i0][i1] <= 0;
-				valid_mem [i0][i1] <= 0;
-				dirty_mem [i0][i1] <= 0;
-				use_mem       [i1] <= 0;
+					tag_mem	 [i0][i1] <= 0;
+					valid_mem [i0][i1] <= 0;
+					dirty_mem [i0][i1] <= 0;
+					use_mem       [i1] <= 0;
 
-				for (i2=0; i2<b; i2=i2+1) begin
-					for (i3=0; i3<4; i3=i3+1) begin
+					for (i2=0; i2<b; i2=i2+1) begin
+						for (i3=0; i3<4; i3=i3+1) begin
 
-						data_mem[i0][i1][i2][i3] <= 0;
+							data_mem[i0][i1][i2][i3] <= 0;
 
+						end
 					end
 				end
 			end
-		end
-	end else begin
-		if (state == hit_st || state == load_missing_st) begin // todo: why the two states?, remove one if no other use
-			if (i_mem_write) begin
-				// write operation
-				#20000
-				data_mem  [hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
-				valid_mem [hit_N][set_adrs] <= 1;
-				dirty_mem [hit_N][set_adrs] <= 1;
-				use_mem			  [set_adrs] <= 1;
+		end else begin
+			if (state == hit_st || state == load_missing_st) begin // todo: why the two states?, remove one if no other use
+				if (i_mem_write) begin
+					// write operation
+					#20000
+					data_mem  [hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+					valid_mem [hit_N][set_adrs] <= 1;
+					dirty_mem [hit_N][set_adrs] <= 1;
+					use_mem			  [set_adrs] <= 1;
 
-				state <= valid_st;
-			end else begin
-				// read operation
-				#20000
-				o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
-				state <= valid_st;
+					state <= valid_st;
+				end else begin
+					// read operation
+					#20000
+					o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
+					state <= valid_st;
+				end
 			end
 		end
 	end
-end
 endmodule
 
 
@@ -346,45 +346,45 @@ module virtual_memory
 	input  	  [7:0]  											i_write_data,
 	output reg [7:0]  											o_read_data
 );
-reg [7:0] mem [size:0] [3:0]; // 4 bytes in each word
-integer i;
-// state machine vars
-localparam idle_st = 0, read_st = 1, write_st = 2, valid_st = 3;
-reg [$clog2(done_st)-1:0] state;
+	reg [7:0] mem [size:0] [3:0]; // 4 bytes in each word
+	integer i;
+	// state machine vars
+	localparam idle_st = 0, read_st = 1, write_st = 2, valid_st = 3;
+	reg [$clog2(done_st)-1:0] state;
 
-assign o_mem_operation_done = state == valid_st;
+	assign o_mem_operation_done = state == valid_st;
 
-always @(posedge i_clk) begin
-	if (i_rst) begin
-		i <= 0;
-		state <= 0;
-		o_read_data <= 0;
-		for (i=0; i<=size; i=i+1) begin
-			{mem[i][3], mem[i][2], mem[i][1], mem[i][0]} <= 0;
+	always @(posedge i_clk) begin
+		if (i_rst) begin
+			i <= 0;
+			state <= 0;
+			o_read_data <= 0;
+			for (i=0; i<=size; i=i+1) begin
+				{mem[i][3], mem[i][2], mem[i][1], mem[i][0]} <= 0;
+			end
+		end else begin
+			case(state)
+				idle_st: begin
+					if (i_mem_operation) begin
+						state <= i_mem_write ? write_st : read_st;
+					end
+				end
+				read_st: begin
+					o_read_data <= #20000 mem[i_address[31:2]][i_address[1:0]];
+					#20000;
+					state <= valid_st;
+				end
+				write_st: begin
+					mem[i_address[31:2]][i_address[1:0]] <= #20000 i_write_data;
+					#20000;
+					state <= valid_st;
+				end
+				valid_st: begin
+					if (i_mem_system_state == `ready_st_mem_sys) begin
+						state <= idle_st;
+					end
+				end
+			endcase
 		end
-	end else begin
-		case(state)
-			idle_st: begin
-				if (i_mem_operation) begin
-					state <= i_mem_write ? write_st : read_st;
-				end
-			end
-			read_st: begin
-				o_read_data <= #20000 mem[i_address[31:2]][i_address[1:0]];
-				#20000;
-				state <= valid_st;
-			end
-			write_st: begin
-				mem[i_address[31:2]][i_address[1:0]] <= #20000 i_write_data;
-				#20000;
-				state <= valid_st;
-			end
-			valid_st: begin
-				if (i_mem_system_state == `ready_st_mem_sys) begin
-					state <= idle_st;
-				end
-			end
-		endcase
 	end
-end
 endmodule
