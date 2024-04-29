@@ -99,83 +99,72 @@ endmodule
 module memory(
 	input         i_clk, 
 	input         i_rst,
-	input         i_mem_operation,
-	output        o_mem_operation_done,
+
 	input  		  i_mem_write,
 	input	 [31:0] i_address,
 	input  [7:0]  i_write_data,
+
+	input         i_mem_operation,
+
 	output [7:0]  o_read_data
+	output        o_mem_operation_done,
 );
+	// L0 cache parameters
+	wire mem_write_higher_0;
+	wire address_higher_0;
 
+	wire write_data_higher_0;
+	wire read_data_higher_0;
+
+	wire mem_operation_higher_0;
+	wire mem_operation_higher_done_0;
+
+	// virtual memory parameters
 	wire mem_operation_done_virtual_memory;
-	wire [`cache_state_reg_len-1:0] cache_state_0;
-	wire cache_valid = 		(cache_state_0 == `valid_st_cache) || (mem_operation_done_virtual_memory);
-	wire all_caches_valid = (cache_state_0 == `valid_st_cache);
 
-	reg [`memory_system_state_reg_len-1:0] state;
-	always @(*) begin
-		if (i_rst) begin
-			state = 0;
-		end else begin
-			case (state)
-				`ready_st_mem_sys: begin
-					if (i_mem_operation) begin
-						state = `busy_st_mem_sys;
-					end
-				end
-				`busy_st_mem_sys: begin
-					if (cache_valid) begin /* todo */
-						state = `valid_st_mem_sys;
-					end
-				end
-				`valid_st_mem_sys: begin
-					if (all_caches_valid) begin /* todo */
-						state = `ready_st_mem_sys;
-					end else if (!i_mem_operation) begin
-						state = `prep_st_mem_sys;
-					end
-				end
-				`prep_st_mem_sys: begin
-					// this state is necessary so that o_mem_operation_done is
-					// deasserted
-					if (all_caches_valid) begin
-						state = `ready_st_mem_sys;
-					end
-				end
-			endcase
-		end
-	end
-	assign o_mem_operation_done = state == `valid_st_mem_sys ? 1 : 0;
-
-	// cache instantiations
-	wire [7:0] read_data_cache_0, read_data_virtual_mem;
-
-	assign o_read_data = (cache_state_0 == `valid_st_cache) ? read_data_cache_0 : read_data_virtual_mem;
-
+	//	instantiations
 	cache #(.C(8), .b(1), .N(1)) 
 	cache_direct_mapped_l_0 (
 		.i_clk(i_clk),
 		.i_rst(i_rst),
-		.i_mem_system_state(state),
-		.i_lower_cache_state(`disconnected_st_cache), // because lowest cache
-		.o_state(cache_state_0),
-		.i_mem_write(mem_write),
+
+		// interaction with this cache
+		.i_mem_write(i_mem_write),
 		.i_address(i_address),
-		.i_write_data(write_data),
-		.o_read_data(read_data_cache_0)
+
+		.i_write_data(i_write_data),
+		.o_read_data(o_read_data)
+
+		.i_mem_operation(i_mem_operation),
+		.o_mem_operation_done(o_mem_operation_done),
+
+		// interaction with higher cache
+		.o_mem_write_higher(mem_write_higher_0),
+		.o_address_higher(address_higher_0),
+
+		.o_write_data_higher(write_data_higher_0),
+		.i_read_data_higher(read_data_higher_0),
+
+		.o_mem_operation_higher(mem_operation_higher_0),
+		.i_mem_operation_higher_done(mem_operation_higher_done_0)
 	);
+
 
 	virtual_memory v_mem(
 		.i_clk(i_clk),
 		.i_rst(i_rst),
-		.i_mem_system_state(state),
-		.i_lower_cache_state(cache_state_0),
-		.o_mem_operation_done(mem_operation_done_virtual_memory),
-		.i_mem_write(i_mem_write),
-		.i_address(i_address),
-		.i_write_data(i_write_data),
-		.o_read_data(read_data_virtual_mem)
+
+		.i_mem_write(mem_write_higher_0),
+		.i_address(address_higher_0),
+
+		.i_write_data(write_data_higher_0),
+		.o_read_data(read_data_higher_0),
+
+		.i_mem_operation(mem_operation_higher_0),
+		.o_mem_operation_done(mem_operation_higher_done_0)
 	);
+
+
 endmodule
 
 module cache
@@ -333,27 +322,28 @@ endmodule
 
 
 
-
-
 module virtual_memory
 #(
 	parameter size = 32 // number of words
 )
 (
-	input         													i_clk, 
-	input      											   		i_rst,
-	input 	  [`memory_system_state_reg_len-1:0]		i_mem_system_state,
-	output 															o_mem_operation_done,
-	input      		   											i_mem_write,
-	input		  [31:0] 											i_address,
-	input  	  [7:0]  											i_write_data,
-	output reg [7:0]  											o_read_data
+	input         		i_clk, 
+	input      			i_rst,
+
+	input      		 	i_mem_write,
+	input		  [31:0]	i_address,
+
+	input  	  [7:0] 	i_write_data,
+	output reg [7:0] 	o_read_data,
+
+	input 				i_mem_operation,
+	output 				o_mem_operation_done
 );
 	reg [7:0] mem [size:0] [3:0]; // 4 bytes in each word
 	integer i;
 	// state machine vars
 	localparam idle_st = 0, read_st = 1, write_st = 2, valid_st = 3;
-	reg [$clog2(done_st)-1:0] state;
+	reg [$clog2(3)-1:0] state;
 
 	assign o_mem_operation_done = state == valid_st;
 
@@ -383,7 +373,7 @@ module virtual_memory
 					state <= valid_st;
 				end
 				valid_st: begin
-					if (i_mem_system_state == `ready_st_mem_sys) begin
+					if (!i_mem_operation) begin
 						state <= idle_st;
 					end
 				end
