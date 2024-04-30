@@ -174,15 +174,28 @@ module cache
 	parameter N = 2    // degree of associativity
 )
 (
-	input       											  		i_clk, 
-	input         													i_rst,
-	input 	  [`memory_system_state_reg_len-1:0]		i_mem_system_state,
-	input 	  [`cache_state_reg_len-1:0]					i_lower_cache_state,
-	output reg [`cache_state_reg_len-1:0]					o_state,
-	input 											     		   i_mem_write,
-	input		  [31:0]												i_address,
-	input  	  [7:0] 												i_write_data,
-	output reg [7:0]												o_read_data
+	input       		i_clk, 
+	input         		i_rst,
+
+	// interaction with this cache
+	input 				i_mem_write,
+	input		  [31:0]	i_address,
+
+	input  	  [7:0] 	i_write_data,
+	output reg [7:0]	o_read_data,
+
+	input 				i_mem_operation,
+	output 				o_mem_operation_done,
+
+	// interaction with higher cache
+	output 				o_mem_write_higher,
+	output 				o_address_higher,
+
+	output 				o_write_data_higher,
+	input 				i_read_data_higher,
+
+	output 				o_mem_operation_higher,
+	input 				i_mem_operation_higher_done
 );
 
 	localparam B = C/b;  // number of blocks
@@ -214,46 +227,18 @@ module cache
 		else begin
 			case (state)
 				valid_st: begin
-					if(i_mem_system_state==`busy_st_mem_sys && 
-						i_lower_cache_state == `read_miss_st_cache || i_lower_cache_state == `disconnected_st_cache) 
-					begin
-						state = lookup_st;
-					end
+					state = lookup_st;
 				end
 				// lookup_st: begin
 				// handled elsewhere
 				// end
-				// hit_st: begin
-				// handled elsewhere
-				// end
-				miss_st: begin
-					if (i_mem_system_state == `valid_st_mem_sys) begin
-						state = load_missing_st;
-					end
+				write_hit_st: begin
 				end
-			endcase
-		end
-	end
-
-	// external state
-	always @(*) begin
-		if(i_rst) o_state = `valid_st_cache;
-		else begin
-			case (o_state)
-				`valid_st_cache: begin
-					if			(state == hit_st)		o_state = `read_hit_st_cache;
-					else if  (state == miss_st)	o_state = `read_miss_st_cache;
-					else									o_state = `valid_st_cache;
+				write_miss_st: begin
 				end
-				`read_hit_st_cache: begin
-					if (state == valid_st) begin
-						o_state = `valid_st_cache;
-					end
+				read_hit_st: begin
 				end
-				`read_miss_st_cache: begin
-					if (state == valid_st) begin
-						o_state = `valid_st_cache;
-					end
+				read_miss_st: begin
 				end
 			endcase
 		end
@@ -267,11 +252,11 @@ module cache
 			hit_N = 0;
 		end else if (state == lookup_st) begin
 			#200;
-			state = miss_st; // todo: does this work? I remember this was problematic
+			state = i_mem_write ? write_miss_st : read_miss_st; // todo: does this work? I remember this was problematic
 			for (i=0; i<N; i=i+1) begin
 				if((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs]))begin
 					hit_N = i;
-					state = hit_st;
+					state = i_mem_write ? write_hit_st : read_hit_st;
 				end
 			end
 		end
@@ -299,23 +284,34 @@ module cache
 				end
 			end
 		end else begin
-			if (state == hit_st || state == load_missing_st) begin // todo: why the two states?, remove one if no other use
-				if (i_mem_write) begin
-					// write operation
-					#20000
-					data_mem  [hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
-					valid_mem [hit_N][set_adrs] <= 1;
-					dirty_mem [hit_N][set_adrs] <= 1;
-					use_mem			  [set_adrs] <= 1;
+			////////////////////////////////////// write
+			if (state == write_hit_st) begin
+				#20000
+				data_mem  [hit_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				valid_mem [hit_N][set_adrs] <= 1;
+				dirty_mem [hit_N][set_adrs] <= 1;
+				use_mem			  [set_adrs] <= 1;
 
-					state <= valid_st;
-				end else begin
-					// read operation
-					#20000
-					o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
-					state <= valid_st;
-				end
+				state <= valid_st;
 			end
+
+			if (state == write_miss_st) begin
+				// todo
+			end
+
+
+
+			////////////////////////////////////// read
+			if (state == read_hit_st) begin
+				#20000
+				o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
+				state <= valid_st;
+			end
+
+			if (state == read_miss_st) begin
+				// todo
+			end
+
 		end
 	end
 endmodule
