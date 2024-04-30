@@ -188,13 +188,13 @@ module cache
 	output 				o_mem_operation_done,
 
 	// interaction with higher cache
-	output 				o_mem_write_higher,
-	output 				o_address_higher,
+	output reg			o_mem_write_higher,
+	output reg [31:0]	o_address_higher,
 
-	output 				o_write_data_higher,
-	input 				i_read_data_higher,
+	output reg [7:0]	o_write_data_higher,
+	input      [7:0]	i_read_data_higher,
 
-	output 				o_mem_operation_higher,
+	output reg			o_mem_operation_higher,
 	input 				i_mem_operation_higher_done
 );
 
@@ -276,7 +276,17 @@ module cache
 				end
 
 				read_miss_st: begin
+					o_mem_write_higher     = 0; // read operation
+					o_address_higher 	  	  = i_address;
+					o_mem_operation_higher = 1;
+					state 					  = await_higher_st;
 				end
+
+				await_higher_st: begin
+					if (i_mem_operation_higher_done) begin
+						state = read_missing_st;
+				end
+
 			endcase
 		end
 	end
@@ -286,6 +296,11 @@ module cache
 	integer i0, i1, i2, i3;
 	always @(posedge i_clk) begin
 		if (i_rst) begin
+
+			o_mem_write_higher     <= 0;
+			o_address_higher 	  	  <= 0;
+			o_mem_operation_higher <= 0;
+
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
 
@@ -322,11 +337,24 @@ module cache
 				state <= idle_st;
 			end
 
-			if (state == read_miss_st) begin
-				// todo
+
+			if (state == read_missing_st) begin
+				// todo: do a hit check first
+				// #20000
+				// data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				// valid_mem [target_N][set_adrs] <= 1;
+				// dirty_mem [target_N][set_adrs] <= 1;
+				// use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
+
+				// state <= idle_st;
 			end
 
 		end
+
+	// input      [7:0]	i_read_data_higher,
+
+	// output reg			o_mem_operation_higher,
+	// input 				i_mem_operation_higher_done
 	end
 endmodule
 
