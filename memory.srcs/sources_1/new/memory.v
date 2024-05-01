@@ -231,8 +231,16 @@ module cache
 	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N[size_N-1:1], use_mem [set_adrs]}; // final N #note0001
 
 	// internal state
-	localparam idle_st = 0, lookup_st = 1, write_st = 2, read_hit_st = 3, read_miss_st = 4, await_higher_st = 5, write_missing_st = 6; // todo: rename stuff
 	reg [$clog2(4)-1:0] state;
+	localparam 
+		idle_st 			  = 0, 
+		lookup_st 		  = 1, 
+		evacuate_st 	  = 2, 
+		write_st 		  = 3, 
+		read_hit_st      = 4, 
+		read_miss_st     = 5, 
+		await_higher_st  = 6, 
+		write_missing_st = 7;
 
 	always @(*) begin
 		if(i_rst) begin 
@@ -246,15 +254,33 @@ module cache
 			case (state)
 
 				idle_st: begin
-					if (i_mem_operation) state = lookup_st;
+					if (i_mem_operation) state = i_mem_write ? write_st : read_st;
 				end
 
 				lookup_st: begin
 					hit_check();
-					conflict_check ();
+					if (i_mem_write) conflict_check ();
+					state = i_mem_write ? write_init_st : read_init_st; // todo: add state declarations
+				end
 
-					state = i_mem_write ? write_st :
-						hit_occurred ? read_hit_st : read_miss_st;
+				write_init_st: begin
+					if (hit_occurred || empty_found) state = write_st;
+					else state = evacuate_st;
+				end
+
+				evacuate_st: begin
+					// todo: evacuation
+					state = i_mem_write ? write_st : read_st; // todo: add state declarations
+				end
+
+				write_st: begin
+						#20000
+						data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+						valid_mem [target_N][set_adrs] <= 1;
+						dirty_mem [target_N][set_adrs] <= 1;
+						use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
+
+						state = idle_st;
 				end
 
 //				read_hit_st: begin
@@ -280,25 +306,18 @@ module cache
 		begin
 			#200;
 			for (i=0; i<N; i=i+1) begin
-				if ((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs])) begin
-					hit_occurred = 1;
-					hit_N = i;
-				end
-			end
-		end
-	endtask
-
-	task conflict_check ();
-		begin
-			for (i=0; i<N; i=i+1) begin
-				if (valid_mem[i][set_adrs] == 0) begin
-					empty_found = 1;
+				if (valid_mem[i][set_adrs]) begin
+					if (tag_adrs == tag_mem[i][set_adrs]) begin
+						hit_occurred = 1'b1;
+						hit_N = i;
+					end
+				end else begin
+					empty_found = 1'b1;
 					empty_N = i;
 				end
 			end
 		end
 	endtask
-
 
 	// actual read/write operations
 	always @(posedge i_clk) begin : read_write
