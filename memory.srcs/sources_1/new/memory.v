@@ -321,6 +321,7 @@ module cache
 		end else begin
 			////////////////////////////////////// write
 			if (state == write_st) begin
+				mem_write(i_address, 
 				#20000
 				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 				valid_mem [target_N][set_adrs] <= 1;
