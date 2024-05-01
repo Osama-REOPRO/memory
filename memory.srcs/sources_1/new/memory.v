@@ -234,9 +234,6 @@ module cache
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
 	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N(size_N-1:1), use_mem [set_adrs]}; // final N #note0001
 
-	input i_clk, i_rst, 
-	output reg [size-1:0] o_num
-
 	always @(*) begin
 		if(i_rst) begin 
 			state = 0;
@@ -292,6 +289,19 @@ module cache
 	end
 
 
+	task hit_check (output hit_occurred, output [size_N-1:0] hit_N);
+		begin
+			#200;
+			for (i=0; i<N; i=i+1) begin
+				if ((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs])) begin
+					hit_occurred = 1;
+					hit_N = i;
+				end
+			end
+		end
+	endtask
+
+
 	// actual read/write operations
 	integer i0, i1, i2, i3;
 	always @(posedge i_clk) begin
@@ -340,7 +350,7 @@ module cache
 
 
 			if (state == read_missing_st) begin
-				// todo: do a hit check first
+				// todo: do a conflict check first
 				// #20000
 				// data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 				// valid_mem [target_N][set_adrs] <= 1;
