@@ -226,6 +226,7 @@ module cache
 	reg hit_occurred; // validates hit_N
 	reg [size_N-1:0] empty_N; // which of the N-ways is empty
 	reg empty_found; // validates empty_found
+	wire conflict = !hit_occurred && !empty_found;
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
 	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N[size_N-1:1], use_mem [set_adrs]}; // final N #note0001
@@ -259,13 +260,9 @@ module cache
 
 				lookup_st: begin
 					hit_check();
-					if (i_mem_write) conflict_check ();
-					state = i_mem_write ? write_init_st : read_init_st; // todo: add state declarations
-				end
-
-				write_init_st: begin
-					if (hit_occurred || empty_found) state = write_st;
-					else state = evacuate_st;
+					state = i_mem_write ? 
+						conflict ? evacuate_st : write_st : 
+						read_init_st; // todo: add state declarations
 				end
 
 				evacuate_st: begin
@@ -273,18 +270,11 @@ module cache
 					state = i_mem_write ? write_st : read_st; // todo: add state declarations
 				end
 
-				write_st: begin
-						#20000
-						data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
-						valid_mem [target_N][set_adrs] <= 1;
-						dirty_mem [target_N][set_adrs] <= 1;
-						use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-						state = idle_st;
-				end
-
-//				read_hit_st: begin
-//				end
+				read_init_st: begin
+				// read_st: begin
+				// elsewhere
+				// end
 
 				read_miss_st: begin
 					o_mem_write_higher     = 0; // read operation
@@ -351,7 +341,6 @@ module cache
 		end else begin
 			////////////////////////////////////// write
 			if (state == write_st) begin
-				// mem_write(i_address, 
 				#20000
 				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 				valid_mem [target_N][set_adrs] <= 1;
@@ -362,33 +351,13 @@ module cache
 			end
 
 			////////////////////////////////////// read
-			if (state == read_hit_st) begin
+			if (state == read_st) begin
 				#20000
 				o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
 				state <= idle_st;
 			end
 
-
-			if (state == write_missing_st) begin
-				// todo: do a conflict check first
-				
-				conflict_check ();
-
-				// #20000
-				// data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
-				// valid_mem [target_N][set_adrs] <= 1;
-				// dirty_mem [target_N][set_adrs] <= 1;
-				// use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
-
-				// state <= idle_st;
-			end
-
 		end
-
-	// input      [7:0]	i_read_data_higher,
-
-	// output reg			o_mem_operation_higher,
-	// input 				i_mem_operation_higher_done
 	end
 endmodule
 
