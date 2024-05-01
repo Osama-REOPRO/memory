@@ -444,7 +444,7 @@ module LFSR
 	output reg [size-1:0] o_num
 );
 	always@(posedge i_clk) begin
-		if(i_rst) o_num <= {size{1}};
+		if(i_rst) o_num <= {size{1'b1}};
 		else o_num = {o_num[size-2:0],(o_num[size-1]^o_num[size-2])};
 		// shift left once
 		// right-most bit is xor of 2 left-most bits
