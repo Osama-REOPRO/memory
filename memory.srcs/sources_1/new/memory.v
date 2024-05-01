@@ -106,8 +106,8 @@ module memory(
 
 	input         i_mem_operation,
 
-	output [7:0]  o_read_data
-	output        o_mem_operation_done,
+	output [7:0]  o_read_data,
+	output        o_mem_operation_done
 );
 	// L0 cache parameters
 	wire mem_write_higher_0;
@@ -133,7 +133,7 @@ module memory(
 		.i_address(i_address),
 
 		.i_write_data(i_write_data),
-		.o_read_data(o_read_data)
+		.o_read_data(o_read_data),
 
 		.i_mem_operation(i_mem_operation),
 		.o_mem_operation_done(o_mem_operation_done),
@@ -219,10 +219,6 @@ module cache
 	wire [Set_nbytes-1:0] 			 set_adrs 			 =	i_address[Block_offset_nbytes	+:	Set_nbytes-1				];
 	wire [Tag_nbytes-1:0] 			 tag_adrs 			 =	i_address[Set_nbytes				+:	Tag_nbytes-1				];
 
-	// internal state
-	localparam valid_st = 0, lookup_st = 1, hit_st = 2, miss_st = 3, load_missing_st = 4; // todo: rename stuff
-	reg [$clog2(4)-1:0] state;
-
 	// N operations
 	integer i;
 	localparam size_N = $clog2(N);
@@ -232,7 +228,11 @@ module cache
 	reg empty_found; // validates empty_found
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
-	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N(size_N-1:1), use_mem [set_adrs]}; // final N #note0001
+	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N[size_N-1:1], use_mem [set_adrs]}; // final N #note0001
+
+	// internal state
+	localparam idle_st = 0, lookup_st = 1, write_st = 2, read_hit_st = 3, read_miss_st = 4, await_higher_st = 5, write_missing_st = 6; // todo: rename stuff
+	reg [$clog2(4)-1:0] state;
 
 	always @(*) begin
 		if(i_rst) begin 
@@ -246,31 +246,19 @@ module cache
 			case (state)
 
 				idle_st: begin
-					if (i_mem_operation) state = hit_check_st;
+					if (i_mem_operation) state = lookup_st;
 				end
 
 				lookup_st: begin
-					#200;
-					for (i=0; i<N; i=i+1) begin
-						if ((valid_mem[i][set_adrs])&&(tag_adrs == tag_mem[i][set_adrs])) begin
-							hit_occurred = 1;
-							hit_N = i;
-						end
-					end
-
-					for (i=0; i<N; i=i+1) begin
-						if (valid_mem[i][set_adrs] == 0) begin
-							empty_found = 1;
-							empty_N = i;
-						end
-					end
+					hit_check();
+					conflict_check ();
 
 					state = i_mem_write ? write_st :
-						hit_occurred ?  : read_hit_st : read_miss_st;
+						hit_occurred ? read_hit_st : read_miss_st;
 				end
 
-				read_hit_st: begin
-				end
+//				read_hit_st: begin
+//				end
 
 				read_miss_st: begin
 					o_mem_write_higher     = 0; // read operation
@@ -280,16 +268,15 @@ module cache
 				end
 
 				await_higher_st: begin
-					if (i_mem_operation_higher_done) begin
-						state = read_missing_st;
+					if (i_mem_operation_higher_done)
+						state = write_missing_st;
 				end
-
 			endcase
 		end
 	end
 
-
-	task hit_check (output hit_occurred, output [size_N-1:0] hit_N);
+	// tasks
+	task hit_check ();
 		begin
 			#200;
 			for (i=0; i<N; i=i+1) begin
@@ -301,10 +288,24 @@ module cache
 		end
 	endtask
 
+	task conflict_check ();
+		begin
+			for (i=0; i<N; i=i+1) begin
+				if (valid_mem[i][set_adrs] == 0) begin
+					empty_found = 1;
+					empty_N = i;
+				end
+			end
+		end
+	endtask
+
 
 	// actual read/write operations
-	integer i0, i1, i2, i3;
-	always @(posedge i_clk) begin
+	always @(posedge i_clk) begin : read_write
+		integer i0;
+		integer i1;
+		integer i2;
+		integer i3;
 		if (i_rst) begin
 
 			o_mem_write_higher     <= 0;
@@ -331,7 +332,7 @@ module cache
 		end else begin
 			////////////////////////////////////// write
 			if (state == write_st) begin
-				mem_write(i_address, 
+				// mem_write(i_address, 
 				#20000
 				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 				valid_mem [target_N][set_adrs] <= 1;
@@ -349,8 +350,11 @@ module cache
 			end
 
 
-			if (state == read_missing_st) begin
+			if (state == write_missing_st) begin
 				// todo: do a conflict check first
+				
+				conflict_check ();
+
 				// #20000
 				// data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 				// valid_mem [target_N][set_adrs] <= 1;
