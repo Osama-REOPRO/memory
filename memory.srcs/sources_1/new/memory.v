@@ -109,6 +109,30 @@ module memory(
 	output [7:0]  o_read_data,
 	output        o_mem_operation_done
 );
+	
+	localparam 
+		idle_st 			  = 0, 
+		get_data_st 	  = 1, 
+		evac_st 			  = 2, 
+		write_missing_st = 3;
+	reg [$clog2(4)-1:0] state;
+	always @(*) begin
+		if (i_rst) state = 0;
+		else begin
+			case (state)
+				idle_st: begin
+					if (i_mem_operation && !i_mem_write) state = get_data_st;
+				end
+				get_data_st: begin
+					if (hit_occurred) state = miss_occurred ? (evac_needed ? evac_st : write_missing_st) : idle_st; // todo: add missing stuff
+				end
+				evac_st: begin
+				end
+				write_missing_st: begin
+				end
+			endcase
+		end
+	end
 	// L0 cache parameters
 	wire mem_write_higher_0;
 	wire address_higher_0;
@@ -226,7 +250,7 @@ module cache
 	reg hit_occurred; // validates hit_N
 	reg [size_N-1:0] empty_N; // which of the N-ways is empty
 	reg empty_found; // validates empty_found
-	wire conflict = !hit_occurred && !empty_found;
+	wire write_conflict = !hit_occurred && !empty_found;
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
 	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N[size_N-1:1], use_mem [set_adrs]}; // final N #note0001
@@ -242,7 +266,8 @@ module cache
 		read_miss_st     = 5, 
 		await_higher_st  = 6, 
 		write_missing_st = 7;
-
+ // todo: update states
+ 
 	always @(*) begin
 		if(i_rst) begin 
 			state = 0;
@@ -255,14 +280,14 @@ module cache
 			case (state)
 
 				idle_st: begin
-					if (i_mem_operation) state = i_mem_write ? write_st : read_st;
+					if (i_mem_operation) state = lookup_st;
 				end
 
 				lookup_st: begin
 					hit_check();
 					state = i_mem_write ? 
-						conflict ? evacuate_st : write_st : 
-						read_init_st; // todo: add state declarations
+						write_conflict ? evacuate_st : write_st : 
+						hit_occurred ? read_st : await_higher_hit_st;
 				end
 
 				evacuate_st: begin
@@ -270,23 +295,23 @@ module cache
 					state = i_mem_write ? write_st : read_st; // todo: add state declarations
 				end
 
+				read_evac_st: begin
+					// todo: init read request to higher level
+					o_mem_write_higher = 1;
+					o_mem_operation_higher = 1;
 
-				read_init_st: begin
+					if (i_mem_operation_higher_done) state = read_missing_st;
+				end
+
 				// read_st: begin
 				// elsewhere
 				// end
 
-				read_miss_st: begin
-					o_mem_write_higher     = 0; // read operation
-					o_address_higher 	  	  = i_address;
-					o_mem_operation_higher = 1;
-					state 					  = await_higher_st;
-				end
-
-				await_higher_st: begin
+				await_higher_hit_st: begin
 					if (i_mem_operation_higher_done)
 						state = write_missing_st;
 				end
+
 			endcase
 		end
 	end
@@ -341,6 +366,16 @@ module cache
 		end else begin
 			////////////////////////////////////// write
 			if (state == write_st) begin
+				#20000
+				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				valid_mem [target_N][set_adrs] <= 1;
+				dirty_mem [target_N][set_adrs] <= 1;
+				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
+
+				state <= idle_st;
+			end
+
+			if (state == write_missing_st) begin
 				#20000
 				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 				valid_mem [target_N][set_adrs] <= 1;
