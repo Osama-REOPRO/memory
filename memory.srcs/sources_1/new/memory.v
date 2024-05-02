@@ -280,21 +280,49 @@ module cache
 			case (state)
 
 				idle_st: begin
-					if (i_mem_operation) state = lookup_st;
+					if (i_state_lower == queue_read_missing_st || 
+					  	 i_state_lower == queue_read_evac_st	 ||
+						 i_state_lower == write_order_st			 ||
+						 i_state_lower == queue_write_evac_st) 
+						 	state = lookup_st;
 				end
 
 				lookup_st: begin
 					hit_check();
-					state = i_mem_write ? 
-						write_conflict ? evacuate_st : write_st : 
-						hit_occurred ? read_st : await_higher_hit_st;
+
+					case(i_state_lower)
+						queue_read_missing_st, queue_read_evac_st: state = read_st;
+						write_order_st, queue_write_evac_st: 		 state = write_st;
+					endcase
 				end
 
-				evacuate_st: begin
+				read_st: begin
+					if 	  (hit_occurred) state = read_exec_st;
+					else if (empty_found)  state = queue_read_missing_st;
+					else 						  state = queue_read_evac_st;
+				end
+				read_exec_st: begin
+					// handlede elsewhere
+					// leads to read_done_st state
+				end
+				queue_read_evac_st: begin
+					if (phase_done && is_lowest_not_done) state = read_evac_st;
+					else transparent = 1'b1;
+				end
+				read_evac_st: begin
 					// todo: evacuation
 					state = i_mem_write ? write_st : read_st; // todo: add state declarations
 				end
+				queue_read_missing_st: begin
+					if (phase_done && is_lowest_not_done) state = read_missing_st;
+					else transparent = 1'b1;
+				end
+				read_missing_st: begin
 
+				end
+				transparent_st: begin
+					transparent = 1'b1;
+				end
 				read_evac_st: begin
 					// todo: init read request to higher level
 					o_mem_write_higher = 1;
