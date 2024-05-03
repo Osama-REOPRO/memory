@@ -258,15 +258,13 @@ module cache
 	// internal state
 	reg [$clog2(4)-1:0] state;
 	localparam 
-		idle_st 			  = 0, 
-		lookup_st 		  = 1, 
-		evacuate_st 	  = 2, 
-		write_st 		  = 3, 
-		read_hit_st      = 4, 
-		read_miss_st     = 5, 
-		await_higher_st  = 6, 
-		write_missing_st = 7;
- // todo: update states
+		idle_st 			     = 0, 
+		lookup_st 		     = 1, 
+		evacuate_st 	     = 2, 
+		write_st 		  	  = 3, 
+		read_st 		 	  	  = 4, 
+		await_higher_hit_st = 5, 
+		write_missing_st    = 6;
  
 	always @(*) begin
 		if(i_rst) begin 
@@ -290,26 +288,23 @@ module cache
 						hit_occurred ? read_st : await_higher_hit_st;
 				end
 
+				// read_st: // handled elsewhere
+
 				evacuate_st: begin
-					// todo: evacuation
-					state = i_mem_write ? write_st : read_st; // todo: add state declarations
+					if (i_mem_operation_higher_done) 
+						state = i_mem_write ? write_st : read_st;
 				end
 
-				read_evac_st: begin
-					// todo: init read request to higher level
-					o_mem_write_higher = 1;
-					o_mem_operation_higher = 1;
-
-					if (i_mem_operation_higher_done) state = read_missing_st;
+				write_missing_evac_st: begin
+					if (i_mem_operation_higher_done) 
+						state = write_missing_st;
 				end
-
-				// read_st: begin
-				// elsewhere
-				// end
 
 				await_higher_hit_st: begin
-					if (i_mem_operation_higher_done)
-						state = write_missing_st;
+					if (i_mem_operation_higher_done) begin
+						state = write_conflict ? write_missing_evac_st : write_missing_st;
+						o_mem_operation_higher = 1'b0;
+					end
 				end
 
 			endcase
@@ -377,12 +372,12 @@ module cache
 
 			if (state == write_missing_st) begin
 				#20000
-				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_read_data_higher; 
 				valid_mem [target_N][set_adrs] <= 1;
 				dirty_mem [target_N][set_adrs] <= 1;
 				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-				state <= idle_st;
+				state <= read_st; // return the data just written
 			end
 
 			////////////////////////////////////// read
@@ -394,6 +389,20 @@ module cache
 
 		end
 	end
+
+	always @(*) begin
+		case (state)
+			await_higher_hit_st: begin
+				o_mem_write_higher 	  = 1'b0;
+				o_address_higher   	  = i_address;
+				o_mem_operation_higher = 1'b1;
+			end
+			evacuate_st: begin
+				o_mem_write_higher 	  = 1'b1;
+				o_address_higher   	  = i_address;
+				o_mem_operation_higher = 1'b1;
+			end
+		endcase
 endmodule
 
 
