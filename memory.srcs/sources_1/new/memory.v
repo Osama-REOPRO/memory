@@ -235,13 +235,14 @@ module cache
 	// internal state
 	reg [$clog2(4)-1:0] state;
 	localparam 
-		idle_st 			     = 0, 
-		lookup_st 		     = 1, 
-		evacuate_st 	     = 2, 
-		write_st 		  	  = 3, 
-		read_st 		 	  	  = 4, 
-		await_higher_hit_st = 5, 
-		write_missing_st    = 6;
+		idle_st 			     	 = 0,
+		lookup_st 		     	 = 1,
+		evacuate_st 	     	 = 2,
+		write_st 		  	  	 = 3,
+		read_st 		 	  	  	 = 4,
+		await_higher_hit_st 	 = 5,
+		write_missing_st   	 = 6,
+		write_missing_evac_st = 7;
  
 	always @(*) begin
 		if(i_rst) begin 
@@ -311,7 +312,7 @@ module cache
 
 			hit_check_done = 1'b1;
 		end
-	endtask
+	end
 
 	// clocked read/write operations
 	always @(posedge i_clk) begin : read_write
@@ -388,6 +389,7 @@ module cache
 				o_mem_operation_higher = 1'b1;
 			end
 		endcase
+	end
 endmodule
 
 
