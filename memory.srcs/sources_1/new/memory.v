@@ -109,30 +109,6 @@ module memory(
 	output [7:0]  o_read_data,
 	output        o_mem_operation_done
 );
-	
-	localparam 
-		idle_st 			  = 0, 
-		get_data_st 	  = 1, 
-		evac_st 			  = 2, 
-		write_missing_st = 3;
-	reg [$clog2(4)-1:0] state;
-	always @(*) begin
-		if (i_rst) state = 0;
-		else begin
-			case (state)
-				idle_st: begin
-					if (i_mem_operation && !i_mem_write) state = get_data_st;
-				end
-				get_data_st: begin
-					if (hit_occurred) state = miss_occurred ? (evac_needed ? evac_st : write_missing_st) : idle_st; // todo: add missing stuff
-				end
-				evac_st: begin
-				end
-				write_missing_st: begin
-				end
-			endcase
-		end
-	end
 	// L0 cache parameters
 	wire mem_write_higher_0;
 	wire address_higher_0;
