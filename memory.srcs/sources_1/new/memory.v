@@ -254,6 +254,7 @@ module cache
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
 	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N[size_N-1:1], use_mem [set_adrs]}; // final N #note0001
+	reg hit_check_done;
 
 	// internal state
 	reg [$clog2(4)-1:0] state;
@@ -269,10 +270,6 @@ module cache
 	always @(*) begin
 		if(i_rst) begin 
 			state = 0;
-			hit_N = 0;
-			i = 0;
-			empty_found = 0;
-			hit_occurred = 0;
 		end
 		else begin
 			case (state)
@@ -282,13 +279,16 @@ module cache
 				end
 
 				lookup_st: begin
-					hit_check();
-					state = i_mem_write ? 
-						write_conflict ? evacuate_st : write_st : 
-						hit_occurred ? read_st : await_higher_hit_st;
+					if (hit_check_done) begin
+						state = i_mem_write ? 
+							write_conflict ? evacuate_st : write_st : 
+							hit_occurred ? read_st : await_higher_hit_st;
+					end
 				end
 
 				// read_st: // handled elsewhere
+				// write_st: // handled elsewhere
+				// write_missing_st: // handled elsewhere
 
 				evacuate_st: begin
 					if (i_mem_operation_higher_done) 
@@ -311,9 +311,15 @@ module cache
 		end
 	end
 
-	// tasks
-	task hit_check ();
-		begin
+	// hit check
+	always @(*) begin
+		if (i_rst || i_mem_operation) begin
+			hit_check_done = 1'b0;
+			hit_N = 1'b0;
+			empty_found = 1'b0;
+			hit_occurred = 1'b0;
+			i = 1'b0;
+		end else if (state == lookup_st && !hit_check_done) begin
 			#200;
 			for (i=0; i<N; i=i+1) begin
 				if (valid_mem[i][set_adrs]) begin
@@ -326,10 +332,12 @@ module cache
 					empty_N = i;
 				end
 			end
+
+			hit_check_done = 1'b1;
 		end
 	endtask
 
-	// actual read/write operations
+	// clocked read/write operations
 	always @(posedge i_clk) begin : read_write
 		integer i0;
 		integer i1;
@@ -390,6 +398,7 @@ module cache
 		end
 	end
 
+	// higher cache handling
 	always @(*) begin
 		case (state)
 			await_higher_hit_st: begin
