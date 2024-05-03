@@ -3,3 +3,5 @@
 - [ ] if received address is already being output, do nothing
 - [ ] implement word writes and line writes etc. for refilling of caches
 	- right now we can only do one byte write
+- [ ] check parameter edge cases, small numbers and zeros, because it is a small design, we might have lots of those
+- [ ] add more cache levels

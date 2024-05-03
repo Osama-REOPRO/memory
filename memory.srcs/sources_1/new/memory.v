@@ -81,12 +81,15 @@ integer valToWrite = 1;
 	memory mem (
 		.i_clk(clk),
 		.i_rst(rst),
-		.i_mem_operation(mem_operation),
-		.o_mem_operation_done(mem_operation_done),
+
 		.i_mem_write(mem_write),
 		.i_address(address),
 		.i_write_data(write_data),
-		.o_read_data(read_data)
+
+		.i_mem_operation(mem_operation),
+
+		.o_read_data(read_data),
+		.o_mem_operation_done(mem_operation_done)
 	);
 	initial begin
 		{clk, mem_operation, mem_write, address, write_data} = 0;
