@@ -199,13 +199,16 @@ module cache
 				o_mem_operation_done = 1'b0;
 				o_success 				= 1'b0;
 		end else begin
-			if (state == success_st) begin
-				o_mem_operation_done = 1'b1;
-				o_success 				= 1'b1;
-			end else if (state == fail_st) begin
-				o_mem_operation_done = 1'b1;
-				o_success 				= 1'b0;
-			end
+			case (state)
+				success_st: begin
+					o_mem_operation_done = 1'b1;
+					o_success            = 1'b1;
+				end
+				fail_st: begin
+					o_mem_operation_done = 1'b1;
+					o_success            = 1'b0;
+				end
+			endcase
 		end
 	end
 endmodule
