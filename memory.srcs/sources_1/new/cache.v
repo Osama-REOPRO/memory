@@ -66,12 +66,13 @@ module cache
 	// state machine
 	reg [$clog2(4)-1:0] state;
 	localparam 
-		idle_st 		= 0,
-		lookup_st 	= 1,
-		write_st 	= 2,
-		read_st 		= 3,
-		fail_st		= 4,
-		success_st	= 5;
+		idle_st 		 = 0,
+		lookup_st 	 = 1,
+		write_st 	 = 2,
+		read_st 		 = 3,
+		evac_read_st = 4,
+		fail_st		 = 5,
+		success_st	 = 6;
 
 	reg rw_done;
  
