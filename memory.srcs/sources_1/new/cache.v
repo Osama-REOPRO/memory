@@ -17,8 +17,8 @@ module cache
 	output reg [7:0]	o_read_data,
 
 	input 				i_mem_operation,
-	output 				o_mem_operation_done,
-	output 				o_success // #note003
+	output reg			o_mem_operation_done,
+	output reg  		o_success // #note003
 );
 
 	localparam B = C/b;  // number of blocks
@@ -45,10 +45,14 @@ module cache
 	// N operations
 	integer i;
 	localparam size_N = $clog2(N);
+
 	reg [size_N-1:0] hit_N; // which of the N-ways the hit occurred in
 	reg hit_occurred; // validates hit_N
 	reg [size_N-1:0] empty_N; // which of the N-ways is empty
-	reg empty_found; // validates empty_found
+	reg empty_found; // validates empty_N
+	reg [size_N-1:0] clean_N;
+	reg clean_found; // validates clean_N
+
 	wire write_conflict = !hit_occurred && !empty_found;
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
@@ -58,14 +62,14 @@ module cache
 	// internal state
 	reg [$clog2(4)-1:0] state;
 	localparam 
-		idle_st 			     	 = 0,
-		lookup_st 		     	 = 1,
-		evacuate_st 	     	 = 2,
-		write_st 		  	  	 = 3,
-		read_st 		 	  	  	 = 4,
-		await_higher_hit_st 	 = 5,
-		write_missing_st   	 = 6,
-		write_missing_evac_st = 7;
+		idle_st 		= 0,
+		lookup_st 	= 1,
+		write_st 	= 2,
+		read_st 		= 3,
+		fail_st		= 4,
+		success_st	= 5;
+
+	reg rw_done;
  
 	always @(*) begin
 		if(i_rst) begin 
@@ -105,11 +109,19 @@ module cache
 	// hit check
 	always @(*) begin
 		if (i_rst || i_mem_operation) begin
+
 			hit_check_done = 1'b0;
-			hit_N = 1'b0;
-			empty_found = 1'b0;
+
 			hit_occurred = 1'b0;
-			i = 1'b0;
+			empty_found  = 1'b0;
+			clean_found  = 1'b0;
+
+			hit_N   = {size_N{1'b0}};
+			empty_N = {size_N{1'b0}};
+			clean_N = {size_N{1'b0}};
+
+			i = 0;
+
 		end else if (state == lookup_st && !hit_check_done) begin
 			#200;
 			for (i=0; i<N; i=i+1) begin
@@ -117,6 +129,9 @@ module cache
 					if (tag_adrs == tag_mem[i][set_adrs]) begin
 						hit_occurred = 1'b1;
 						hit_N = i;
+					end else if (!dirty_mem[i][set_adrs]) begin
+						clean_found  = 1'b1;
+						clean_N = i;
 					end
 				end else begin
 					empty_found = 1'b1;
@@ -136,9 +151,7 @@ module cache
 		integer i3;
 		if (i_rst) begin
 
-			o_mem_write_higher     <= 0;
-			o_address_higher 	  	  <= 0;
-			o_mem_operation_higher <= 0;
+			rw_done <= 0;
 
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
@@ -166,14 +179,15 @@ module cache
 				dirty_mem [target_N][set_adrs] <= 1;
 				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-				state <= idle_st;
+				rw_done <= 1'b1;
 			end
 
 			////////////////////////////////////// read
 			if (state == read_st) begin
 				#20000
 				o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
-				state <= idle_st;
+
+				rw_done <= 1'b1;
 			end
 
 		end
@@ -194,5 +208,21 @@ module cache
 			end
 		end
 	end
+endmodule
 
 
+// todo: test
+module LFSR
+#(
+	size = 4
+) (
+	input i_clk, i_rst, 
+	output reg [size-1:0] o_num
+);
+	always@(posedge i_clk) begin
+		if(i_rst) o_num <= {size{1'b1}};
+		else o_num = {o_num[size-2:0],(o_num[size-1]^o_num[size-2])};
+		// shift left once
+		// right-most bit is xor of 2 left-most bits
+	end
+endmodule
