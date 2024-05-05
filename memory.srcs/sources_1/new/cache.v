@@ -74,6 +74,8 @@ module cache
 	always @(*) begin
 		if(i_rst) begin 
 			state = 0;
+			o_mem_operation_done = 1'b0;
+			o_success 				= 1'b0;
 		end
 		else begin
 			case (state)
@@ -91,19 +93,20 @@ module cache
 				end
 
 				write_conflict_st: begin
-					// more logic elsewhere
+					read_op = 1'b1; // so it can be evacuated
 					if (read_op_done) state = idle_st;
 				end
 				read_miss_st: begin
-					// more logic elsewhere
 					if (!i_mem_operation) state = idle_st;
 				end
 				fail_st: begin
-					// more logic elsewhere
+					o_mem_operation_done = 1'b1;
+					o_success 				= 1'b0;
 					if (!i_mem_operation) state = idle_st;
 				end
 				success_st: begin
-					// more logic elsewhere
+					o_mem_operation_done = 1'b1;
+					o_success 				= 1'b1;
 					if (!i_mem_operation) state = idle_st;
 				end
 
@@ -198,26 +201,6 @@ module cache
 		end
 	end
 
-	// success and fail states
-	always @(*) begin
-		if (i_rst) begin
-				o_mem_operation_done = 1'b0;
-				o_success 				= 1'b0;
-		end else begin
-			case (state)
-				success_st: begin
-					o_mem_operation_done = 1'b1;
-					o_success 				= 1'b1;
-				end
-				fail_st: begin
-					o_mem_operation_done = 1'b1;
-					o_success 				= 1'b0;
-				end
-				write_conflict_st: begin
-					read_op = 1'b1; // so it can be evacuated
-				end
-		end
-	end
 endmodule
 
 
