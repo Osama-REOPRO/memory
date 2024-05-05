@@ -54,7 +54,7 @@ module mem(
 	);
 
 
-	virtual_memory v_mem(
+	vr_mem vr_mem(
 		.i_clk(i_clk),
 		.i_rst(i_rst),
 
@@ -68,22 +68,4 @@ module mem(
 		.o_mem_operation_done(mem_operation_higher_done_0)
 	);
 
-
-endmodule
-
-
-// todo: test
-module LFSR
-#(
-	size = 4
-) (
-	input i_clk, i_rst, 
-	output reg [size-1:0] o_num
-);
-	always@(posedge i_clk) begin
-		if(i_rst) o_num <= {size{1'b1}};
-		else o_num = {o_num[size-2:0],(o_num[size-1]^o_num[size-2])};
-		// shift left once
-		// right-most bit is xor of 2 left-most bits
-	end
 endmodule

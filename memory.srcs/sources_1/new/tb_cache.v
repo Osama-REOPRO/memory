@@ -12,12 +12,14 @@ wire 			success;
 
 always #0.1 clk <= !clk; // clock runs at 10 MHz
 
-cache (
+cache 
 #(
-	C = 8,   // capacity (words)
-	b = 2,   // block size
-	N = 2    // degree of associativity
-) cache (
+	.C(8), // capacity (words)
+	.b(1), // block size (words in block)
+	.N(1)  // degree of associativity
+) 
+cache 
+(
 	.i_clk(clk),
 	.i_rst(rst),
 
@@ -50,6 +52,7 @@ always @(posedge clk) begin
 	end else begin
 		case (state)
 			idle_st: begin
+				#200;
 				state = write_init_st;
 			end
 			read_init_st: begin
@@ -90,23 +93,5 @@ initial begin
 	#1
 	rst = 0;
 end
+
 endmodule
-
-
-
-// todo: test
-module LFSR
-#(
-	size = 4
-) (
-	input i_clk, i_rst, 
-	output reg [size-1:0] o_num
-);
-	always@(posedge i_clk) begin
-		if(i_rst) o_num <= {size{1'b1}};
-		else o_num = {o_num[size-2:0],(o_num[size-1]^o_num[size-2])};
-		// shift left once
-		// right-most bit is xor of 2 left-most bits
-	end
-endmodule
-
