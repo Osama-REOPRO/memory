@@ -85,14 +85,19 @@ module cache
 				lookup_st: begin
 					if (hit_check_done) begin
 						state = i_mem_write ? 
-							write_conflict ? fail_st : write_st : 
-							hit_occurred ? read_st : fail_st;
+							write_conflict ? write_conflict_st : write_st : 
+							hit_occurred ? read_st : read_fail_st;
 					end
 				end
 
-				// read_st: // handled elsewhere
-				// write_st: // handled elsewhere
-
+				write_conflict_st: begin
+					// more logic elsewhere
+					if (read_op_done) state = idle_st;
+				end
+				read_miss_st: begin
+					// more logic elsewhere
+					if (!i_mem_operation) state = idle_st;
+				end
 				fail_st: begin
 					// more logic elsewhere
 					if (!i_mem_operation) state = idle_st;
@@ -199,13 +204,18 @@ module cache
 				o_mem_operation_done = 1'b0;
 				o_success 				= 1'b0;
 		end else begin
-			if (state == success_st) begin
-				o_mem_operation_done = 1'b1;
-				o_success 				= 1'b1;
-			end else if (state == fail_st) begin
-				o_mem_operation_done = 1'b1;
-				o_success 				= 1'b0;
-			end
+			case (state)
+				success_st: begin
+					o_mem_operation_done = 1'b1;
+					o_success 				= 1'b1;
+				end
+				fail_st: begin
+					o_mem_operation_done = 1'b1;
+					o_success 				= 1'b0;
+				end
+				write_conflict_st: begin
+					read_op = 1'b1; // so it can be evacuated
+				end
 		end
 	end
 endmodule
