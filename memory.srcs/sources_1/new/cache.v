@@ -59,7 +59,7 @@ module cache
 	wire target_N = hit_occurred ? hit_N : empty_found ? empty_N : {random_N[size_N-1:1], use_mem [set_adrs]}; // final N #note0001
 	reg hit_check_done;
 
-	// internal state
+	// state machine
 	reg [$clog2(4)-1:0] state;
 	localparam 
 		idle_st 		= 0,
