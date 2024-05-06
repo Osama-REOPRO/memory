@@ -25,12 +25,12 @@ module cache
 	localparam B = C/b;  // number of blocks
 	localparam S = B/N;  // number of sets
 
-	localparam Byte_offset_nbytes = $clog2(4);
-	localparam Block_offset_nbytes = $clog2(b);
+	localparam Byte_offset_nbytes = $clog2(4); // offset of byte within word
+	localparam Block_offset_nbytes = $clog2(b); // offset of word within block (confusing, shouldn't it be word_offset?)
 	localparam Set_nbytes = $clog2(S);
 	localparam Tag_nbytes = 32 - Set_nbytes - Block_offset_nbytes - Byte_offset_nbytes;
 	localparam Use_bit	 = N > 1;
-
+	
 	reg [7:0] 				data_mem  [N-1:0] [S-1:0] [b-1:0] [3:0];
 	reg [Tag_nbytes-1:0] tag_mem   [N-1:0] [S-1:0];
 	reg 						valid_mem [N-1:0] [S-1:0];
