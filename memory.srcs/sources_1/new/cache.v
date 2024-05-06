@@ -29,40 +29,100 @@ module cache
 	localparam Block_offset_nbytes = $clog2(b); // offset of word within block (confusing, shouldn't it be word_offset?)
 	localparam Set_nbytes = $clog2(S);
 	localparam Tag_nbytes = 32 - Set_nbytes - Block_offset_nbytes - Byte_offset_nbytes;
-	localparam Use_bit	 = N > 1;
-	
-	reg [7:0] 				data_mem  [N-1:0] [S-1:0] [b-1:0] [3:0];
-	reg [Tag_nbytes-1:0] tag_mem   [N-1:0] [S-1:0];
-	reg 						valid_mem [N-1:0] [S-1:0];
-	reg 						dirty_mem [N-1:0] [S-1:0];
-	reg 						use_mem   			[S-1:0];
 
+	localparam Single_word_blocks = (b <= 1); // no block offset
+	localparam Direct_mapped 	= (N <= 1); // don't utilize use_bit
+		
 	// todo: check if should do -1
 	wire [Byte_offset_nbytes-1:0]  byte_offset_adrs  =	i_address[						 0 +:	Byte_offset_nbytes-1		]; 
 	wire [Block_offset_nbytes-1:0] block_offset_adrs = i_address[Byte_offset_nbytes	+:	Block_offset_nbytes-1	];
 	wire [Set_nbytes-1:0] 			 set_adrs 			 =	i_address[Block_offset_nbytes	+:	Set_nbytes-1				];
 	wire [Tag_nbytes-1:0] 			 tag_adrs 			 =	i_address[Set_nbytes				+:	Tag_nbytes-1				];
 
-	// N operations
-	integer i;
-	localparam size_N = $clog2(N);
-
-	reg [size_N-1:0] hit_N; // which of the N-ways the hit occurred in
 	reg hit_occurred; // validates hit_N
-	reg [size_N-1:0] empty_N; // which of the N-ways is empty
 	reg empty_found; // validates empty_N
-	reg [size_N-1:0] clean_N;
 	reg clean_found; // validates clean_N
-
 	wire write_conflict = !hit_occurred && !empty_found && !clean_found;
-	wire [size_N-1:0] random_N; // randomly generated N with LFSR
-	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
-	wire target_N = hit_occurred ? hit_N 	:
-						 empty_found  ? empty_N :
-						 clean_found  ? clean_N :
-						 {random_N[size_N-1:1], use_mem [set_adrs]}; // N to evacuate then replace #note0001
+
 	reg hit_check_done;
 
+	// memory generation
+	if (Direct_mapped) begin : dir_map
+
+		if (Single_word_blocks) begin : sng_wrd
+			reg [7:0] data_mem		   [S-1:0]			 [3:0];
+		end else begin : mul_wrd
+			reg [7:0] data_mem		   [S-1:0] [b-1:0] [3:0];
+		end
+
+		reg 				 [Tag_nbytes-1:0] tag_mem  		   [S-1:0];
+		reg 										valid_mem		   [S-1:0];
+		reg 										dirty_mem		   [S-1:0];
+
+	end else begin : N_way
+
+		if (Single_word_blocks) reg [7:0] data_mem [N-1:0] [S-1:0] 			 [3:0];
+		else 							reg [7:0] data_mem [N-1:0] [S-1:0] [b-1:0] [3:0];
+
+		reg 				 [Tag_nbytes-1:0] tag_mem   [N-1:0] [S-1:0];
+		reg 								 		valid_mem [N-1:0] [S-1:0];
+		reg 										dirty_mem [N-1:0] [S-1:0];
+
+		reg 										use_mem   			[S-1:0];
+		
+		// N operations
+		integer i;
+		localparam size_N = $clog2(N);
+	
+		reg [size_N-1:0] hit_N; // which of the N-ways the hit occurred in
+		reg [size_N-1:0] empty_N; // which of the N-ways is empty
+		reg [size_N-1:0] clean_N;
+	
+		wire [size_N-1:0] random_N; // randomly generated N with LFSR
+		LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
+		wire target_N = hit_occurred ? hit_N 	:
+							 empty_found  ? empty_N :
+							 clean_found  ? clean_N :
+							 {random_N[size_N-1:1], mul_map.use_mem [set_adrs]}; // N to evacuate then replace #note0001	
+							 
+		// hit check
+		always @(*) begin
+			if (i_rst || i_mem_operation) begin
+	
+				hit_check_done = 1'b0;
+	
+				hit_occurred = 1'b0;
+				empty_found  = 1'b0;
+				clean_found  = 1'b0;
+	
+				hit_N   = {size_N{1'b0}};
+				empty_N = {size_N{1'b0}};
+				clean_N = {size_N{1'b0}};
+	
+				i = 0;
+	
+			end else if (state == lookup_st && !hit_check_done) begin
+				#200;
+				for (i=0; i<N; i=i+1) begin
+					if (valid_mem[i][set_adrs]) begin
+						if (tag_adrs == tag_mem[i][set_adrs]) begin
+							hit_occurred = 1'b1;
+							hit_N = i;
+						end else if (!dirty_mem[i][set_adrs]) begin
+							clean_found  = 1'b1;
+							clean_N = i;
+						end
+					end else begin
+						empty_found = 1'b1;
+						empty_N = i;
+					end
+				end
+	
+				hit_check_done = 1'b1;
+			end
+		end
+	end
+	
 	// state machine
 	reg [$clog2(4)-1:0] state;
 	localparam 
@@ -112,43 +172,6 @@ module cache
 				end
 
 			endcase
-		end
-	end
-
-	// hit check
-	always @(*) begin
-		if (i_rst || i_mem_operation) begin
-
-			hit_check_done = 1'b0;
-
-			hit_occurred = 1'b0;
-			empty_found  = 1'b0;
-			clean_found  = 1'b0;
-
-			hit_N   = {size_N{1'b0}};
-			empty_N = {size_N{1'b0}};
-			clean_N = {size_N{1'b0}};
-
-			i = 0;
-
-		end else if (state == lookup_st && !hit_check_done) begin
-			#200;
-			for (i=0; i<N; i=i+1) begin
-				if (valid_mem[i][set_adrs]) begin
-					if (tag_adrs == tag_mem[i][set_adrs]) begin
-						hit_occurred = 1'b1;
-						hit_N = i;
-					end else if (!dirty_mem[i][set_adrs]) begin
-						clean_found  = 1'b1;
-						clean_N = i;
-					end
-				end else begin
-					empty_found = 1'b1;
-					empty_N = i;
-				end
-			end
-
-			hit_check_done = 1'b1;
 		end
 	end
 
