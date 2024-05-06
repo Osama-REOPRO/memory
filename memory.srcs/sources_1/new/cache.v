@@ -26,8 +26,8 @@ module cache
 	localparam S = B/N;  // number of sets
 
 	localparam Byte_offset_nbytes = $clog2(4); // offset of byte within word
-	localparam Block_offset_nbytes = $clog2(b); // offset of word within block (confusing, shouldn't it be word_offset?)
-	localparam Set_nbytes = $clog2(S);
+	localparam Block_offset_nbytes = ($clog2(b) > 0) ? $clog2(b) : 1; // offset of word within block (more like word_offset)
+	localparam Set_nbytes = ($clog2(S) > 0) ? $clog2(S) : 1;
 	localparam Tag_nbytes = 32 - Set_nbytes - Block_offset_nbytes - Byte_offset_nbytes;
 	localparam Use_bit	 = N > 1;
 	
@@ -39,6 +39,7 @@ module cache
 
 	// todo: check if should do -1
 	wire [Byte_offset_nbytes-1:0]  byte_offset_adrs  =	i_address[						 0 +:	Byte_offset_nbytes-1		]; 
+//	wire [Block_offset_nbytes-1:0] block_offset_adrs = i_address[Byte_offset_nbytes	+:	1	];
 	wire [Block_offset_nbytes-1:0] block_offset_adrs = i_address[Byte_offset_nbytes	+:	Block_offset_nbytes-1	];
 	wire [Set_nbytes-1:0] 			 set_adrs 			 =	i_address[Block_offset_nbytes	+:	Set_nbytes-1				];
 	wire [Tag_nbytes-1:0] 			 tag_adrs 			 =	i_address[Set_nbytes				+:	Tag_nbytes-1				];
