@@ -61,13 +61,13 @@ module cache
 	reg 						use_mem   			[S-1:0];
 
 	// decode address
-	wire [Byte_offset_nbytes-1:0]  											 byte_offset_adrs  =	i_address[0 +:	Byte_offset_nbytes ];
-	wire [(Block_offset_nbytes > 0 ? Block_offset_nbytes-1 : 0) :0] block_offset_adrs = i_address[0 +  Byte_offset_nbytes +: Block_offset_nbytes	];
-	wire [Set_nbytes-1:0] 			 											 set_adrs 			 =	i_address[0 +  Byte_offset_nbytes +	 Block_offset_nbytes	+:	Set_nbytes ];
-	wire [Tag_nbytes-1:0] 			 											 tag_adrs 			 =	i_address[0 +  Byte_offset_nbytes +	 Block_offset_nbytes	+	Set_nbytes +: Tag_nbytes ];
+	wire [Byte_offset_nbytes-1:0]  											 byte_offset_adrs  =										 i_address[0 +: Byte_offset_nbytes ];
+	wire [(Block_offset_nbytes > 0 ? Block_offset_nbytes-1 : 0) :0] block_offset_adrs = Single_word_blocks ? 1'b0 : i_address[0 +  Byte_offset_nbytes +: Block_offset_nbytes > 0 ? Block_offset_nbytes : 1]; // just so it will compile, not used when Single_word_blocks
+	wire [Set_nbytes-1:0] 			 											 set_adrs 			 =										 i_address[0 +  Byte_offset_nbytes +  Block_offset_nbytes	+:	Set_nbytes ];
+	wire [Tag_nbytes-1:0] 			 											 tag_adrs 			 =										 i_address[0 +  Byte_offset_nbytes +  Block_offset_nbytes	+	Set_nbytes +: Tag_nbytes ];
 
 	initial begin
-		$display("\n////////////////////////// decode address ////////////////////////////////////");
+		$display("\n////////////////////////// decode address ////////////////////////////////////\n");
 		
       $display("byte_offset_adrs  = i_address[%0d +: %2d], absolute [%0d : %2d]", 0,   Byte_offset_nbytes,  																 0, 																			Byte_offset_nbytes - 1);
 		if (!Single_word_blocks)
@@ -92,9 +92,10 @@ module cache
 	wire write_conflict = !hit_occurred && !empty_found && !clean_found;
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
-	wire target_N = hit_occurred ? hit_N 	:
-						 empty_found  ? empty_N :
-						 clean_found  ? clean_N :
+	wire target_N = Direct_mapped ? 0       : 
+						 hit_occurred  ? hit_N 	 :
+						 empty_found   ? empty_N :
+						 clean_found   ? clean_N :
 						 {random_N[size_N-1:1], use_mem [set_adrs]}; // N to evacuate then replace #note0001
 	reg hit_check_done;
 
@@ -270,14 +271,15 @@ endmodule
 // todo: test
 module LFSR
 #(
-	size = 4
+	parameter size = 4,
+	localparam clamped_size = size >= 4 ? size : 4 // LFSR makes no sense under 4-bits
 ) (
 	input i_clk, i_rst, 
-	output reg [size-1:0] o_num
+	output reg [clamped_size-1:0] o_num
 );
 	always@(posedge i_clk) begin
-		if(i_rst) o_num <= {size{1'b1}};
-		else o_num = {o_num[size-2:0],(o_num[size-1]^o_num[size-2])};
+		if(i_rst) o_num <= {clamped_size{1'b1}};
+		else o_num = {o_num[clamped_size-2:0],(o_num[clamped_size-1]^o_num[clamped_size-2])};
 		// shift left once
 		// right-most bit is xor of 2 left-most bits
 	end
