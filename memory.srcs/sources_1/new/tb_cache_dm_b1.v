@@ -89,9 +89,9 @@ end
 
 cache 
 #(
-	.C(8), // capacity (words)
-	.b(1), // block size (words in block)
-	.N(1)  // degree of associativity
+	.I_C(8), // capacity (words)
+	.I_b(2), // block size (words in block)
+	.I_N(1)  // degree of associativity
 ) 
 cache 
 (
