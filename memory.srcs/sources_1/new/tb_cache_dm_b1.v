@@ -12,12 +12,12 @@ wire [7:0]  read_data;
 reg  			mem_operation;
 wire 			mem_operation_done;
 wire 			success;
-
+reg 			word_op;
 
 always #0.1 clk <= !clk; // clock runs at 10 MHz
 
 initial begin
-	{clk, mem_operation, mem_write, address, write_data} = 0;
+	{clk, mem_operation, mem_write, address, write_data, word_op} = 0;
 	rst = 1;
 	#0.2
 	rst = 0;
@@ -103,6 +103,7 @@ cache
 	.i_address(address),
 
 	.i_write_data(write_data),
+	.i_word_op(word_op),
 	.o_read_data(read_data),
 
 	.i_mem_operation(mem_operation),

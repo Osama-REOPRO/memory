@@ -11,11 +11,12 @@ module cache
 	input         		i_rst,
 
 	input 				i_mem_write,
+	input 				i_word_op,
 	input 				i_dirty_replace, // assert to replace dirty after evac
 	input		  [31:0]	i_address,
 
-	input  	  [7:0] 	i_write_data,
-	output reg [7:0]	o_read_data,
+	input  	  [31:0]	i_write_data,
+	output reg [31:0]	o_read_data,
 
 	input 				i_mem_operation,
 	output reg			o_mem_operation_done,
@@ -237,9 +238,21 @@ module cache
 			if (state == write_st) begin
 //				#20000
 				#20;
-				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
-				tag_mem	 [target_N][set_adrs] <= tag_adrs;
-				valid_mem [target_N][set_adrs] <= 1;
+				if (i_word_op) begin
+					// word write
+					data_mem  [target_N][set_adrs][block_offset_adrs][0] <= i_write_data[0*8 +:8];
+					data_mem  [target_N][set_adrs][block_offset_adrs][1] <= i_write_data[1*8 +:8];
+					data_mem  [target_N][set_adrs][block_offset_adrs][2] <= i_write_data[2*8 +:8];
+					data_mem  [target_N][set_adrs][block_offset_adrs][3] <= i_write_data[3*8 +:8];
+
+					tag_mem	 [target_N][set_adrs] <= tag_adrs;
+					valid_mem [target_N][set_adrs] <= 1;
+				end else begin
+					// byte write
+					data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data[7:0];
+					// on word write, use the first 8-bits
+				end
+
 				dirty_mem [target_N][set_adrs] <= 1;
 				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
@@ -250,7 +263,17 @@ module cache
 			if (state == read_st) begin
 //				#20000
 				#20;
-				o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
+				if (i_word_op) begin
+					// word read
+					o_read_data[0*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][0];
+					o_read_data[1*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][1];
+					o_read_data[2*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][2];
+					o_read_data[3*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][3];
+				end else begin
+					// byte read
+					o_read_data[7:0] <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
+					// read only to first 8 bytes
+				end
 
 				state <= success_st;
 			end
