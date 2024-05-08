@@ -3,291 +3,74 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="tb_cache_behav.wdb" id="1">
+      <db_ref path="tb_cache_dm_b2_behav.wdb" id="1">
          <top_modules>
             <top_module name="glbl" />
-            <top_module name="tb_cache" />
+            <top_module name="tb_cache_dm_b2" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="205.020921 us"></ZoomEndTime>
-      <Cursor1Time time="0.000000 us"></Cursor1Time>
+      <ZoomEndTime time="488.176851 us"></ZoomEndTime>
+      <Cursor1Time time="50.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="265"></NameColumnWidth>
-      <ValueColumnWidth column_width="108"></ValueColumnWidth>
+      <ValueColumnWidth column_width="103"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="22" />
-   <wvobject fp_name="/tb_cache/clk" type="logic">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/rst" type="logic">
-      <obj_property name="ElementShortName">rst</obj_property>
-      <obj_property name="ObjectShortName">rst</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/state" type="array">
-      <obj_property name="ElementShortName">state[31:0]</obj_property>
-      <obj_property name="ObjectShortName">state[31:0]</obj_property>
-      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/mem_operation" type="logic">
-      <obj_property name="ElementShortName">mem_operation</obj_property>
-      <obj_property name="ObjectShortName">mem_operation</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/mem_write" type="logic">
-      <obj_property name="ElementShortName">mem_write</obj_property>
-      <obj_property name="ObjectShortName">mem_write</obj_property>
-      <obj_property name="CustomSignalColor">#800080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/diry_replace" type="logic">
-      <obj_property name="ElementShortName">diry_replace</obj_property>
-      <obj_property name="ObjectShortName">diry_replace</obj_property>
-      <obj_property name="CustomSignalColor">#A52A2A</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/address" type="array">
+   <WVObjectSize size="12" />
+   <wvobject fp_name="/tb_cache_dm_b2/address" type="array">
       <obj_property name="ElementShortName">address[31:0]</obj_property>
       <obj_property name="ObjectShortName">address[31:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache/write_data" type="array">
+   <wvobject fp_name="/tb_cache_dm_b2/write_data" type="array">
       <obj_property name="ElementShortName">write_data[7:0]</obj_property>
       <obj_property name="ObjectShortName">write_data[7:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache/read_data" type="array">
+   <wvobject fp_name="/tb_cache_dm_b2/mem_write" type="logic">
+      <obj_property name="ElementShortName">mem_write</obj_property>
+      <obj_property name="ObjectShortName">mem_write</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b2/diry_replace" type="logic">
+      <obj_property name="ElementShortName">diry_replace</obj_property>
+      <obj_property name="ObjectShortName">diry_replace</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b2/read_data" type="array">
       <obj_property name="ElementShortName">read_data[7:0]</obj_property>
       <obj_property name="ObjectShortName">read_data[7:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache/mem_operation_done" type="logic">
+   <wvobject fp_name="/tb_cache_dm_b2/mem_operation" type="logic">
+      <obj_property name="ElementShortName">mem_operation</obj_property>
+      <obj_property name="ObjectShortName">mem_operation</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b2/mem_operation_done" type="logic">
       <obj_property name="ElementShortName">mem_operation_done</obj_property>
       <obj_property name="ObjectShortName">mem_operation_done</obj_property>
-      <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache/success" type="logic">
+   <wvobject fp_name="/tb_cache_dm_b2/success" type="logic">
       <obj_property name="ElementShortName">success</obj_property>
       <obj_property name="ObjectShortName">success</obj_property>
-      <obj_property name="CustomSignalColor">#0000FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/valToWrite" type="array">
-      <obj_property name="ElementShortName">valToWrite[31:0]</obj_property>
-      <obj_property name="ObjectShortName">valToWrite[31:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject type="divider" fp_name="divider286">
       <obj_property name="label">Cache</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="BkColor">#808080</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache/cache/state" type="array">
-      <obj_property name="ElementShortName">state[2:0]</obj_property>
-      <obj_property name="ObjectShortName">state[2:0]</obj_property>
-      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/cache/i_address" type="array">
-      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
-      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
    <wvobject fp_name="vbus555" type="vbus">
       <obj_property name="label">hit check</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <wvobject fp_name="/tb_cache/cache/hit_check_done" type="logic">
-         <obj_property name="ElementShortName">hit_check_done</obj_property>
-         <obj_property name="ObjectShortName">hit_check_done</obj_property>
-         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/hit_occurred" type="logic">
-         <obj_property name="ElementShortName">hit_occurred</obj_property>
-         <obj_property name="ObjectShortName">hit_occurred</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/empty_found" type="logic">
-         <obj_property name="ElementShortName">empty_found</obj_property>
-         <obj_property name="ObjectShortName">empty_found</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/clean_found" type="logic">
-         <obj_property name="ElementShortName">clean_found</obj_property>
-         <obj_property name="ObjectShortName">clean_found</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/write_would_conflict" type="logic">
-         <obj_property name="ElementShortName">write_would_conflict</obj_property>
-         <obj_property name="ObjectShortName">write_would_conflict</obj_property>
-      </wvobject>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/cache/o_read_data" type="array">
-      <obj_property name="ElementShortName">o_read_data[7:0]</obj_property>
-      <obj_property name="ObjectShortName">o_read_data[7:0]</obj_property>
-      <obj_property name="CustomSignalColor">#008000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/cache/o_mem_operation_done" type="logic">
-      <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
-      <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
-      <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/cache/o_success" type="logic">
-      <obj_property name="ElementShortName">o_success</obj_property>
-      <obj_property name="ObjectShortName">o_success</obj_property>
-      <obj_property name="CustomSignalColor">#0000FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="group553" type="group">
       <obj_property name="label">mem</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
-      <wvobject fp_name="/tb_cache/cache/data_mem" type="array">
-         <obj_property name="ElementShortName">data_mem[0:0][7:0][0:0][3:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">data_mem[0:0][7:0][0:0][3:0][7:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         <obj_property name="isExpanded"></obj_property>
-         <wvobject fp_name="/tb_cache/cache/data_mem[0]" type="array">
-            <obj_property name="ElementShortName">[0][7:0][0:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][7:0][0:0][3:0][7:0]</obj_property>
-            <obj_property name="isExpanded"></obj_property>
-            <obj_property name="CustomSignalColor">#808080</obj_property>
-            <obj_property name="UseCustomSignalColor">true</obj_property>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][7]" type="array">
-               <obj_property name="ElementShortName">[7][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[7][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][6]" type="array">
-               <obj_property name="ElementShortName">[6][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[6][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][5]" type="array">
-               <obj_property name="ElementShortName">[5][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[5][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][4]" type="array">
-               <obj_property name="ElementShortName">[4][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[4][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][3]" type="array">
-               <obj_property name="ElementShortName">[3][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[3][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][2]" type="array">
-               <obj_property name="ElementShortName">[2][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[2][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][1]" type="array">
-               <obj_property name="ElementShortName">[1][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[1][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-            <wvobject fp_name="/tb_cache/cache/data_mem[0][0]" type="array">
-               <obj_property name="ElementShortName">[0][0:0][3:0][7:0]</obj_property>
-               <obj_property name="ObjectShortName">[0][0:0][3:0][7:0]</obj_property>
-               <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-            </wvobject>
-         </wvobject>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/tag_mem" type="array">
-         <obj_property name="ElementShortName">tag_mem[0:0][7:0][26:0]</obj_property>
-         <obj_property name="ObjectShortName">tag_mem[0:0][7:0][26:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         <obj_property name="CustomSignalColor">#808000</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <wvobject fp_name="/tb_cache/cache/tag_mem[0]" type="array">
-            <obj_property name="ElementShortName">[0][7:0][26:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][7:0][26:0]</obj_property>
-         </wvobject>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/valid_mem" type="array">
-         <obj_property name="ElementShortName">valid_mem[0:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">valid_mem[0:0][7:0]</obj_property>
-         <obj_property name="Radix">BINARYRADIX</obj_property>
-         <obj_property name="CustomSignalColor">#808000</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/dirty_mem" type="array">
-         <obj_property name="ElementShortName">dirty_mem[0:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">dirty_mem[0:0][7:0]</obj_property>
-         <obj_property name="Radix">BINARYRADIX</obj_property>
-         <obj_property name="CustomSignalColor">#808000</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/use_mem" type="array">
-         <obj_property name="ElementShortName">use_mem[7:0]</obj_property>
-         <obj_property name="ObjectShortName">use_mem[7:0]</obj_property>
-         <obj_property name="Radix">BINARYRADIX</obj_property>
-         <obj_property name="CustomSignalColor">#808000</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
    </wvobject>
    <wvobject fp_name="group552" type="group">
       <obj_property name="label">adrs dec</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
-      <wvobject fp_name="/tb_cache/cache/byte_offset_adrs" type="array">
-         <obj_property name="ElementShortName">byte_offset_adrs[1:0]</obj_property>
-         <obj_property name="ObjectShortName">byte_offset_adrs[1:0]</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/block_offset_adrs" type="array">
-         <obj_property name="ElementShortName">block_offset_adrs[0:0]</obj_property>
-         <obj_property name="ObjectShortName">block_offset_adrs[0:0]</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/set_adrs" type="array">
-         <obj_property name="ElementShortName">set_adrs[2:0]</obj_property>
-         <obj_property name="ObjectShortName">set_adrs[2:0]</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_cache/cache/tag_adrs" type="array">
-         <obj_property name="ElementShortName">tag_adrs[26:0]</obj_property>
-         <obj_property name="ObjectShortName">tag_adrs[26:0]</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-      </wvobject>
-   </wvobject>
-   <wvobject fp_name="/tb_cache/cache/rw_done" type="logic">
-      <obj_property name="ElementShortName">rw_done</obj_property>
-      <obj_property name="ObjectShortName">rw_done</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
 </wave_config>
