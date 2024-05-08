@@ -21,15 +21,12 @@ module cache
 	output reg			o_mem_operation_done,
 	output reg  		o_success // #note003
 );
-//	localparam C = $pow(2,$clog2(I_C));   // capacity (words)
-//	localparam b = $pow(2,$clog2(I_b));   // block size
-//	localparam N = $pow(2,$clog2(I_N));   // degree of associativity
-
-	parameter C = I_C;   // capacity (words)
-	parameter b = I_b;   // block size
-	parameter N = I_N;   // degree of associativity
-
+	// snap to powers of 2
+	localparam C = $rtoi($pow(2,$clog2(I_C)));   // capacity (words)
+	localparam b = I_b > C ? C : $rtoi($pow(2,$clog2(I_b)));   // block size
 	localparam B = C/b;  // number of blocks
+
+	localparam N = I_N > B ? B : $rtoi($pow(2,$clog2(I_N)));   // degree of associativity
 	localparam S = B/N;  // number of sets
 
 	localparam Single_word_blocks  = (b <= 1); // no block offset
@@ -49,7 +46,7 @@ module cache
 		$display("b = 2^(clog2(%0d)) = 2^%0d = %0d", I_b, $clog2(I_b), $pow(2,$clog2(I_b)));
 		$display("N = 2^(clog2(%0d)) = 2^%0d = %0d", I_N, $clog2(I_N), $pow(2,$clog2(I_N)));
 		$display();
-		for(t=0;t<100;t=t+1) $display("parameter = 2^(clog2(%3d)) = 2^%3d = %3d", t, $clog2(t), $pow(2,$clog2(t)));
+		// for(t=0;t<100;t=t+1) $display("parameter = 2^(clog2(%3d)) = 2^%3d = %3d", t, $clog2(t), $pow(2,$clog2(t)));
 		$display();
 
 		$write  ("block size        b = %0d", b); if (Single_word_blocks) $display(" (Single_word_blocks)"); else $display();
@@ -69,7 +66,11 @@ module cache
 		$display("\n");
 	end
 	
-	reg [7:0] 				data_mem  [N-1:0] [S-1:0] [b-1:0] [3:0];
+	reg [7:0] 				data_mem  
+	[N-1:0] 
+	[S-1:0] 
+	[b-1:0] 
+	[3:0];
 	reg [Tag_nbytes-1:0] tag_mem   [N-1:0] [S-1:0];
 	reg 						valid_mem [N-1:0] [S-1:0];
 	reg 						dirty_mem [N-1:0] [S-1:0];
