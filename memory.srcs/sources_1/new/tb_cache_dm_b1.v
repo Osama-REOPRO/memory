@@ -1,6 +1,8 @@
+// directly mapped, block size 1
+
 `timescale 1us / 1ns
 
-module tb_cache;
+module tb_cache_dm_b1;
 reg  			clk, rst;
 reg  			mem_write;
 reg 			diry_replace;
