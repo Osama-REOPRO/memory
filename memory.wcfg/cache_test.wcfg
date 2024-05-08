@@ -11,9 +11,9 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="2,032,195.097 ns"></ZoomStartTime>
-      <ZoomEndTime time="2,036,308.100 ns"></ZoomEndTime>
-      <Cursor1Time time="4,000,000.000 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="205.020921 us"></ZoomEndTime>
+      <Cursor1Time time="0.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="265"></NameColumnWidth>
@@ -47,7 +47,7 @@
    <wvobject fp_name="/tb_cache/mem_write" type="logic">
       <obj_property name="ElementShortName">mem_write</obj_property>
       <obj_property name="ObjectShortName">mem_write</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="CustomSignalColor">#800080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache/diry_replace" type="logic">
@@ -61,6 +61,7 @@
       <obj_property name="ObjectShortName">address[31:0]</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache/write_data" type="array">
       <obj_property name="ElementShortName">write_data[7:0]</obj_property>
@@ -95,16 +96,10 @@
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache/adrsToWrite" type="array">
-      <obj_property name="ElementShortName">adrsToWrite[31:0]</obj_property>
-      <obj_property name="ObjectShortName">adrsToWrite[31:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
    <wvobject type="divider" fp_name="divider286">
       <obj_property name="label">Cache</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="BkColor">#808080</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache/cache/state" type="array">
       <obj_property name="ElementShortName">state[2:0]</obj_property>
@@ -112,12 +107,16 @@
       <obj_property name="CustomSignalColor">#FF00FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_cache/cache/i_address" type="array">
+      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
    <wvobject fp_name="vbus555" type="vbus">
       <obj_property name="label">hit check</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_cache/cache/hit_check_done" type="logic">
          <obj_property name="ElementShortName">hit_check_done</obj_property>
          <obj_property name="ObjectShortName">hit_check_done</obj_property>
@@ -229,6 +228,10 @@
          <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="CustomSignalColor">#808000</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
+         <wvobject fp_name="/tb_cache/cache/tag_mem[0]" type="array">
+            <obj_property name="ElementShortName">[0][7:0][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[0][7:0][26:0]</obj_property>
+         </wvobject>
       </wvobject>
       <wvobject fp_name="/tb_cache/cache/valid_mem" type="array">
          <obj_property name="ElementShortName">valid_mem[0:0][7:0]</obj_property>

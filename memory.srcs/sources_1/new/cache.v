@@ -111,8 +111,6 @@ module cache
 		fail_st		 = 5,
 		success_st	 = 6;
 
-	reg rw_done;
- 
 	always @(*) begin
 		if(i_rst) begin 
 			state = 0;
@@ -205,8 +203,6 @@ module cache
 		integer i3;
 		if (i_rst) begin
 
-			rw_done <= 0;
-
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
 
@@ -230,6 +226,7 @@ module cache
 //				#20000
 				#20;
 				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
+				tag_mem	 [target_N][set_adrs] <= tag_adrs;
 				valid_mem [target_N][set_adrs] <= 1;
 				dirty_mem [target_N][set_adrs] <= 1;
 				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write

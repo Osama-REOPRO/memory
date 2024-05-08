@@ -21,9 +21,9 @@ initial begin
 	rst = 0;
 end
 
-integer valToWrite = 1;
-integer adrsToWrite = 1;
-integer state = 0;
+integer valToWrite;
+integer adrsToWrite;
+integer state;
 localparam idle_st 		  = 0, 
 			  read_init_st   = 1, 
 			  await_read_st  = 2, 
@@ -32,14 +32,14 @@ localparam idle_st 		  = 0,
 
 always @(posedge clk) begin
 	if(rst) begin
-		mem_operation <= 0;
-		mem_write <= 0;
-		diry_replace <= 0;
-		address <= 0;
-		write_data <= 0;
-		valToWrite <= 0;
-		adrsToWrite <= 0;
-		state <= 0;
+		mem_operation  <= 0;
+		mem_write 		<= 0;
+		diry_replace   <= 0;
+		address        <= 0;
+		write_data 		<= 0;
+		valToWrite 		<= 0;
+		adrsToWrite 	<= 0;
+		state 			<= 0;
 	end else begin
 		case (state)
 			idle_st: begin
@@ -47,39 +47,37 @@ always @(posedge clk) begin
 				// reverse the operation each time
 			end
 			write_init_st: begin
-				mem_operation = 1;
-				mem_write 	  = 1;
-				address 		  = adrsToWrite;
-				write_data 	  = valToWrite;
-				state 		  = await_write_st;
+				mem_operation <= 1;
+				mem_write 	  <= 1;
+				write_data 	  <= valToWrite;
+				state 		  <= await_write_st;
 			end
 			await_write_st: begin
 				if (mem_operation_done) begin
-					mem_operation = 0;
-					state 		  = idle_st;
+					mem_operation <= 0;
+					state 		  <= idle_st;
 					if (success) begin
-						adrsToWrite   = adrsToWrite + 1;
-						diry_replace  = 0;
+						diry_replace  <= 0;
 					end else begin
-						diry_replace  = 1;
-						mem_write	  = 0; // so write operation repeat
+						diry_replace  <= 1;
+						mem_write	  <= 0; // so write operation repeat
 					end
 				end
 			end
 			read_init_st: begin
-				mem_operation = 1;
-				mem_write 	  = 0;
-				address 	 	  = adrsToWrite - 1;
-				state 		  = await_read_st;
+				mem_operation <= 1;
+				mem_write 	  <= 0;
+				state 		  <= await_read_st;
 			end
 			await_read_st: begin
 				if (mem_operation_done) begin
-					mem_operation = 0;
-					state 		  = idle_st;
+					mem_operation <= 0;
+					state 		  <= idle_st;
 					if (success) begin
-						valToWrite 	  = read_data + 1;
+						valToWrite <= read_data + 1;
+						address 	  <= address + 1;
 					end else begin
-						mem_write	  = 1; // repeat read on fail, (loops forever)
+						mem_write	  <= 1; // repeat read on fail, (loops forever)
 					end
 				end
 			end
