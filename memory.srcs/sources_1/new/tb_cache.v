@@ -3,6 +3,7 @@
 module tb_cache;
 reg  			clk, rst;
 reg  			mem_write;
+reg 			diry_replace;
 reg  [31:0] address;
 reg  [7:0]  write_data;
 wire [7:0]  read_data;
@@ -10,7 +11,81 @@ reg  			mem_operation;
 wire 			mem_operation_done;
 wire 			success;
 
+
 always #0.1 clk <= !clk; // clock runs at 10 MHz
+
+initial begin
+	{clk, mem_operation, mem_write, address, write_data} = 0;
+	rst = 1;
+	#0.2
+	rst = 0;
+end
+
+integer valToWrite = 1;
+integer adrsToWrite = 1;
+integer state = 0;
+localparam idle_st 		  = 0, 
+			  read_init_st   = 1, 
+			  await_read_st  = 2, 
+			  write_init_st  = 3, 
+			  await_write_st = 4;
+
+always @(posedge clk) begin
+	if(rst) begin
+		mem_operation <= 0;
+		mem_write <= 0;
+		diry_replace <= 0;
+		address <= 0;
+		write_data <= 0;
+		valToWrite <= 0;
+		adrsToWrite <= 0;
+		state <= 0;
+	end else begin
+		case (state)
+			idle_st: begin
+				if (!mem_operation_done) state = mem_write ? read_init_st : write_init_st;
+				// reverse the operation each time
+			end
+			write_init_st: begin
+				mem_operation = 1;
+				mem_write 	  = 1;
+				address 		  = adrsToWrite;
+				write_data 	  = valToWrite;
+				state 		  = await_write_st;
+			end
+			await_write_st: begin
+				if (mem_operation_done) begin
+					mem_operation = 0;
+					state 		  = idle_st;
+					if (success) begin
+						adrsToWrite   = adrsToWrite + 1;
+						diry_replace  = 0;
+					end else begin
+						diry_replace  = 1;
+						mem_write	  = 0; // so write operation repeat
+					end
+				end
+			end
+			read_init_st: begin
+				mem_operation = 1;
+				mem_write 	  = 0;
+				address 	 	  = adrsToWrite - 1;
+				state 		  = await_read_st;
+			end
+			await_read_st: begin
+				if (mem_operation_done) begin
+					mem_operation = 0;
+					state 		  = idle_st;
+					if (success) begin
+						valToWrite 	  = read_data + 1;
+					end else begin
+						mem_write	  = 1; // repeat read on fail, (loops forever)
+					end
+				end
+			end
+		endcase
+	end
+end
 
 cache 
 #(
@@ -24,6 +99,7 @@ cache
 	.i_rst(rst),
 
 	.i_mem_write(mem_write),
+	.i_dirty_replace(diry_replace),
 	.i_address(address),
 
 	.i_write_data(write_data),
@@ -33,65 +109,5 @@ cache
 	.o_mem_operation_done(mem_operation_done),
 	.o_success(success)
 );
-
-
-integer valToWrite = 1;
-integer adrsToWrite = 1;
-integer state = 0;
-localparam idle_st = 0, read_init_st = 1, await_read_st = 2, write_init_st = 3, await_write_st = 4;
-
-always @(posedge clk) begin
-	if(rst) begin
-		mem_operation <= 0;
-		mem_write <= 0;
-		address <= 0;
-		write_data <= 0;
-		valToWrite <= 0;
-		adrsToWrite <= 0;
-		state <= 0;
-	end else begin
-		case (state)
-			idle_st: begin
-				#200;
-				state = write_init_st;
-			end
-			read_init_st: begin
-				mem_operation = 1;
-				mem_write = 0;
-				address = adrsToWrite - 1;
-				state = await_read_st;
-			end
-			await_read_st: begin
-				if (mem_operation_done) begin
-					mem_operation = 0;
-					valToWrite = read_data+1;
-					state = write_init_st;
-				end
-			end
-			write_init_st: begin
-				mem_operation = 1;
-				mem_write = 1;
-				address = adrsToWrite;
-				write_data = valToWrite;
-				state = await_write_st;
-			end
-			await_write_st: begin
-				if (mem_operation_done) begin
-					mem_operation = 0;
-					adrsToWrite = adrsToWrite + 1;
-					state = read_init_st;
-				end
-			end
-		endcase
-	end
-end
-
-
-initial begin
-	{clk, mem_operation, mem_write, address, write_data} = 0;
-	rst = 1;
-	#1
-	rst = 0;
-end
 
 endmodule

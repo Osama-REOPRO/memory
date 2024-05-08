@@ -89,7 +89,6 @@ module cache
 	reg [size_N-1:0] clean_N;
 	reg clean_found; // validates clean_N
 
-	wire write_conflict = !hit_occurred && !empty_found && !clean_found;
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
 	wire target_N = Direct_mapped ? 0       : 
@@ -97,10 +96,12 @@ module cache
 						 empty_found   ? empty_N :
 						 clean_found   ? clean_N :
 						 {random_N[size_N-1:1], use_mem [set_adrs]}; // N to evacuate then replace #note0001
+
 	reg hit_check_done;
+	wire write_would_conflict = !hit_occurred && !empty_found && !clean_found;
 
 	// state machine
-	reg [$clog2(4)-1:0] state;
+	reg [$clog2(7)-1:0] state;
 	localparam 
 		idle_st 		 = 0,
 		lookup_st 	 = 1,
@@ -128,8 +129,9 @@ module cache
 
 				lookup_st: begin
 					if (hit_check_done) begin
+						#0.1;
 						state = i_mem_write ? 
-							write_conflict ? evac_read_st : write_st : 
+							write_would_conflict ? evac_read_st : write_st : 
 							hit_occurred ? read_st : fail_st;
 					end
 				end
@@ -140,10 +142,12 @@ module cache
 
 				success_st: begin
 					// handled elsewhere
+					#0.3
 					if (!i_mem_operation) state = idle_st;
 				end
 				fail_st: begin
 					// handled elsewhere
+					#0.3
 					if (!i_mem_operation) state = idle_st;
 				end
 
@@ -153,7 +157,7 @@ module cache
 
 	// hit check
 	always @(*) begin
-		if (i_rst || i_mem_operation) begin
+		if (i_rst) begin
 
 			hit_check_done = 1'b0;
 
@@ -168,7 +172,10 @@ module cache
 			i = 0;
 
 		end else if (state == lookup_st && !hit_check_done) begin
-			#200;
+			hit_occurred = 1'b0;
+			clean_found  = 1'b0;
+			empty_found  = 1'b0;
+			#10;
 			for (i=0; i<N; i=i+1) begin
 				if (valid_mem[i][set_adrs]) begin
 					if (tag_adrs == tag_mem[i][set_adrs]) begin
@@ -185,6 +192,8 @@ module cache
 			end
 
 			hit_check_done = 1'b1;
+		end else begin
+			hit_check_done = 1'b0;
 		end
 	end
 
@@ -218,27 +227,30 @@ module cache
 		end else begin
 			////////////////////////////////////// write
 			if (state == write_st) begin
-				#20000
+//				#20000
+				#20;
 				data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data; 
 				valid_mem [target_N][set_adrs] <= 1;
 				dirty_mem [target_N][set_adrs] <= 1;
 				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-				state = success_st;
+				state <= success_st;
 			end
 
 			////////////////////////////////////// read
 			if (state == read_st) begin
-				#20000
+//				#20000
+				#20;
 				o_read_data <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
 
-				state = success_st;
+				state <= success_st;
 			end
 
 			////////////////////////////////////// evac read
 			// read data that should be evacuated for a conflicting write
 			if (state == evac_read_st) begin
-				#20000
+//				#20000
+				#20;
 				o_read_data <= data_mem[target_N][set_adrs][block_offset_adrs][byte_offset_adrs];
 
 				state = fail_st;
@@ -260,6 +272,10 @@ module cache
 				end
 				fail_st: begin
 					o_mem_operation_done = 1'b1;
+					o_success            = 1'b0;
+				end
+				default: begin
+					o_mem_operation_done = 1'b0;
 					o_success            = 1'b0;
 				end
 			endcase
