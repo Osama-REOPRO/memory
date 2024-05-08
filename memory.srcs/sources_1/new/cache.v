@@ -66,11 +66,7 @@ module cache
 		$display("\n");
 	end
 	
-	reg [7:0] 				data_mem  
-	[N-1:0] 
-	[S-1:0] 
-	[b-1:0] 
-	[3:0];
+	reg [7:0] 				data_mem  [N-1:0] [S-1:0] [b-1:0] [3:0];
 	reg [Tag_nbytes-1:0] tag_mem   [N-1:0] [S-1:0];
 	reg 						valid_mem [N-1:0] [S-1:0];
 	reg 						dirty_mem [N-1:0] [S-1:0];
