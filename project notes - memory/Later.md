@@ -11,3 +11,8 @@
 	- cache flushes entire lines at once to write buffer, then the write buffer at some point completes the writes to ram
 - [ ] change var naming so it conforms with competition spec
 	- I put the `i_ / o_` before the var name but it should be after it according to the spec
+- what needs to be communicated to cache from outside
+	- dirty override
+		- ignore the fact that it is dirty and overwrite
+- how about the model where we prompt the cache for a hit or a conflict, and that data is returned to the outside system, the outside system decides what to do with that info
+	- so when the outside system requests a write, we always write, when it requests a read we always read, the lower system does not concern itself with any rules, it does what it is told
