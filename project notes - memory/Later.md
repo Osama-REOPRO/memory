@@ -9,3 +9,5 @@
 - [ ] rewrite testbench more elegently
 - [ ] lookup write buffers
 	- cache flushes entire lines at once to write buffer, then the write buffer at some point completes the writes to ram
+- [ ] change var naming so it conforms with competition spec
+	- I put the `i_ / o_` before the var name but it should be after it according to the spec

@@ -4,32 +4,38 @@ module cache
 #(
 	parameter I_C = 8,   // capacity (words)
 	parameter I_b = 2,   // block size
-	parameter I_N = 2    // degree of associativity
+	parameter I_N = 2,    // degree of associativity
+
+
+	// snap to powers of 2
+	localparam C  = $rtoi($pow(2,$clog2(I_C))),   // capacity (words)
+	localparam b  = I_b > C ? C : $rtoi($pow(2,$clog2(I_b))),   // block size (in words)
+	localparam B  = C/b,  // number of blocks
+
+	localparam N  = I_N > B ? B : $rtoi($pow(2,$clog2(I_N))),   // degree of associativity
+	localparam S  = B/N  // number of sets
 )
 (
-	input       		i_clk, 
-	input         		i_rst,
+	input       			   i_clk, 
+	input         			   i_rst,
 
-	input 				i_mem_write,
-	input 				i_word_op,
-	input 				i_dirty_replace, // assert to replace dirty after evac
-	input		  [31:0]	i_address,
+	input 					   i_mem_write,
+	input		  [31:0]		   i_address,
 
-	input  	  [31:0]	i_write_data,
-	output reg [31:0]	o_read_data,
+	input 					   i_dirty_replace, // assert to replace dirty after evac
 
-	input 				i_mem_operation,
-	output reg			o_mem_operation_done,
-	output reg  		o_success, // #note003
-	output reg  		o_word_missing
+	input 	  [(4*b)-1:0]  i_sel, 			  // valid bytes
+	output 	  [(4*b)-1:0]  o_sel, 			  // valid bytes
+
+	output reg [(32*b)-1:0] o_read_data,
+	input 	  [(32*b)-1:0] i_write_data,
+
+	input 					   i_mem_operation,
+	output reg				   o_mem_operation_done,
+
+	output reg  			   o_success, // #note003
+	output reg  			   o_word_missing
 );
-	// snap to powers of 2
-	localparam C = $rtoi($pow(2,$clog2(I_C)));   // capacity (words)
-	localparam b = I_b > C ? C : $rtoi($pow(2,$clog2(I_b)));   // block size
-	localparam B = C/b;  // number of blocks
-
-	localparam N = I_N > B ? B : $rtoi($pow(2,$clog2(I_N)));   // degree of associativity
-	localparam S = B/N;  // number of sets
 
 	localparam Single_word_blocks  = (b <= 1); // no block offset
 	localparam Direct_mapped       = (N <= 1); // don't utilize use_bit
