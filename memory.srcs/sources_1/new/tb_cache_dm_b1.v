@@ -5,14 +5,15 @@
 module tb_cache_dm_b1;
 reg  			clk, rst;
 reg  			mem_write;
-reg 			diry_replace;
+reg 			word_op;
+reg 			dirty_replace;
 reg  [31:0] address;
-reg  [7:0]  write_data;
-wire [7:0]  read_data;
+reg  [31:0]  write_data;
+wire [31:0]  read_data;
 reg  			mem_operation;
 wire 			mem_operation_done;
 wire 			success;
-reg 			word_op;
+wire 			word_missing;
 
 always #0.1 clk <= !clk; // clock runs at 10 MHz
 
@@ -23,8 +24,9 @@ initial begin
 	rst = 0;
 end
 
-integer valToWrite;
-integer adrsToWrite;
+reg [7:0] valToWrite;
+integer 	 adrsToWrite;
+
 integer state;
 localparam idle_st 		  = 0, 
 			  read_init_st   = 1, 
@@ -36,7 +38,7 @@ always @(posedge clk) begin
 	if(rst) begin
 		mem_operation  <= 0;
 		mem_write 		<= 0;
-		diry_replace   <= 0;
+		dirty_replace   <= 0;
 		address        <= 0;
 		write_data 		<= 0;
 		valToWrite 		<= 0;
@@ -51,17 +53,24 @@ always @(posedge clk) begin
 			write_init_st: begin
 				mem_operation <= 1;
 				mem_write 	  <= 1;
-				write_data 	  <= valToWrite;
+				if  (word_missing) write_data 	   <= 32'b0; // fill with zeros
+				else 					 write_data [7:0] <= valToWrite;
 				state 		  <= await_write_st;
+				word_op 		  <= word_missing || dirty_replace;
 			end
 			await_write_st: begin
 				if (mem_operation_done) begin
-					mem_operation <= 0;
-					state 		  <= idle_st;
+					mem_operation 	  <= 0;
+					state 		  	  <= idle_st;
 					if (success) begin
-						diry_replace  <= 0;
+						dirty_replace  <= 1'b0;
+						word_op 		  <= 1'b0;
+						if (word_op) mem_write <= 1'b0; // repeat if previous word refill
 					end else begin
-						diry_replace  <= 1;
+						if (!word_missing) begin
+							dirty_replace  <= 1;
+							word_op 		  <= 1;
+						end
 						mem_write	  <= 0; // so write operation repeat
 					end
 				end
@@ -76,7 +85,7 @@ always @(posedge clk) begin
 					mem_operation <= 0;
 					state 		  <= idle_st;
 					if (success) begin
-						valToWrite <= read_data + 1;
+						valToWrite <= read_data[7:0] + 1;
 						address 	  <= address + 1;
 					end else begin
 						mem_write	  <= 1; // repeat read on fail, (loops forever)
@@ -90,7 +99,7 @@ end
 cache 
 #(
 	.I_C(8), // capacity (words)
-	.I_b(2), // block size (words in block)
+	.I_b(1), // block size (words in block)
 	.I_N(1)  // degree of associativity
 ) 
 cache 
@@ -99,16 +108,17 @@ cache
 	.i_rst(rst),
 
 	.i_mem_write(mem_write),
-	.i_dirty_replace(diry_replace),
+	.i_word_op(word_op),
+	.i_dirty_replace(dirty_replace),
 	.i_address(address),
 
 	.i_write_data(write_data),
-	.i_word_op(word_op),
 	.o_read_data(read_data),
 
 	.i_mem_operation(mem_operation),
 	.o_mem_operation_done(mem_operation_done),
-	.o_success(success)
+	.o_success(success),
+	.o_word_missing(word_missing)
 );
 
 endmodule

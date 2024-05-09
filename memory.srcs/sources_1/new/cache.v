@@ -20,7 +20,8 @@ module cache
 
 	input 				i_mem_operation,
 	output reg			o_mem_operation_done,
-	output reg  		o_success // #note003
+	output reg  		o_success, // #note003
+	output reg  		o_word_missing
 );
 	// snap to powers of 2
 	localparam C = $rtoi($pow(2,$clog2(I_C)));   // capacity (words)
@@ -142,7 +143,7 @@ module cache
 					if (hit_check_done) begin
 						#0.1;
 						state = i_mem_write ? 
-							write_would_conflict ? evac_read_st : write_st : 
+							write_would_conflict ? evac_read_st : valid_mem [target_N][set_adrs] || i_word_op ? write_st : fail_st : 
 							hit_occurred ? read_st : fail_st;
 					end
 				end
@@ -216,6 +217,8 @@ module cache
 		integer i3;
 		if (i_rst) begin
 
+			o_word_missing <= 0;
+
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
 
@@ -246,7 +249,8 @@ module cache
 					data_mem  [target_N][set_adrs][block_offset_adrs][3] <= i_write_data[3*8 +:8];
 
 					tag_mem	 [target_N][set_adrs] <= tag_adrs;
-					valid_mem [target_N][set_adrs] <= 1;
+					valid_mem [target_N][set_adrs] <= 1'b1;
+					o_word_missing 					 <= 1'b0;
 				end else begin
 					// byte write
 					data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data[7:0];
@@ -283,7 +287,10 @@ module cache
 			if (state == evac_read_st) begin
 //				#20000
 				#20;
-				o_read_data <= data_mem[target_N][set_adrs][block_offset_adrs][byte_offset_adrs];
+				o_read_data[0*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][0];
+				o_read_data[1*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][1];
+				o_read_data[2*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][2];
+				o_read_data[3*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][3];
 
 				state = fail_st;
 			end
@@ -305,6 +312,7 @@ module cache
 				fail_st: begin
 					o_mem_operation_done = 1'b1;
 					o_success            = 1'b0;
+					o_word_missing			= !valid_mem [target_N][set_adrs];
 				end
 				default: begin
 					o_mem_operation_done = 1'b0;
