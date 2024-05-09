@@ -7,3 +7,5 @@
 - [ ] add more cache levels
 - [ ] make reading async, writing sync
 - [ ] rewrite testbench more elegently
+- [ ] lookup write buffers
+	- cache flushes entire lines at once to write buffer, then the write buffer at some point completes the writes to ram

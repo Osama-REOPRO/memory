@@ -38,7 +38,7 @@ always @(posedge clk) begin
 	if(rst) begin
 		mem_operation  <= 0;
 		mem_write 		<= 0;
-		dirty_replace   <= 0;
+		dirty_replace  <= 0;
 		address        <= 0;
 		write_data 		<= 0;
 		valToWrite 		<= 0;
