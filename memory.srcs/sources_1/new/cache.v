@@ -19,7 +19,7 @@ module cache
 	input       			   i_clk, 
 	input         			   i_rst,
 
-	input 					   i_mem_write,
+	input 	  [op_N:0]	   i_op,
 	input		  [31:0]		   i_address,
 
 	input 					   i_dirty_replace, // assert to replace dirty after evac
@@ -139,10 +139,14 @@ module cache
 			case (state)
 
 				idle_st: begin
-					if (i_mem_operation) state = i_dirty_replace ? write_st : lookup_st; // #note0002
-					// skip lookup if we are replacing dirty after evac
-					// another lookup will ruin already obtained random N
-					// we want to preserve the value of target_N
+					if (i_mem_operation) begin
+						case (i_op)
+							get_state : state = lookup_st;
+							read		 : state = write_st;
+							write		 : state = write_st;
+							default   : state = idle_st;
+						endcase
+					end
 				end
 
 				lookup_st: begin
