@@ -10,8 +10,11 @@ module cache
 	input       			   	  i_clk, 
 	input         			   	  i_rst,
 
-	input 	  [op_N:0]	   	  i_op, 				// lookup, read, write
+	input 	  [`op_N:0]	   	  i_op, 				// lookup, read, write
 	input		  [31:0]		   	  i_address,
+
+	input 							  i_set_dirty,
+	input 							  i_set_use,
 
 	input 					   	  i_mem_operation,
 
@@ -27,7 +30,6 @@ module cache
 
 	output reg				   	  o_mem_operation_done
 );
-
 	// parameters
 	localparam B  = C/b;  // number of blocks
 	localparam S  = B/N;  // number of sets
@@ -40,6 +42,7 @@ module cache
 	localparam Set_nbytes 			 = $clog2(S);
 	localparam Tag_nbytes 			 = 32 - Set_nbytes - Block_offset_nbytes - Byte_offset_nbytes;
 	
+	// mem
 	reg [7:0] 				data_mem  [N-1:0] [S-1:0] [b-1:0] [3:0];
 	reg [Tag_nbytes-1:0] tag_mem   [N-1:0] [S-1:0];
 	reg 						valid_mem [N-1:0] [S-1:0];
@@ -96,7 +99,6 @@ module cache
 			endcase
 		end
 	end
-
 
 	// hit check
 	always @(*) begin
@@ -172,85 +174,34 @@ module cache
 		end else begin
 			////////////////////////////////////// write
 			if (state == busy_st && i_op == `write_op) begin
-//				#20000
 				#20;
 
 				for (ib=0; ib<i_n_bytes; ib=ib+1)
-						data_mem  [target_N][set_adrs][ ib[$clog2(4*b)-1:2] ][ ib[1:0] ] <= i_write_data[0*8 +:8];
+						data_mem  				[target_N][set_adrs][ ib[$clog2(4*b)-1:2] ][ ib[1:0] ] <= i_write_data[ib*8 +:8];
 				end
 
-				if (i_valid_bytes == {(4*b){1'b1}}) valid_mem [target_N][set_adrs] <= 1'b1;
-
-				tag_mem	 [target_N][set_adrs] <= tag_adrs;
-
-
-				if (i_word_op) begin
-					// word write
-					data_mem  [target_N][set_adrs][block_offset_adrs][0] <= i_write_data[0*8 +:8];
-					data_mem  [target_N][set_adrs][block_offset_adrs][1] <= i_write_data[1*8 +:8];
-					data_mem  [target_N][set_adrs][block_offset_adrs][2] <= i_write_data[2*8 +:8];
-					data_mem  [target_N][set_adrs][block_offset_adrs][3] <= i_write_data[3*8 +:8];
-
-					tag_mem	 [target_N][set_adrs] <= tag_adrs;
-					valid_mem [target_N][set_adrs] <= 1'b1;
-					o_word_missing 					 <= 1'b0;
-				end else begin
-					// byte write
-					data_mem  [target_N][set_adrs][block_offset_adrs][byte_offset_adrs] <= i_write_data[7:0];
-					// on word write, use the first 8-bits
+				if (i_n_bytes == $clog2(4*b)) begin
+					valid_mem 					[target_N][set_adrs] <= 1'b1;
+					tag_mem	 					[target_N][set_adrs] <= tag_adrs;
 				end
 
-				dirty_mem [target_N][set_adrs] <= 1;
-				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
+				if (i_set_dirty) dirty_mem [target_N][set_adrs] <= 1'b1;
+				if (i_set_use)   use_mem 				 [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-				op_done 								 <= 1'b1;
+				op_done <= 1'b1;
 			end
 
 			////////////////////////////////////// read
 			if (state == busy_st && i_op == `read_op) begin
-//				#20000
 				#20;
-				if (i_word_op) begin
-					// word read
-					o_read_data[0*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][0];
-					o_read_data[1*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][1];
-					o_read_data[2*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][2];
-					o_read_data[3*8 +:8] <= data_mem[hit_N][set_adrs][block_offset_adrs][3];
-				end else begin
-					// byte read
-					o_read_data[7:0] <= data_mem[hit_N][set_adrs][block_offset_adrs][byte_offset_adrs];
-					// read only to first 8 bytes
+				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
+					o_read_data[ib*8 +:8] <= data_mem[hit_N][set_adrs][ ib[$clog2(4*b)-1:2] ][ ib[1:0] ];
 				end
 
-				op_done 								 <= 1'b1;
+				op_done <= 1'b1;
 			end
 		end
 	end
-
-	// success and fail states
-	always @(*) begin
-		if (i_rst) begin
-				o_mem_operation_done = 1'b0;
-				o_success 				= 1'b0;
-		end else begin
-			case (state)
-				success_st: begin
-					o_mem_operation_done = 1'b1;
-					o_success            = 1'b1;
-				end
-				fail_st: begin
-					o_mem_operation_done = 1'b1;
-					o_success            = 1'b0;
-					o_word_missing			= !valid_mem [target_N][set_adrs];
-				end
-				default: begin
-					o_mem_operation_done = 1'b0;
-					o_success            = 1'b0;
-				end
-			endcase
-		end
-	end
-endmodule
 
 // LFSR
 module LFSR
