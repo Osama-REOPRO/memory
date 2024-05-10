@@ -2,38 +2,34 @@
 
 module cache
 #(
-	parameter I_C = 8,   // capacity (words)
-	parameter I_b = 2,   // block size
-	parameter I_N = 2,    // degree of associativity
-
-
-	// snap to powers of 2
-	localparam C  = $rtoi($pow(2,$clog2(I_C))),   // capacity (words)
-	localparam b  = I_b > C ? C : $rtoi($pow(2,$clog2(I_b))),   // block size (in words)
-	localparam B  = C/b,  // number of blocks
-
-	localparam N  = I_N > B ? B : $rtoi($pow(2,$clog2(I_N))),   // degree of associativity
-	localparam S  = B/N  // number of sets
+	parameter C = 8,   // capacity (total words)
+	parameter b = 2,   // block size (words per block)
+	parameter N = 2    // degree of associativity (blocks per set)
 )
 (
 	input       			   i_clk, 
 	input         			   i_rst,
 
-	input 	  [op_N:0]	   i_op, // lookup, read, write
+	input 	  [op_N:0]	   i_op, 				// lookup, read, write
 	input		  [31:0]		   i_address,
 
-	input 	  [(4*b)-1:0]  i_sel, 			  // valid bytes
-	output 	  [(4*b)-1:0]  o_sel, 			  // valid bytes
+	input 					   i_mem_operation,
 
-	output reg [(32*b)-1:0] o_read_data,
+	output reg 					o_hit_occurred,
+	output reg 					o_empty_found,
+	output reg  			   o_clean_found,
+
+	input 	  [(4*b)-1:0]  i_valid_bytes, 	// valid bytes in write_data
 	input 	  [(32*b)-1:0] i_write_data,
 
-	input 					   i_mem_operation,
-	output reg				   o_mem_operation_done,
+	output 	  [(4*b)-1:0]  o_valid_bytes, 	// valid bytes in read_data
+	output reg [(32*b)-1:0] o_read_data,
 
-	output reg  			   o_conflict,
-	output reg  			   o_word_missing
+	output reg				   o_mem_operation_done
 );
+
+	localparam B  = C/b;  // number of blocks
+	localparam S  = B/N;  // number of sets
 
 	localparam Single_word_blocks  = (b <= 1); // no block offset
 	localparam Direct_mapped       = (N <= 1); // don't utilize use_bit
