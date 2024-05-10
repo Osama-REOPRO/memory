@@ -19,10 +19,8 @@ module cache
 	input       			   i_clk, 
 	input         			   i_rst,
 
-	input 	  [op_N:0]	   i_op,
+	input 	  [op_N:0]	   i_op, // lookup, read, write
 	input		  [31:0]		   i_address,
-
-	input 					   i_dirty_replace, // assert to replace dirty after evac
 
 	input 	  [(4*b)-1:0]  i_sel, 			  // valid bytes
 	output 	  [(4*b)-1:0]  o_sel, 			  // valid bytes
@@ -33,7 +31,7 @@ module cache
 	input 					   i_mem_operation,
 	output reg				   o_mem_operation_done,
 
-	output reg  			   o_success, // #note003
+	output reg  			   o_conflict,
 	output reg  			   o_word_missing
 );
 
