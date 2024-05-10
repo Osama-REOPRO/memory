@@ -1,4 +1,5 @@
 `timescale 1us / 1ns
+`include "cache_ops.vh"
 
 module cache
 #(
@@ -22,10 +23,9 @@ module cache
 	output reg 						  o_empty_found,
 	output reg  			   	  o_clean_found,
 
-	input 	  [$clog2(4*b)-1:0] i_n_bytes, 	// number of bytes in write_data
-	input 	  [(32*b)-1:0] 	  i_write_data,
+	input 	  [$clog2(4*b)-1:0] i_n_bytes, 	// number of bytes in read/write data
 
-	output 	  [$clog2(4*b)-1:0] o_n_bytes, 	// number of bytes in read_data
+	input 	  [(32*b)-1:0] 	  i_write_data,
 	output reg [(32*b)-1:0] 	  o_read_data,
 
 	output reg				   	  o_mem_operation_done
@@ -85,7 +85,7 @@ module cache
 		done_st 	 = 2;
 
 	reg op_done;
-	always @(*) if (state = idle_st) op_done = 1'b0;
+	always @(*) if (state == idle_st) op_done = 1'b0;
 
 	always @(*) begin
 		if(i_rst) begin 
@@ -116,7 +116,7 @@ module cache
 
 			i = 0;
 
-		end else if (state == lookup_st && !hit_check_done) begin
+		end else if (state == busy_st && i_op == `lookup_op) begin
 			hit_occurred = 1'b0;
 			clean_found  = 1'b0;
 			empty_found  = 1'b0;
@@ -135,11 +135,8 @@ module cache
 					empty_N = i;
 				end
 			end
-
-			hit_check_done = 1'b1;
-		end else begin
-			hit_check_done = 1'b0;
 		end
+
 		op_done = 1'b1;
 	end
 
@@ -149,7 +146,7 @@ module cache
 		integer i1;
 		integer i2;
 		integer i3;
-		reg [$clog2(4*b)-1:0] ib, 	// number of bytes in write_data
+		reg [$clog2(4*b)-1:0] ib; 	// number of bytes in write_data
 		if (i_rst) begin
 
 			o_word_missing <= 0;
@@ -176,7 +173,7 @@ module cache
 			if (state == busy_st && i_op == `write_op) begin
 				#20;
 
-				for (ib=0; ib<i_n_bytes; ib=ib+1)
+				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
 						data_mem  				[target_N][set_adrs][ ib[$clog2(4*b)-1:2] ][ ib[1:0] ] <= i_write_data[ib*8 +:8];
 				end
 

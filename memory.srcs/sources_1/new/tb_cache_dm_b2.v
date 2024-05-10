@@ -1,12 +1,13 @@
 // directly mapped, block size 2
 
 `timescale 1us / 1ns
+`include "cache_ops.vh"
 
 module tb_cache_dm_b2;
 reg  			clk, rst;
 reg  			mem_write;
 reg 			word_op;
-reg 			dirty_replace;
+reg 			set_dirty;
 reg  [31:0] address;
 reg  [31:0] write_data;
 wire [31:0] read_data;
@@ -38,7 +39,7 @@ always @(posedge clk) begin
 	if(rst) begin
 		mem_operation  <= 0;
 		mem_write 		<= 0;
-		dirty_replace  <= 0;
+		set_dirty  <= 0;
 		address        <= 0;
 		write_data 		<= 0;
 		valToWrite 		<= 0;
@@ -56,19 +57,19 @@ always @(posedge clk) begin
 				if  (word_missing) write_data 	   <= 32'b0; // fill with zeros
 				else 					 write_data [7:0] <= valToWrite;
 				state 		  <= await_write_st;
-				word_op 		  <= word_missing || dirty_replace;
+				word_op 		  <= word_missing || set_dirty;
 			end
 			await_write_st: begin
 				if (mem_operation_done) begin
 					mem_operation 	  <= 0;
 					state 		  	  <= idle_st;
 					if (success) begin
-						dirty_replace  <= 1'b0;
+						set_dirty  <= 1'b0;
 						word_op 		  <= 1'b0;
 						if (word_op) mem_write <= 1'b0; // repeat if previous word refill
 					end else begin
 						if (!word_missing) begin
-							dirty_replace  <= 1;
+							set_dirty  <= 1;
 							word_op 		  <= 1;
 						end
 						mem_write	  <= 0; // so write operation repeat
@@ -98,27 +99,33 @@ end
 
 cache 
 #(
-	.I_C(8), // capacity (words)
-	.I_b(2), // block size (words in block)
-	.I_N(1)  // degree of associativity
+	.C(8), // capacity (words)
+	.b(2), // block size (words in block)
+	.N(1)  // degree of associativity
 ) 
 cache 
 (
 	.i_clk(clk),
 	.i_rst(rst),
 
-	.i_mem_write(mem_write),
-	.i_word_op(word_op),
-	.i_dirty_replace(dirty_replace),
+	.i_op(op),
 	.i_address(address),
+
+	.i_set_dirty(set_dirty),
+	.i_set_use(set_use),
+
+	.i_mem_operation(mem_operation),
+
+	.o_hit_occurred(hit_occurred),
+	.o_empty_found(empty_found),
+	.o_clean_found(clean_found),
+
+	.i_n_bytes(n_bytes),
 
 	.i_write_data(write_data),
 	.o_read_data(read_data),
 
-	.i_mem_operation(mem_operation),
 	.o_mem_operation_done(mem_operation_done),
-	.o_success(success),
-	.o_word_missing(word_missing)
 );
 
 endmodule
