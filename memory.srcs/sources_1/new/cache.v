@@ -7,27 +7,28 @@ module cache
 	parameter N = 2    // degree of associativity (blocks per set)
 )
 (
-	input       			   i_clk, 
-	input         			   i_rst,
+	input       			   	  i_clk, 
+	input         			   	  i_rst,
 
-	input 	  [op_N:0]	   i_op, 				// lookup, read, write
-	input		  [31:0]		   i_address,
+	input 	  [op_N:0]	   	  i_op, 				// lookup, read, write
+	input		  [31:0]		   	  i_address,
 
-	input 					   i_mem_operation,
+	input 					   	  i_mem_operation,
 
-	output reg 					o_hit_occurred,
-	output reg 					o_empty_found,
-	output reg  			   o_clean_found,
+	output reg 						  o_hit_occurred,
+	output reg 						  o_empty_found,
+	output reg  			   	  o_clean_found,
 
-	input 	  [(4*b)-1:0]  i_valid_bytes, 	// valid bytes in write_data
-	input 	  [(32*b)-1:0] i_write_data,
+	input 	  [$clog2(4*b)-1:0] i_n_bytes, 	// number of bytes in write_data
+	input 	  [(32*b)-1:0] 	  i_write_data,
 
-	output 	  [(4*b)-1:0]  o_valid_bytes, 	// valid bytes in read_data
-	output reg [(32*b)-1:0] o_read_data,
+	output 	  [$clog2(4*b)-1:0] o_n_bytes, 	// number of bytes in read_data
+	output reg [(32*b)-1:0] 	  o_read_data,
 
-	output reg				   o_mem_operation_done
+	output reg				   	  o_mem_operation_done
 );
 
+	// parameters
 	localparam B  = C/b;  // number of blocks
 	localparam S  = B/N;  // number of sets
 
@@ -74,15 +75,14 @@ module cache
 	wire write_would_conflict = !hit_occurred && !empty_found && !clean_found;
 
 	// state machine
-	reg [$clog2(7)-1:0] state;
+	reg [$clog2(3)-1:0] state;
 	localparam 
-		idle_st 		 = 0,
-		lookup_st 	 = 1,
-		write_st 	 = 2,
-		read_st 		 = 3,
-		evac_read_st = 4,
-		fail_st		 = 5,
-		success_st	 = 6;
+		idle_st 	 = 0,
+		busy_st 	 = 1,
+		done_st 	 = 2;
+
+	reg op_done;
+	always @(*) if (state = idle_st) op_done = 1'b0;
 
 	always @(*) begin
 		if(i_rst) begin 
@@ -90,45 +90,13 @@ module cache
 		end
 		else begin
 			case (state)
-
-				idle_st: begin
-					if (i_mem_operation) begin
-						case (i_op)
-							get_state : state = lookup_st;
-							read		 : state = write_st;
-							write		 : state = write_st;
-							default   : state = idle_st;
-						endcase
-					end
-				end
-
-				lookup_st: begin
-					if (hit_check_done) begin
-						#0.1;
-						state = i_mem_write ? 
-							write_would_conflict ? evac_read_st : valid_mem [target_N][set_adrs] || i_word_op ? write_st : fail_st : 
-							hit_occurred ? read_st : fail_st;
-					end
-				end
-
-				// read_st: // handled elsewhere
-				// write_st: // handled elsewhere
-				// evac_read_st: // handled elsewhere
-
-				success_st: begin
-					// handled elsewhere
-					#0.3
-					if (!i_mem_operation) state = idle_st;
-				end
-				fail_st: begin
-					// handled elsewhere
-					#0.3
-					if (!i_mem_operation) state = idle_st;
-				end
-
+				idle_st: if (i_mem_operation)  state = busy_st;
+				busy_st: if (op_done) 			 state = done_st;
+				done_st: if (!i_mem_operation) state = idle_st;
 			endcase
 		end
 	end
+
 
 	// hit check
 	always @(*) begin
@@ -170,6 +138,7 @@ module cache
 		end else begin
 			hit_check_done = 1'b0;
 		end
+		op_done = 1'b1;
 	end
 
 	// clocked read/write operations
@@ -178,6 +147,7 @@ module cache
 		integer i1;
 		integer i2;
 		integer i3;
+		reg [$clog2(4*b)-1:0] ib, 	// number of bytes in write_data
 		if (i_rst) begin
 
 			o_word_missing <= 0;
@@ -201,9 +171,19 @@ module cache
 			end
 		end else begin
 			////////////////////////////////////// write
-			if (state == write_st) begin
+			if (state == busy_st && i_op == `write_op) begin
 //				#20000
 				#20;
+
+				for (ib=0; ib<i_n_bytes; ib=ib+1)
+						data_mem  [target_N][set_adrs][ ib[$clog2(4*b)-1:2] ][ ib[1:0] ] <= i_write_data[0*8 +:8];
+				end
+
+				if (i_valid_bytes == {(4*b){1'b1}}) valid_mem [target_N][set_adrs] <= 1'b1;
+
+				tag_mem	 [target_N][set_adrs] <= tag_adrs;
+
+
 				if (i_word_op) begin
 					// word write
 					data_mem  [target_N][set_adrs][block_offset_adrs][0] <= i_write_data[0*8 +:8];
@@ -223,11 +203,11 @@ module cache
 				dirty_mem [target_N][set_adrs] <= 1;
 				use_mem	   		  [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-				state <= success_st;
+				op_done 								 <= 1'b1;
 			end
 
 			////////////////////////////////////// read
-			if (state == read_st) begin
+			if (state == busy_st && i_op == `read_op) begin
 //				#20000
 				#20;
 				if (i_word_op) begin
@@ -242,22 +222,8 @@ module cache
 					// read only to first 8 bytes
 				end
 
-				state <= success_st;
+				op_done 								 <= 1'b1;
 			end
-
-			////////////////////////////////////// evac read
-			// read data that should be evacuated for a conflicting write
-			if (state == evac_read_st) begin
-//				#20000
-				#20;
-				o_read_data[0*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][0];
-				o_read_data[1*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][1];
-				o_read_data[2*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][2];
-				o_read_data[3*8 +:8] <= data_mem[target_N][set_adrs][block_offset_adrs][3];
-
-				state = fail_st;
-			end
-
 		end
 	end
 
@@ -286,8 +252,7 @@ module cache
 	end
 endmodule
 
-
-// todo: test
+// LFSR
 module LFSR
 #(
 	parameter size = 4,
