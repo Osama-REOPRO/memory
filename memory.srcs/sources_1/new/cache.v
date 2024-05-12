@@ -30,6 +30,7 @@ module cache
 
 	output reg				   	  o_mem_operation_done
 );
+
 	// parameters
 	localparam B  = C/b;  // number of blocks
 	localparam S  = B/N;  // number of sets

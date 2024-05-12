@@ -1,55 +1,102 @@
 // directly mapped, block size 1
 
 `timescale 1us / 1ns
+`include "cache_ops.vh"
 
 module tb_cache_dm_b1;
-reg  			clk, rst;
-reg  			mem_write;
-reg 			word_op;
-reg 			dirty_replace;
-reg  [31:0] address;
-reg  [31:0]  write_data;
-wire [31:0]  read_data;
-reg  			mem_operation;
-wire 			mem_operation_done;
-wire 			success;
-wire 			word_missing;
+
+
+localparam C = 8,   // capacity (total words)
+localparam b = 2,   // block size (words per block)
+localparam N = 1    // degree of associativity (blocks per set)
+
+reg  			  clk, rst;
+
+reg [`op_N:0] op;
+
+reg  [31:0]   address;
+
+reg 			  set_dirty;
+reg 			  set_use;
+
+reg  			  mem_operation;
+
+reg 			  hit_occurred
+reg 			  empty_found,
+reg 			  clean_found,
+
+input [$clog2(4*b)-1:0] i_n_bytes;
+
+reg  [(32*b)-1:0] 		write_data;
+wire [(32*b)-1:0] 		read_data;
+
+wire 							mem_operation_done;
 
 always #0.1 clk <= !clk; // clock runs at 10 MHz
 
 initial begin
-	{clk, mem_operation, mem_write, address, write_data, word_op} = 0;
+	{	clk, rst,
+	             
+		op,
+		             
+		address,
+		             
+		set_dirty,
+		set_use,
+		             
+		mem_operation,
+		             
+		hit_occurred
+		empty_found,
+		clean_found,
+		
+		i_n_bytes,
+		                  
+		write_data,
+		read_data,
+		                  
+		mem_operation_done } = 0
+
+
 	rst = 1;
 	#0.2
 	rst = 0;
 end
 
 reg [7:0] valToWrite;
-integer 	 adrsToWrite;
 
 integer state;
 localparam idle_st 		  = 0, 
-			  read_init_st   = 1, 
-			  await_read_st  = 2, 
-			  write_init_st  = 3, 
-			  await_write_st = 4;
+			  lookup_st 	  = 1,
+			  read_init_st   = 2, 
+			  await_read_st  = 3, 
+			  write_init_st  = 4, 
+			  await_write_st = 5;
 
 always @(posedge clk) begin
 	if(rst) begin
 		mem_operation  <= 0;
-		mem_write 		<= 0;
-		dirty_replace  <= 0;
 		address        <= 0;
 		write_data 		<= 0;
 		valToWrite 		<= 0;
-		adrsToWrite 	<= 0;
 		state 			<= 0;
 	end else begin
 		case (state)
 			idle_st: begin
-				if (!mem_operation_done) state = mem_write ? read_init_st : write_init_st;
-				// reverse the operation each time
+				if (!mem_operation_done) begin 
+					state = lookup_st;
+					address 	  <= address + 1;
+				end
 			end
+
+			lookup_st: begin
+				op <= `lookup_op;
+				mem_operation <= 1;
+			end
+			await_lookup_st: begin
+				if (mem_operation_done) begin
+			end
+
 			write_init_st: begin
 				mem_operation <= 1;
 				mem_write 	  <= 1;
