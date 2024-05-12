@@ -64,6 +64,7 @@ initial begin
 end
 
 reg [7:0] valToWrite;
+reg 		 phase; // 0 is write, 1 is read (so write is first)
 
 integer state;
 localparam idle_st 		  = 0, 
@@ -75,73 +76,213 @@ localparam idle_st 		  = 0,
 
 always @(posedge clk) begin
 	if(rst) begin
-		mem_operation  <= 0;
-		address        <= 0;
-		write_data 		<= 0;
-		valToWrite 		<= 0;
-		state 			<= 0;
+		mem_operation  <= 1'b0;
+		address        <= 1'b0;
+		write_data 		<= 1'b0;
+		valToWrite 		<= 1'b0;
+		state 			<= 1'b0;
+		phase 			<= 1'b0;
 	end else begin
 		case (state)
 			idle_st: begin
-				if (!mem_operation_done) begin 
-					state = lookup_st;
-					address 	  <= address + 1;
-				end
+				address <= address + 1;
+				state   <= write_lookup_st;
 			end
 
-			lookup_st: begin
-				op <= `lookup_op;
-				mem_operation <= 1;
-			end
-			await_lookup_st: begin
-				if (mem_operation_done) begin
-			end
-
-			write_init_st: begin
-				mem_operation <= 1;
-				mem_write 	  <= 1;
-				if  (word_missing) write_data 	   <= 32'b0; // fill with zeros
-				else 					 write_data [7:0] <= valToWrite;
-				state 		  <= await_write_st;
-				word_op 		  <= word_missing || dirty_replace;
-			end
-			await_write_st: begin
-				if (mem_operation_done) begin
-					mem_operation 	  <= 0;
-					state 		  	  <= idle_st;
-					if (success) begin
-						dirty_replace  <= 1'b0;
-						word_op 		  <= 1'b0;
-						if (word_op) mem_write <= 1'b0; // repeat if previous word refill
-					end else begin
-						if (!word_missing) begin
-							dirty_replace  <= 1;
-							word_op 		  <= 1;
+			///////////// write
+			write_lookup_st: begin
+				case (sub_state)
+					init: begin
+						op 			  <= `lookup_op;
+						mem_operation <= 1'b1;
+						sub_state 	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) 
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
 						end
-						mem_write	  <= 0; // so write operation repeat
 					end
-				end
-			end
-			read_init_st: begin
-				mem_operation <= 1;
-				mem_write 	  <= 0;
-				state 		  <= await_read_st;
-			end
-			await_read_st: begin
-				if (mem_operation_done) begin
-					mem_operation <= 0;
-					state 		  <= idle_st;
-					if (success) begin
-						valToWrite <= read_data[7:0] + 1;
-						address 	  <= address + 1;
-					end else begin
-						mem_write	  <= 1; // repeat read on fail, (loops forever)
+					finish: begin
+						if (!mem_operation_done) begin
+							if 	  (hit_occurred) 					  state <= write_st;				  // write right away
+							else if (empty_found || clean_found)  state <= write_fill_empty_st; // fill with zeroes then write
+							else 											  state <= write_evac_read_st;
+
+							sub_state <= init;
+						end
 					end
-				end
+				endcase
 			end
+
+			write_st: begin
+				case (sub_state)
+					init: begin
+						write_data [7:0] <= valToWrite;
+						op 			     <= `write_op;
+						mem_operation    <= 1'b1;
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							state		 <= read_lookup_st;
+							sub_state <= init;
+						end
+				endcase
+
+				write_fill_empty_st: begin
+					case (sub_state)
+						init: begin
+						end
+						busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
+						end
+						finish: begin
+						end
+					endcase
+				end
+
+				write_evac_read_st: begin
+					case (sub_state)
+						init: begin
+						end
+						busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
+						end
+						finish: begin
+						end
+					endcase
+				end
+
+
+				// if (mem_operation_done) 
+				// mem_operation <= 1;
+				// mem_write 	  <= 1;
+				// if  (word_missing) write_data 	   <= 32'b0; // fill with zeros
+				// else 					 write_data [7:0] <= valToWrite;
+				// state 		  <= await_write_st;
+				// word_op 		  <= word_missing || dirty_replace;
+// 
+				// if (mem_operation_done) begin
+					// mem_operation 	  <= 0;
+					// state 		  	  <= idle_st;
+					// if (success) begin
+						// dirty_replace  <= 1'b0;
+						// word_op 		  <= 1'b0;
+						// if (word_op) mem_write <= 1'b0; // repeat if previous word refill
+					// end else begin
+						// if (!word_missing) begin
+							// dirty_replace  <= 1;
+							// word_op 		  <= 1;
+						// end
+						// mem_write	  <= 0; // so write operation repeat
+					// end
+				// end
+			// end
+
+
+
+
+			read_lookup_st: begin
+				case (sub_state)
+					init: begin
+						op 			  <= `lookup_op;
+						mem_operation <= 1'b1;
+						sub_state 	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) 
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							if 	  (hit_occurred) 					  state <= read_st;				  // read right away
+							else if (empty_found || clean_found)  state <= read_fill_empty_st; // fill with zeroes then write
+							else 											  state <= read_evac_st;
+
+							sub_state <= init;
+						end
+					end
+				endcase
+			end
+
+			read_st: begin
+				case (sub_state)
+					init: begin
+						op 			     <= `read_op;
+						mem_operation    <= 1'b1;
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							valToWrite <= read_data[7:0] + 1;
+							address 	  <= address + 1;
+							state		  <= write_lookup_st;
+							sub_state  <= init;
+						end
+					end
+				endcase
+			end
+
+
+			read_fill_empty_st: begin
+				case (sub_state)
+					init: begin
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+					end
+				endcase
+			end
+
+			read_evac_st: begin
+				case (sub_state)
+					init: begin
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+					end
+				endcase
+			end
+
+
 		endcase
 	end
 end
+
+
+
+
 
 cache 
 #(
