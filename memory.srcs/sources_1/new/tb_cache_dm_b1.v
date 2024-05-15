@@ -25,7 +25,7 @@ reg 			  hit_occurred
 reg 			  empty_found,
 reg 			  clean_found,
 
-input [$clog2(4*b)-1:0] i_n_bytes;
+input [$clog2(4*b)-1:0] n_bytes;
 
 reg  [(32*b)-1:0] 		write_data;
 wire [(32*b)-1:0] 		read_data;
@@ -50,7 +50,7 @@ initial begin
 		empty_found,
 		clean_found,
 		
-		i_n_bytes,
+		n_bytes,
 		                  
 		write_data,
 		read_data,
@@ -122,6 +122,9 @@ always @(posedge clk) begin
 						op 			     <= `write_op;
 						mem_operation    <= 1'b1;
 						sub_state	     <= busy;
+						set_dirty		  <= 1'b1;
+						set_use			  <= 1'b1;
+						n_bytes			  <= 1;
 					end
 					busy: begin
 						if (mem_operation_done) begin
@@ -136,21 +139,27 @@ always @(posedge clk) begin
 						end
 				endcase
 
+				// todo
 				write_fill_empty_st: begin
 					case (sub_state)
 						init: begin
+							write_data <= {(32*b){1'b0}};
+							op 			     <= `write_op;
+							mem_operation    <= 1'b1;
+							n_bytes			  <= 4*b;
+							sub_state	     <= busy;
 						end
 						busy: begin
 						if (mem_operation_done) begin
 							mem_operation <= 1'b1;
 							sub_state 	  <= finish;
 						end
-						end
 						finish: begin
 						end
 					endcase
 				end
 
+				// todo
 				write_evac_read_st: begin
 					case (sub_state)
 						init: begin
@@ -159,7 +168,6 @@ always @(posedge clk) begin
 						if (mem_operation_done) begin
 							mem_operation <= 1'b1;
 							sub_state 	  <= finish;
-						end
 						end
 						finish: begin
 						end
@@ -245,6 +253,7 @@ always @(posedge clk) begin
 			end
 
 
+			// todo
 			read_fill_empty_st: begin
 				case (sub_state)
 					init: begin
@@ -260,6 +269,7 @@ always @(posedge clk) begin
 				endcase
 			end
 
+			// todo
 			read_evac_st: begin
 				case (sub_state)
 					init: begin
