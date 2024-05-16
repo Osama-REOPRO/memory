@@ -7,7 +7,7 @@ module tb_cache_dm_b1;
 
 
 localparam C = 8;   // capacity (total words)
-localparam b = 2;   // block size (words per block)
+localparam b = 1;   // block size (words per block)
 localparam N = 1;   // degree of associativity (blocks per set)
 
 reg  			  clk, rst;
@@ -57,18 +57,16 @@ initial begin
 end
 
 reg [7:0] valToWrite;
-reg 		 phase; // 0 is write, 1 is read (so write is first)
 
 integer state;
-localparam idle_st 		  		 	= 0,
-			  write_lookup_st 	 	= 1,
-			  write_st 		  		 	= 2,
-			  write_fill_empty_w_st = 3,
-			  write_evac_r_st  		= 4,
-			  read_lookup_st		 	= 5,
-			  read_st 		  		 	= 6,
-			  read_fill_empty_w_st	= 7,
-			  read_evac_r_st			= 8;
+localparam write_lookup_st 	 	= 0,
+			  write_st 		  		 	= 1,
+			  write_fill_empty_w_st = 2,
+			  write_evac_r_st  		= 3,
+			  read_lookup_st		 	= 4,
+			  read_st 		  		 	= 5,
+			  read_fill_empty_w_st	= 6,
+			  read_evac_r_st			= 7;
 		  
 integer sub_state;
 localparam init   = 0,
@@ -80,15 +78,10 @@ always @(posedge clk) begin
 		address        <= 1'b0;
 		write_data 		<= 1'b0;
 		valToWrite 		<= 1'b0;
-		state 			<= 1'b0;
-		phase 			<= 1'b0;
+		state 			<= 0;
+		sub_state		<= 0;
 	end else begin
 		case (state)
-			idle_st: begin
-				address <= address + 1;
-				state   <= write_lookup_st;
-			end
-
 			///////////// write
 			write_lookup_st: begin
 				case (sub_state)
@@ -236,7 +229,7 @@ always @(posedge clk) begin
 						if (!mem_operation_done) begin
 							valToWrite <= read_data[7:0] + 1;
 							address 	  <= address + 1;
-							state		  <= idle_st;
+							state		  <= write_lookup_st;
 							sub_state  <= init;
 						end
 					end
@@ -303,9 +296,9 @@ end
 
 cache 
 #(
-	.C(8), // capacity (words)
-	.b(1), // block size (words in block)
-	.N(1)  // degree of associativity
+	.C(C), // capacity (words)
+	.b(b), // block size (words in block)
+	.N(N)  // degree of associativity
 ) 
 cache 
 (

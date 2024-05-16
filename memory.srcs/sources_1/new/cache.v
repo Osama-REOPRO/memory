@@ -85,8 +85,7 @@ module cache
 		busy_st 	 = 1,
 		done_st 	 = 2;
 
-	reg op_done;
-	always @(*) if (state == idle_st) op_done = 1'b0;
+	always @(*) if (state == idle_st) o_mem_operation_done = 1'b0;
 
 	always @(*) begin
 		if(i_rst) begin 
@@ -94,9 +93,9 @@ module cache
 		end
 		else begin
 			case (state)
-				idle_st: if (i_mem_operation)  state = busy_st;
-				busy_st: if (op_done) 			 state = done_st;
-				done_st: if (!i_mem_operation) state = idle_st;
+				idle_st: if (i_mem_operation) 	  state = busy_st;
+				busy_st: if (o_mem_operation_done) state = done_st;
+				done_st: if (!i_mem_operation) 	  state = idle_st;
 			endcase
 		end
 	end
@@ -136,9 +135,8 @@ module cache
 					empty_N = i;
 				end
 			end
+		o_mem_operation_done = 1'b1;
 		end
-
-		op_done = 1'b1;
 	end
 
 	// clocked read/write operations
@@ -188,7 +186,7 @@ module cache
 				if (i_set_dirty) dirty_mem [target_N][set_adrs] <= 1'b1;
 				if (i_set_use)   use_mem 				 [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-				op_done <= 1'b1;
+				o_mem_operation_done <= 1'b1;
 			end
 
 			////////////////////////////////////// read
@@ -198,7 +196,7 @@ module cache
 					o_read_data[(ib+1)*8 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 				end
 
-				op_done <= 1'b1;
+				o_mem_operation_done <= 1'b1;
 			end
 		end
 	end
