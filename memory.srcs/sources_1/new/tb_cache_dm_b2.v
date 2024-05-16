@@ -125,7 +125,7 @@ cache
 	.i_write_data(write_data),
 	.o_read_data(read_data),
 
-	.o_mem_operation_done(mem_operation_done),
+	.o_mem_operation_done(mem_operation_done)
 );
 
 endmodule

@@ -6,9 +6,9 @@
 module tb_cache_dm_b1;
 
 
-localparam C = 8,   // capacity (total words)
-localparam b = 2,   // block size (words per block)
-localparam N = 1    // degree of associativity (blocks per set)
+localparam C = 8;   // capacity (total words)
+localparam b = 2;   // block size (words per block)
+localparam N = 1;   // degree of associativity (blocks per set)
 
 reg  			  clk, rst;
 
@@ -21,11 +21,11 @@ reg 			  set_use;
 
 reg  			  mem_operation;
 
-reg 			  hit_occurred
-reg 			  empty_found,
-reg 			  clean_found,
+wire 			  hit_occurred;
+wire 			  empty_found;
+wire 			  clean_found;
 
-input [$clog2(4*b)-1:0] n_bytes;
+reg [$clog2(4*b)-1:0] n_bytes;
 
 reg  [(32*b)-1:0] 		write_data;
 wire [(32*b)-1:0] 		read_data;
@@ -45,17 +45,10 @@ initial begin
 		set_use,
 		             
 		mem_operation,
-		             
-		hit_occurred
-		empty_found,
-		clean_found,
-		
+		             		
 		n_bytes,
 		                  
-		write_data,
-		read_data,
-		                  
-		mem_operation_done } = 0
+		write_data } = 0;
 
 
 	rst = 1;
@@ -67,13 +60,20 @@ reg [7:0] valToWrite;
 reg 		 phase; // 0 is write, 1 is read (so write is first)
 
 integer state;
-localparam idle_st 		  = 0, 
-			  lookup_st 	  = 1,
-			  read_init_st   = 2, 
-			  await_read_st  = 3, 
-			  write_init_st  = 4, 
-			  await_write_st = 5;
-
+localparam idle_st 		  		 	= 0,
+			  write_lookup_st 	 	= 1,
+			  write_st 		  		 	= 2,
+			  write_fill_empty_w_st = 3,
+			  write_evac_r_st  		= 4,
+			  read_lookup_st		 	= 5,
+			  read_st 		  		 	= 6,
+			  read_fill_empty_w_st	= 7,
+			  read_evac_r_st			= 8;
+		  
+integer sub_state;
+localparam init   = 0,
+			  busy   = 1,
+			  finish = 2;
 always @(posedge clk) begin
 	if(rst) begin
 		mem_operation  <= 1'b0;
@@ -98,7 +98,7 @@ always @(posedge clk) begin
 						sub_state 	  <= busy;
 					end
 					busy: begin
-						if (mem_operation_done) 
+						if (mem_operation_done) begin
 							mem_operation <= 1'b0;
 							sub_state 	  <= finish;
 						end
@@ -106,8 +106,8 @@ always @(posedge clk) begin
 					finish: begin
 						if (!mem_operation_done) begin
 							if 	  (hit_occurred) 					  state <= write_st;				  // write right away
-							else if (empty_found || clean_found)  state <= write_fill_empty_st; // fill with zeroes then write
-							else 											  state <= write_evac_read_st;
+							else if (empty_found || clean_found)  state <= write_fill_empty_w_st; // fill with zeroes then write
+							else 											  state <= write_evac_r_st;
 
 							sub_state <= init;
 						end
@@ -139,34 +139,37 @@ always @(posedge clk) begin
 							state		 <= read_lookup_st;
 							sub_state <= init;
 						end
+					end
 				endcase
+			end
 
-				write_fill_empty_st: begin
-					case (sub_state)
-						init: begin
-							write_data <= {(32*b){1'b0}};
-							op 			     <= `write_op;
-							mem_operation    <= 1'b1;
-							n_bytes			  <= 4*b;
+			write_fill_empty_w_st: begin
+				case (sub_state)
+					init: begin
+						write_data <= {(32*b){1'b0}};
+						op 			     <= `write_op;
+						mem_operation    <= 1'b1;
+						n_bytes			  <= 4*b;
 
-							sub_state	     <= busy;
-						end
-						busy: begin
+						sub_state	     <= busy;
+					end
+					busy: begin
 						if (mem_operation_done) begin
 							mem_operation <= 1'b1;
 							sub_state 	  <= finish;
 						end
-						finish: begin
-							if (!mem_operation_done) begin
-								state		 <= write_st;
-								sub_state <= init;
-							end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							state		 <= write_st;
+							sub_state <= init;
 						end
-					endcase
-				end
+					end
+				endcase
+			end
 
 				// we read the data but do nothing with it
-				write_evac_read_st: begin
+				write_evac_r_st: begin
 					case (sub_state)
 						init: begin
 							op 			     <= `read_op;
@@ -175,13 +178,14 @@ always @(posedge clk) begin
 							sub_state	     <= busy;
 						end
 						busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
-							sub_state 	  <= finish;
+							if (mem_operation_done) begin
+								mem_operation <= 1'b1;
+								sub_state 	  <= finish;
+							end
 						end
 						finish: begin
 							if (!mem_operation_done) begin
-								state		  <= write_fill_empty_st;
+								state		  <= write_fill_empty_w_st;
 								sub_state  <= init;
 							end
 						end
@@ -197,7 +201,7 @@ always @(posedge clk) begin
 						sub_state 	  <= busy;
 					end
 					busy: begin
-						if (mem_operation_done) 
+						if (mem_operation_done) begin
 							mem_operation <= 1'b0;
 							sub_state 	  <= finish;
 						end
@@ -206,7 +210,7 @@ always @(posedge clk) begin
 						if (!mem_operation_done) begin
 							if 	  (hit_occurred) 					  state <= read_st;				  // read right away
 							else if (empty_found || clean_found)  state <= read_fill_empty_w_st; // fill with zeroes then write missing
-							else 											  state <= read_evac_st;
+							else 											  state <= read_evac_r_st;
 
 							sub_state <= init;
 						end
@@ -232,7 +236,7 @@ always @(posedge clk) begin
 						if (!mem_operation_done) begin
 							valToWrite <= read_data[7:0] + 1;
 							address 	  <= address + 1;
-							state		  <= write_lookup_st;
+							state		  <= idle_st;
 							sub_state  <= init;
 						end
 					end
@@ -252,9 +256,10 @@ always @(posedge clk) begin
 						sub_state	     <= busy;
 					end
 					busy: begin
-					if (mem_operation_done) begin
-						mem_operation <= 1'b1;
-						sub_state 	  <= finish;
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
 					end
 					finish: begin
 						if (!mem_operation_done) begin
@@ -265,7 +270,7 @@ always @(posedge clk) begin
 				endcase
 			end
 
-			read_evac_st: begin
+			read_evac_r_st: begin
 				case (sub_state)
 					init: begin
 						op 			     <= `read_op;

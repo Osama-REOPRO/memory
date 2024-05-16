@@ -150,8 +150,6 @@ module cache
 		reg [$clog2(4*b)-1:0] ib; 	// number of bytes in write_data
 		if (i_rst) begin
 
-			o_word_missing <= 0;
-
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
 
@@ -175,7 +173,11 @@ module cache
 				#20;
 
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
-						data_mem  				[target_N][set_adrs][ ib[$clog2(4*b)-1:2] ][ ib[1:0] ] <= i_write_data[ib*8 +:8];
+						data_mem  				[target_N]
+													[set_adrs]
+													[ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ]
+													[ ib[1:0] ] 
+												<= i_write_data[(ib+1)*8 -: 8];
 				end
 
 				if (i_n_bytes == $clog2(4*b)) begin
@@ -193,13 +195,16 @@ module cache
 			if (state == busy_st && i_op == `read_op) begin
 				#20;
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
-					o_read_data[ib*8 +:8] <= data_mem[hit_N][set_adrs][ ib[$clog2(4*b)-1:2] ][ ib[1:0] ];
+					o_read_data[(ib+1)*8 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 				end
 
 				op_done <= 1'b1;
 			end
 		end
 	end
+
+endmodule
+
 
 // LFSR
 module LFSR
