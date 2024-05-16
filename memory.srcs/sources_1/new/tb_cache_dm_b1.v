@@ -121,10 +121,12 @@ always @(posedge clk) begin
 						write_data [7:0] <= valToWrite;
 						op 			     <= `write_op;
 						mem_operation    <= 1'b1;
-						sub_state	     <= busy;
+						n_bytes			  <= 1;
+
 						set_dirty		  <= 1'b1;
 						set_use			  <= 1'b1;
-						n_bytes			  <= 1;
+
+						sub_state	     <= busy;
 					end
 					busy: begin
 						if (mem_operation_done) begin
@@ -139,12 +141,35 @@ always @(posedge clk) begin
 						end
 				endcase
 
-				// todo
 				write_fill_empty_st: begin
 					case (sub_state)
 						init: begin
 							write_data <= {(32*b){1'b0}};
 							op 			     <= `write_op;
+							mem_operation    <= 1'b1;
+							n_bytes			  <= 4*b;
+
+							sub_state	     <= busy;
+						end
+						busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b1;
+							sub_state 	  <= finish;
+						end
+						finish: begin
+							if (!mem_operation_done) begin
+								state		 <= write_st;
+								sub_state <= init;
+							end
+						end
+					endcase
+				end
+
+				// we read the data but do nothing with it
+				write_evac_read_st: begin
+					case (sub_state)
+						init: begin
+							op 			     <= `read_op;
 							mem_operation    <= 1'b1;
 							n_bytes			  <= 4*b;
 							sub_state	     <= busy;
@@ -155,52 +180,13 @@ always @(posedge clk) begin
 							sub_state 	  <= finish;
 						end
 						finish: begin
+							if (!mem_operation_done) begin
+								state		  <= write_fill_empty_st;
+								sub_state  <= init;
+							end
 						end
 					endcase
 				end
-
-				// todo
-				write_evac_read_st: begin
-					case (sub_state)
-						init: begin
-						end
-						busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
-							sub_state 	  <= finish;
-						end
-						finish: begin
-						end
-					endcase
-				end
-
-
-				// if (mem_operation_done) 
-				// mem_operation <= 1;
-				// mem_write 	  <= 1;
-				// if  (word_missing) write_data 	   <= 32'b0; // fill with zeros
-				// else 					 write_data [7:0] <= valToWrite;
-				// state 		  <= await_write_st;
-				// word_op 		  <= word_missing || dirty_replace;
-// 
-				// if (mem_operation_done) begin
-					// mem_operation 	  <= 0;
-					// state 		  	  <= idle_st;
-					// if (success) begin
-						// dirty_replace  <= 1'b0;
-						// word_op 		  <= 1'b0;
-						// if (word_op) mem_write <= 1'b0; // repeat if previous word refill
-					// end else begin
-						// if (!word_missing) begin
-							// dirty_replace  <= 1;
-							// word_op 		  <= 1;
-						// end
-						// mem_write	  <= 0; // so write operation repeat
-					// end
-				// end
-			// end
-
-
 
 
 			read_lookup_st: begin
@@ -219,7 +205,7 @@ always @(posedge clk) begin
 					finish: begin
 						if (!mem_operation_done) begin
 							if 	  (hit_occurred) 					  state <= read_st;				  // read right away
-							else if (empty_found || clean_found)  state <= read_fill_empty_st; // fill with zeroes then write
+							else if (empty_found || clean_found)  state <= read_fill_empty_w_st; // fill with zeroes then write missing
 							else 											  state <= read_evac_st;
 
 							sub_state <= init;
@@ -233,6 +219,7 @@ always @(posedge clk) begin
 					init: begin
 						op 			     <= `read_op;
 						mem_operation    <= 1'b1;
+						n_bytes			  <= 1;
 						sub_state	     <= busy;
 					end
 					busy: begin
@@ -253,26 +240,38 @@ always @(posedge clk) begin
 			end
 
 
-			// todo
-			read_fill_empty_st: begin
+			// just fill with 0s
+			read_fill_empty_w_st: begin
 				case (sub_state)
 					init: begin
+						write_data <= {(32*b){1'b0}};
+						op 			     <= `write_op;
+						mem_operation    <= 1'b1;
+						n_bytes			  <= 4*b;
+
+						sub_state	     <= busy;
 					end
 					busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
-							sub_state 	  <= finish;
-						end
+					if (mem_operation_done) begin
+						mem_operation <= 1'b1;
+						sub_state 	  <= finish;
 					end
 					finish: begin
+						if (!mem_operation_done) begin
+							state		 <= read_st;
+							sub_state <= init;
+						end
 					end
 				endcase
 			end
 
-			// todo
 			read_evac_st: begin
 				case (sub_state)
 					init: begin
+						op 			     <= `read_op;
+						mem_operation    <= 1'b1;
+						n_bytes			  <= 4*b;
+						sub_state	     <= busy;
 					end
 					busy: begin
 						if (mem_operation_done) begin
@@ -281,6 +280,10 @@ always @(posedge clk) begin
 						end
 					end
 					finish: begin
+						if (!mem_operation_done) begin
+							state		  <= read_st;
+							sub_state  <= init;
+						end
 					end
 				endcase
 			end
@@ -293,30 +296,36 @@ end
 
 
 
-
 cache 
 #(
-	.I_C(8), // capacity (words)
-	.I_b(1), // block size (words in block)
-	.I_N(1)  // degree of associativity
+	.C(8), // capacity (words)
+	.b(1), // block size (words in block)
+	.N(1)  // degree of associativity
 ) 
 cache 
 (
 	.i_clk(clk),
 	.i_rst(rst),
 
-	.i_mem_write(mem_write),
-	.i_word_op(word_op),
-	.i_dirty_replace(dirty_replace),
+	.i_op(op),
+
 	.i_address(address),
+
+	.i_set_dirty(set_dirty),
+	.i_set_use(set_use),
+
+	.i_mem_operation(mem_operation),
+
+	.o_hit_occurred(hit_occurred),
+	.o_empty_found(empty_found),
+	.o_clean_found(clean_found),
+
+	.i_n_bytes(n_bytes),
 
 	.i_write_data(write_data),
 	.o_read_data(read_data),
 
-	.i_mem_operation(mem_operation),
-	.o_mem_operation_done(mem_operation_done),
-	.o_success(success),
-	.o_word_missing(word_missing)
+	.o_mem_operation_done(mem_operation_done)
 );
 
 endmodule
