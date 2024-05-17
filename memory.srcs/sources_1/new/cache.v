@@ -14,6 +14,8 @@ module cache
 	input 	  [`op_N:0]	   	  i_op, 				// lookup, read, write
 	input		  [31:0]		   	  i_address,
 
+	input 							  i_set_valid,
+	input 							  i_set_tag,
 	input 							  i_set_dirty,
 	input 							  i_set_use,
 
@@ -61,22 +63,19 @@ module cache
 	localparam size_N = $clog2(N);
 
 	reg [size_N-1:0] hit_N; // which of the N-ways the hit occurred in
-	reg hit_occurred; // validates hit_N
 	reg [size_N-1:0] empty_N; // which of the N-ways is empty
-	reg empty_found; // validates empty_N
 	reg [size_N-1:0] clean_N;
-	reg clean_found; // validates clean_N
 
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
 	wire target_N = Direct_mapped ? 0       : 
-						 hit_occurred  ? hit_N 	 :
-						 empty_found   ? empty_N :
-						 clean_found   ? clean_N :
+						 o_hit_occurred  ? hit_N 	 :
+						 o_empty_found   ? empty_N :
+						 o_clean_found   ? clean_N :
 						 {random_N[size_N-1:1], use_mem [set_adrs]}; // N to evacuate then replace #note0001
 
 	reg hit_check_done;
-	wire write_would_conflict = !hit_occurred && !empty_found && !clean_found;
+	wire write_would_conflict = !o_hit_occurred && !o_empty_found && !o_clean_found;
 
 	// state machine
 	reg [$clog2(3)-1:0] state;
@@ -87,15 +86,15 @@ module cache
 
 	always @(*) if (state == idle_st) o_mem_operation_done = 1'b0;
 
-	always @(*) begin
+	always @(posedge i_clk) begin
 		if(i_rst) begin 
-			state = 0;
+			state <= 0;
 		end
 		else begin
 			case (state)
-				idle_st: if (i_mem_operation) 	  state = busy_st;
-				busy_st: if (o_mem_operation_done) state = done_st;
-				done_st: if (!i_mem_operation) 	  state = idle_st;
+				idle_st: if (i_mem_operation) 	  state <= busy_st;
+				busy_st: if (o_mem_operation_done) state <= done_st;
+				done_st: if (!i_mem_operation) 	  state <= idle_st;
 			endcase
 		end
 	end
@@ -106,9 +105,9 @@ module cache
 
 			hit_check_done = 1'b0;
 
-			hit_occurred = 1'b0;
-			empty_found  = 1'b0;
-			clean_found  = 1'b0;
+			o_hit_occurred = 1'b0;
+			o_empty_found  = 1'b0;
+			o_clean_found  = 1'b0;
 
 			hit_N   = {size_N{1'b0}};
 			empty_N = {size_N{1'b0}};
@@ -117,21 +116,21 @@ module cache
 			i = 0;
 
 		end else if (state == busy_st && i_op == `lookup_op) begin
-			hit_occurred = 1'b0;
-			clean_found  = 1'b0;
-			empty_found  = 1'b0;
+			o_hit_occurred = 1'b0;
+			o_clean_found  = 1'b0;
+			o_empty_found  = 1'b0;
 			#10;
 			for (i=0; i<N; i=i+1) begin
 				if (valid_mem[i][set_adrs]) begin
 					if (tag_adrs == tag_mem[i][set_adrs]) begin
-						hit_occurred = 1'b1;
+						o_hit_occurred = 1'b1;
 						hit_N = i;
 					end else if (!dirty_mem[i][set_adrs]) begin
-						clean_found  = 1'b1;
+						o_clean_found  = 1'b1;
 						clean_N = i;
 					end
 				end else begin
-					empty_found = 1'b1;
+					o_empty_found = 1'b1;
 					empty_N = i;
 				end
 			end
@@ -147,6 +146,8 @@ module cache
 		integer i3;
 		reg [$clog2(4*b)-1:0] ib; 	// number of bytes in write_data
 		if (i_rst) begin
+		
+			o_mem_operation_done <= 1'b0;
 
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
@@ -166,8 +167,8 @@ module cache
 				end
 			end
 		end else begin
-			////////////////////////////////////// write
-			if (state == busy_st && i_op == `write_op) begin
+		
+			if (state == busy_st && i_op == `write_op) begin ////////////////////////////////////// write
 				#20;
 
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
@@ -177,30 +178,22 @@ module cache
 													[ ib[1:0] ] 
 												<= i_write_data[(ib+1)*8 -: 8];
 				end
-
-				if (i_n_bytes == $clog2(4*b)) begin
-					valid_mem 					[target_N][set_adrs] <= 1'b1;
-					tag_mem	 					[target_N][set_adrs] <= tag_adrs;
-				end
-
+				
+				if (i_set_valid) valid_mem [target_N][set_adrs] <= 1'b1;
+				if (i_set_tag)   tag_mem 	[target_N][set_adrs] <= tag_adrs;
 				if (i_set_dirty) dirty_mem [target_N][set_adrs] <= 1'b1;
 				if (i_set_use)   use_mem 				 [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
-				o_mem_operation_done <= 1'b1;
-			end
-
-			////////////////////////////////////// read
-			if (state == busy_st && i_op == `read_op) begin
+			end else if (state == busy_st && i_op == `read_op) begin ////////////////////////////////////// read
 				#20;
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
 					o_read_data[(ib+1)*8 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 				end
-
-				o_mem_operation_done <= 1'b1;
 			end
+			
+		o_mem_operation_done <= 1'b1;
 		end
 	end
-
 endmodule
 
 

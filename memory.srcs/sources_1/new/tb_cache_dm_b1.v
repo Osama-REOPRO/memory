@@ -16,6 +16,8 @@ reg [`op_N:0] op;
 
 reg  [31:0]   address;
 
+reg 			  set_valid;
+reg			  set_tag;
 reg 			  set_dirty;
 reg 			  set_use;
 
@@ -80,6 +82,12 @@ always @(posedge clk) begin
 		valToWrite 		<= 1'b0;
 		state 			<= 0;
 		sub_state		<= 0;
+		
+		set_valid		<= 1'b0;
+		set_tag			<= 1'b0;
+		set_dirty		<= 1'b0;
+		set_use			<= 1'b0;
+
 	end else begin
 		case (state)
 			///////////// write
@@ -98,7 +106,7 @@ always @(posedge clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done) begin
-							if 	  (hit_occurred) 					  state <= write_st;				  // write right away
+							if 	  (hit_occurred) 					  state <= write_st;					 // write right away
 							else if (empty_found || clean_found)  state <= write_fill_empty_w_st; // fill with zeroes then write
 							else 											  state <= write_evac_r_st;
 
@@ -123,7 +131,7 @@ always @(posedge clk) begin
 					end
 					busy: begin
 						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
+							mem_operation <= 1'b0;
 							sub_state 	  <= finish;
 						end
 					end
@@ -143,12 +151,14 @@ always @(posedge clk) begin
 						op 			     <= `write_op;
 						mem_operation    <= 1'b1;
 						n_bytes			  <= 4*b;
+						set_valid		  <= 1'b1;
+						set_tag			  <= 1'b1;
 
 						sub_state	     <= busy;
 					end
 					busy: begin
 						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
+							mem_operation <= 1'b0;
 							sub_state 	  <= finish;
 						end
 					end
@@ -172,7 +182,7 @@ always @(posedge clk) begin
 						end
 						busy: begin
 							if (mem_operation_done) begin
-								mem_operation <= 1'b1;
+								mem_operation <= 1'b0;
 								sub_state 	  <= finish;
 							end
 						end
@@ -221,7 +231,7 @@ always @(posedge clk) begin
 					end
 					busy: begin
 						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
+							mem_operation <= 1'b0;
 							sub_state 	  <= finish;
 						end
 					end
@@ -250,7 +260,7 @@ always @(posedge clk) begin
 					end
 					busy: begin
 						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
+							mem_operation <= 1'b0;
 							sub_state 	  <= finish;
 						end
 					end
@@ -273,7 +283,7 @@ always @(posedge clk) begin
 					end
 					busy: begin
 						if (mem_operation_done) begin
-							mem_operation <= 1'b1;
+							mem_operation <= 1'b0;
 							sub_state 	  <= finish;
 						end
 					end
@@ -309,6 +319,8 @@ cache
 
 	.i_address(address),
 
+	.i_set_valid(set_valid),
+	.i_set_tag(set_tag),
 	.i_set_dirty(set_dirty),
 	.i_set_use(set_use),
 

@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="1,000.001 ns"></ZoomEndTime>
-      <Cursor1Time time="300.000 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="1,000.000001 us"></ZoomEndTime>
+      <Cursor1Time time="1,000.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="265"></NameColumnWidth>
-      <ValueColumnWidth column_width="98"></ValueColumnWidth>
+      <NameColumnWidth column_width="246"></NameColumnWidth>
+      <ValueColumnWidth column_width="156"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="48" />
+   <WVObjectSize size="43" />
    <wvobject fp_name="group348" type="group">
       <obj_property name="label">parms</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -145,9 +145,21 @@
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b1/set_valid" type="logic">
+      <obj_property name="ElementShortName">set_valid</obj_property>
+      <obj_property name="ObjectShortName">set_valid</obj_property>
+      <obj_property name="CustomSignalColor">#0000A0</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/set_dirty" type="logic">
       <obj_property name="ElementShortName">set_dirty</obj_property>
       <obj_property name="ObjectShortName">set_dirty</obj_property>
+      <obj_property name="CustomSignalColor">#0000A0</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b1/set_tag" type="logic">
+      <obj_property name="ElementShortName">set_tag</obj_property>
+      <obj_property name="ObjectShortName">set_tag</obj_property>
       <obj_property name="CustomSignalColor">#0000A0</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
@@ -155,12 +167,6 @@
       <obj_property name="ElementShortName">set_use</obj_property>
       <obj_property name="ObjectShortName">set_use</obj_property>
       <obj_property name="CustomSignalColor">#0000A0</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/mem_operation" type="logic">
-      <obj_property name="ElementShortName">mem_operation</obj_property>
-      <obj_property name="ObjectShortName">mem_operation</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/hit_occurred" type="logic">
@@ -205,27 +211,21 @@
       <obj_property name="CustomSignalColor">#00FF00</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/mem_operation_done" type="logic">
-      <obj_property name="ElementShortName">mem_operation_done</obj_property>
-      <obj_property name="ObjectShortName">mem_operation_done</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
+   <wvobject fp_name="/tb_cache_dm_b1/mem_operation" type="logic">
+      <obj_property name="ElementShortName">mem_operation</obj_property>
+      <obj_property name="ObjectShortName">mem_operation</obj_property>
+      <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="divider" fp_name="divider355">
       <obj_property name="label">Cache</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="BkColor">#FFFFFF</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/cache/i_mem_operation" type="logic">
-      <obj_property name="ElementShortName">i_mem_operation</obj_property>
-      <obj_property name="ObjectShortName">i_mem_operation</obj_property>
-      <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="BkColor">#808080</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/cache/o_mem_operation_done" type="logic">
       <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
       <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/cache/state" type="array">
@@ -342,24 +342,6 @@
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/cache/hit_occurred" type="logic">
-      <obj_property name="ElementShortName">hit_occurred</obj_property>
-      <obj_property name="ObjectShortName">hit_occurred</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/cache/empty_found" type="logic">
-      <obj_property name="ElementShortName">empty_found</obj_property>
-      <obj_property name="ObjectShortName">empty_found</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/cache/clean_found" type="logic">
-      <obj_property name="ElementShortName">clean_found</obj_property>
-      <obj_property name="ObjectShortName">clean_found</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/cache/hit_check_done" type="logic">
       <obj_property name="ElementShortName">hit_check_done</obj_property>
       <obj_property name="ObjectShortName">hit_check_done</obj_property>
@@ -369,18 +351,6 @@
    <wvobject fp_name="/tb_cache_dm_b1/cache/write_would_conflict" type="logic">
       <obj_property name="ElementShortName">write_would_conflict</obj_property>
       <obj_property name="ObjectShortName">write_would_conflict</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/cache/Single_word_blocks" type="logic">
-      <obj_property name="ElementShortName">Single_word_blocks</obj_property>
-      <obj_property name="ObjectShortName">Single_word_blocks</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_cache_dm_b1/cache/Direct_mapped" type="logic">
-      <obj_property name="ElementShortName">Direct_mapped</obj_property>
-      <obj_property name="ObjectShortName">Direct_mapped</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>

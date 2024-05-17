@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="1,000.000001 us"></ZoomEndTime>
-      <Cursor1Time time="1,000.000000 us"></Cursor1Time>
+      <ZoomStartTime time="18,965.680 ns"></ZoomStartTime>
+      <ZoomEndTime time="20,206.865 ns"></ZoomEndTime>
+      <Cursor1Time time="20,000.000 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="265"></NameColumnWidth>
-      <ValueColumnWidth column_width="98"></ValueColumnWidth>
+      <ValueColumnWidth column_width="93"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="18" />
+   <WVObjectSize size="21" />
    <wvobject fp_name="/tb_cache_dm_b1/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -50,6 +50,18 @@
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b1/hit_occurred" type="logic">
+      <obj_property name="ElementShortName">hit_occurred</obj_property>
+      <obj_property name="ObjectShortName">hit_occurred</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b1/empty_found" type="logic">
+      <obj_property name="ElementShortName">empty_found</obj_property>
+      <obj_property name="ObjectShortName">empty_found</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b1/clean_found" type="logic">
+      <obj_property name="ElementShortName">clean_found</obj_property>
+      <obj_property name="ObjectShortName">clean_found</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/address" type="array">
       <obj_property name="ElementShortName">address[31:0]</obj_property>
       <obj_property name="ObjectShortName">address[31:0]</obj_property>
@@ -58,8 +70,8 @@
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/write_data" type="array">
-      <obj_property name="ElementShortName">write_data[63:0]</obj_property>
-      <obj_property name="ObjectShortName">write_data[63:0]</obj_property>
+      <obj_property name="ElementShortName">write_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">write_data[31:0]</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
@@ -135,6 +147,7 @@
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="CustomSignalColor">#00FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_cache_dm_b1/cache/hit_check_done" type="logic">
          <obj_property name="ElementShortName">hit_check_done</obj_property>
          <obj_property name="ObjectShortName">hit_check_done</obj_property>
@@ -200,7 +213,6 @@
          <obj_property name="Radix">BINARYRADIX</obj_property>
          <obj_property name="CustomSignalColor">#808000</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_cache_dm_b1/cache/dirty_mem" type="array">
          <obj_property name="ElementShortName">dirty_mem[0:0][7:0]</obj_property>
