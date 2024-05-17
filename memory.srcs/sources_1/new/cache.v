@@ -25,7 +25,7 @@ module cache
 	output reg 						  o_empty_found,
 	output reg  			   	  o_clean_found,
 
-	input 	  [$clog2(4*b)-1:0] i_n_bytes, 	// number of bytes in read/write data
+	input 	  [$clog2(4*b):0] i_n_bytes, 	// number of bytes in read/write data, number not index so no -1
 
 	input 	  [(32*b)-1:0] 	  i_write_data,
 	output reg [(32*b)-1:0] 	  o_read_data,
@@ -133,8 +133,8 @@ module cache
 					o_empty_found = 1'b1;
 					empty_N = i;
 				end
+				o_mem_operation_done = 1'b1;
 			end
-		o_mem_operation_done = 1'b1;
 		end
 	end
 
@@ -144,7 +144,7 @@ module cache
 		integer i1;
 		integer i2;
 		integer i3;
-		reg [$clog2(4*b)-1:0] ib; 	// number of bytes in write_data
+		reg [$clog2(4*b):0] ib; 	// number of bytes in write_data
 		if (i_rst) begin
 		
 			o_mem_operation_done <= 1'b0;
@@ -160,7 +160,7 @@ module cache
 					for (i2=0; i2<b; i2=i2+1) begin
 						for (i3=0; i3<4; i3=i3+1) begin
 
-							data_mem[i0][i1][i2][i3] <= 0;
+							data_mem[i0][i1][i2][i3] <= 8'hff;
 
 						end
 					end
@@ -172,11 +172,12 @@ module cache
 				#20;
 
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
+					$display(ib);
 						data_mem  				[target_N]
 													[set_adrs]
 													[ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ]
 													[ ib[1:0] ] 
-												<= i_write_data[(ib+1)*8 -: 8];
+												<= i_write_data[((ib+1)*8)-1 -: 8];
 				end
 				
 				if (i_set_valid) valid_mem [target_N][set_adrs] <= 1'b1;
@@ -184,14 +185,16 @@ module cache
 				if (i_set_dirty) dirty_mem [target_N][set_adrs] <= 1'b1;
 				if (i_set_use)   use_mem 				 [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
+				o_mem_operation_done <= 1'b1;
 			end else if (state == busy_st && i_op == `read_op) begin ////////////////////////////////////// read
 				#20;
+				
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
-					o_read_data[(ib+1)*8 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
+					o_read_data[((ib+1)*8)-1 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 				end
+				o_mem_operation_done <= 1'b1;
 			end
 			
-		o_mem_operation_done <= 1'b1;
 		end
 	end
 endmodule

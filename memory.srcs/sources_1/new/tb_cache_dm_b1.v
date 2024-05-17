@@ -27,7 +27,7 @@ wire 			  hit_occurred;
 wire 			  empty_found;
 wire 			  clean_found;
 
-reg [$clog2(4*b)-1:0] n_bytes;
+reg [$clog2(4*b):0] n_bytes;
 
 reg  [(32*b)-1:0] 		write_data;
 wire [(32*b)-1:0] 		read_data;
