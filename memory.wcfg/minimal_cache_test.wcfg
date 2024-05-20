@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="22.916666 us"></ZoomStartTime>
-      <ZoomEndTime time="94.416667 us"></ZoomEndTime>
-      <Cursor1Time time="82.500000 us"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="2,100.000000 us"></ZoomEndTime>
+      <Cursor1Time time="2,100.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="246"></NameColumnWidth>
-      <ValueColumnWidth column_width="141"></ValueColumnWidth>
+      <NameColumnWidth column_width="209"></NameColumnWidth>
+      <ValueColumnWidth column_width="108"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="45" />
+   <WVObjectSize size="46" />
    <wvobject fp_name="group348" type="group">
       <obj_property name="label">parms</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -60,7 +60,6 @@
    <wvobject fp_name="group349" type="group">
       <obj_property name="label">states</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_cache_dm_b1/write_lookup_st" type="array">
          <obj_property name="ElementShortName">write_lookup_st[31:0]</obj_property>
          <obj_property name="ObjectShortName">write_lookup_st[31:0]</obj_property>
@@ -71,7 +70,7 @@
       <wvobject fp_name="/tb_cache_dm_b1/write_st" type="array">
          <obj_property name="ElementShortName">write_st[31:0]</obj_property>
          <obj_property name="ObjectShortName">write_st[31:0]</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
+         <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
@@ -99,7 +98,7 @@
       <wvobject fp_name="/tb_cache_dm_b1/read_st" type="array">
          <obj_property name="ElementShortName">read_st[31:0]</obj_property>
          <obj_property name="ObjectShortName">read_st[31:0]</obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
+         <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
          <obj_property name="UseCustomSignalColor">true</obj_property>
          <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
@@ -191,7 +190,7 @@
    <wvobject fp_name="/tb_cache_dm_b1/valToWrite" type="array">
       <obj_property name="ElementShortName">valToWrite[7:0]</obj_property>
       <obj_property name="ObjectShortName">valToWrite[7:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
@@ -325,6 +324,7 @@
       <obj_property name="ObjectShortName">o_read_data[31:0]</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="vbus118" type="vbus">
       <obj_property name="label">read byte</obj_property>
@@ -369,6 +369,11 @@
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0]" type="array">
+         <obj_property name="ElementShortName">[0][7:0][0:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][7:0][0:0][3:0][7:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem" type="array">
       <obj_property name="ElementShortName">tag_mem[0:0][7:0][26:0]</obj_property>
@@ -429,5 +434,10 @@
       <obj_property name="ObjectShortName">write_would_conflict</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache_dm_b1/previous_read_data" type="array">
+      <obj_property name="ElementShortName">previous_read_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">previous_read_data[7:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
 </wave_config>

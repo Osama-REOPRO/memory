@@ -25,7 +25,7 @@ module cache
 	output reg 						  o_empty_found,
 	output reg  			   	  o_clean_found,
 
-	input 	  [$clog2(4*b):0] i_n_bytes, 	// number of bytes in read/write data, number not index so no -1
+	input 	  [(4*b)-1:0]	     i_valid_bytes, 	// valid bytes in read/write data, 1 for each valid byte
 
 	input 	  [(32*b)-1:0] 	  i_write_data,
 	output reg [(32*b)-1:0] 	  o_read_data,
@@ -115,7 +115,7 @@ module cache
 
 			i = 0;
 
-		end else if (state == busy_st && i_op == `lookup_op) begin
+		end else if (state == busy_st && i_op == `lookup_op && !o_mem_operation_done) begin
 			o_hit_occurred = 1'b0;
 			o_clean_found  = 1'b0;
 			o_empty_found  = 1'b0;
@@ -168,17 +168,31 @@ module cache
 			end
 		end else begin
 		
-			if (state == busy_st && i_op == `write_op) begin ////////////////////////////////////// write
-				$display("before delay");
+			if (state == busy_st && i_op == `write_op && !o_mem_operation_done) begin ////////////////////////////////////// write
+				$display("		write state inside cache start: ************************");
+				$display("		before delay");
+				$display("		i_op = %b", i_op);
+				$display("		write_op = %b", `write_op);
+				$display("		i_op == `write_op = %b", i_op == `write_op);
+				$display("		(state == busy_st && i_op == `write_op) = %b", state == busy_st && i_op == `write_op);
 
 				#20
 				
-				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
+				$display("		after delay");
+				$display("		i_op = %b", i_op);
+				$display("		write_op = %b", `write_op);
+				$display("		i_op == `write_op = %b", i_op == `write_op);
+				$display("		(state == busy_st && i_op == `write_op) = %b", state == busy_st && i_op == `write_op);
+				$display("		write state inside cache end: ************************");
+				
+				for ( ib=0; ib < (4*b); ib=ib+1) begin
+					if (i_valid_bytes[ib]) begin
 						data_mem  				[target_N]
 													[set_adrs]
-													[ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ]
-													[ ib[1:0] ] 
+													[ block_offset_adrs + ( ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 )]
+													[ byte_offset_adrs + ib[1:0] ] 
 												<= i_write_data[((ib+1)*8)-1 -: 8];
+					end
 				end
 				
 				if (i_set_valid) valid_mem [target_N][set_adrs] <= 1'b1;
@@ -187,7 +201,7 @@ module cache
 				if (i_set_use)   use_mem 				 [set_adrs] <= !use_mem [set_adrs]; // inverted on write
 
 				o_mem_operation_done <= 1'b1;
-			end else if (state == busy_st && i_op == `read_op) begin ////////////////////////////////////// read
+			end else if (state == busy_st && i_op == `read_op && !o_mem_operation_done) begin ////////////////////////////////////// read
 				#20
 				
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin

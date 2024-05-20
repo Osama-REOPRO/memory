@@ -27,10 +27,10 @@ wire 			  hit_occurred;
 wire 			  empty_found;
 wire 			  clean_found;
 
-reg [$clog2(4*b):0] n_bytes;
+reg [(4*b)-1:0] 	valid_bytes;
 
-reg  [(32*b)-1:0] 		write_data;
-wire [(32*b)-1:0] 		read_data;
+reg  [(32*b)-1:0]	write_data;
+wire [(32*b)-1:0]	read_data;
 
 wire 							mem_operation_done;
 
@@ -48,7 +48,7 @@ initial begin
 		             
 		mem_operation,
 		             		
-		n_bytes,
+		valid_bytes,
 		                  
 		write_data } = 0;
 
@@ -92,6 +92,7 @@ always @(posedge clk) begin
 		case (state)
 			///////////// write
 			write_lookup_st: begin
+
 				case (sub_state)
 					init: begin
 						op 			  <= `lookup_op;
@@ -122,7 +123,7 @@ always @(posedge clk) begin
 						write_data [7:0] <= valToWrite;
 						op 			     <= `write_op;
 						mem_operation    <= 1'b1;
-						n_bytes			  <= 1;
+						valid_bytes			  <= address;
 
 						set_dirty		  <= 1'b1;
 						set_use			  <= 1'b1;
@@ -150,7 +151,7 @@ always @(posedge clk) begin
 						write_data <= {(32*b){1'b0}};
 						op 			     <= `write_op;
 						mem_operation    <= 1'b1;
-						n_bytes			  <= 4*b;
+						valid_bytes			  <= {4*b{1'b1}}; // all valid
 						set_valid		  <= 1'b1;
 						set_tag			  <= 1'b1;
 
@@ -175,10 +176,10 @@ always @(posedge clk) begin
 				write_evac_r_st: begin
 					case (sub_state)
 						init: begin
-							op 			     <= `read_op;
-							mem_operation    <= 1'b1;
-							n_bytes			  <= 4*b;
-							sub_state	     <= busy;
+							op 			  <= `read_op;
+							mem_operation <= 1'b1;
+							valid_bytes	  <= {4*b{1'b1}};
+							sub_state	  <= busy;
 						end
 						busy: begin
 							if (mem_operation_done) begin
@@ -226,7 +227,7 @@ always @(posedge clk) begin
 					init: begin
 						op 			     <= `read_op;
 						mem_operation    <= 1'b1;
-						n_bytes			  <= 1;
+						valid_bytes		  <= address;
 						sub_state	     <= busy;
 					end
 					busy: begin
@@ -237,7 +238,7 @@ always @(posedge clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done) begin
-							valToWrite <= read_data[7:0] + 1;
+							valToWrite <= read_data[address +: 7] + 1;
 							address 	  <= address + 1;
 							state		  <= write_lookup_st;
 							sub_state  <= init;
@@ -254,7 +255,7 @@ always @(posedge clk) begin
 						write_data <= {(32*b){1'b0}};
 						op 			     <= `write_op;
 						mem_operation    <= 1'b1;
-						n_bytes			  <= 4*b;
+						valid_bytes		  <= {4*b{1'b1}};
 
 						sub_state	     <= busy;
 					end
@@ -278,7 +279,7 @@ always @(posedge clk) begin
 					init: begin
 						op 			     <= `read_op;
 						mem_operation    <= 1'b1;
-						n_bytes			  <= 4*b;
+						valid_bytes		  <= {4*b{1'b1}};
 						sub_state	     <= busy;
 					end
 					busy: begin
@@ -330,12 +331,51 @@ cache
 	.o_empty_found(empty_found),
 	.o_clean_found(clean_found),
 
-	.i_n_bytes(n_bytes),
+	.i_valid_bytes(valid_bytes),
 
 	.i_write_data(write_data),
 	.o_read_data(read_data),
 
 	.o_mem_operation_done(mem_operation_done)
 );
+
+// logs
+initial $display("\n\nlogs start //////////////////////////////////////////\n\n");
+always @(state) begin
+	$display("time = %0t", $time);
+	$write("-> testbench state: ");
+	case (state)
+		write_lookup_st: 			$write("write_lookup_st\n");
+	   write_st: 					$write("write_st\n");
+		write_fill_empty_w_st: 	$write("write_fill_empty_w_st\n");
+		write_evac_r_st: 			$write("write_evac_r_st\n");
+		read_lookup_st: 			$write("read_lookup_st\n");
+		read_st: 					$write("read_st\n");
+		read_fill_empty_w_st: 	$write("read_fill_empty_w_st\n");
+		read_evac_r_st: 			$write("read_evac_r_st\n");
+	endcase
+end
+
+always @(sub_state) begin
+	$write("---> sub-state: ");
+	case (sub_state)
+		init: 	$write("init\n");
+		busy: 	$write("busy\n");  
+		finish: 	$write("finish\n\n");
+	endcase
+end
+
+always @(hit_occurred) $write("--------> hit_occurred = %b\n", hit_occurred);
+always @(empty_found)  $write("--------> empty_found = %b\n", empty_found);
+always @(clean_found)  $write("--------> clean_found = %b\n", clean_found);
+
+always @(cache.data_mem) begin
+	$display();
+	$display();
+	$display("-- memory state --");
+	$display(cache.data_mem);
+	$display("------------------");
+end
+wire [7:0] previous_read_data = read_data[address-1 +: 8];
 
 endmodule
