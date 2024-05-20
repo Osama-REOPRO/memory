@@ -187,11 +187,8 @@ module cache
 				
 				for ( ib=0; ib < (4*b); ib=ib+1) begin
 					if (i_valid_bytes[ib]) begin
-						data_mem  				[target_N]
-													[set_adrs]
-													[ block_offset_adrs + ( ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 )]
-													[ byte_offset_adrs + ib[1:0] ] 
-												<= i_write_data[((ib+1)*8)-1 -: 8];
+						data_mem [target_N] [set_adrs] [ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ] 
+							<= i_write_data[((ib+1)*8)-1 -: 8];
 					end
 				end
 				
@@ -204,8 +201,10 @@ module cache
 			end else if (state == busy_st && i_op == `read_op && !o_mem_operation_done) begin ////////////////////////////////////// read
 				#20
 				
-				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
-					o_read_data[((ib+1)*8)-1 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
+				for (ib=0; ib<(4*b); ib=ib+1) begin
+					if (i_valid_bytes[ib]) begin
+						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
+					end
 				end
 				
 				o_mem_operation_done <= 1'b1;
