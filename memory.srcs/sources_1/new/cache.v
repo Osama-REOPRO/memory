@@ -169,10 +169,11 @@ module cache
 		end else begin
 		
 			if (state == busy_st && i_op == `write_op) begin ////////////////////////////////////// write
-				#20;
+				$display("before delay");
 
+				#20
+				
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
-					$display(ib);
 						data_mem  				[target_N]
 													[set_adrs]
 													[ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ]
@@ -187,11 +188,12 @@ module cache
 
 				o_mem_operation_done <= 1'b1;
 			end else if (state == busy_st && i_op == `read_op) begin ////////////////////////////////////// read
-				#20;
+				#20
 				
 				for (ib=0; ib<i_n_bytes; ib=ib+1) begin
 					o_read_data[((ib+1)*8)-1 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 				end
+				
 				o_mem_operation_done <= 1'b1;
 			end
 			
