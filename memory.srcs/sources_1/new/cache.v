@@ -169,21 +169,12 @@ module cache
 		end else begin
 		
 			if (state == busy_st && i_op == `write_op && !o_mem_operation_done) begin ////////////////////////////////////// write
-				$display("		write state inside cache start: ************************");
-				$display("		before delay");
-				$display("		i_op = %b", i_op);
-				$display("		write_op = %b", `write_op);
-				$display("		i_op == `write_op = %b", i_op == `write_op);
-				$display("		(state == busy_st && i_op == `write_op) = %b", state == busy_st && i_op == `write_op);
+
+				log_state_write_before_delay();
 
 				#20
-				
-				$display("		after delay");
-				$display("		i_op = %b", i_op);
-				$display("		write_op = %b", `write_op);
-				$display("		i_op == `write_op = %b", i_op == `write_op);
-				$display("		(state == busy_st && i_op == `write_op) = %b", state == busy_st && i_op == `write_op);
-				$display("		write state inside cache end: ************************");
+
+				log_state_write_after_delay();
 				
 				for ( ib=0; ib < (4*b); ib=ib+1) begin
 					if (i_valid_bytes[ib]) begin
@@ -199,21 +190,77 @@ module cache
 
 				o_mem_operation_done <= 1'b1;
 			end else if (state == busy_st && i_op == `read_op && !o_mem_operation_done) begin ////////////////////////////////////// read
+				log_state_read_before_delay();
 				#20
 				
 				for (ib=0; ib<(4*b); ib=ib+1) begin
+					$display("		ib = %b", ib);
+					$display("		i_valid_bytes[%0d] = %b", ib, i_valid_bytes[ib]);
 					if (i_valid_bytes[ib]) begin
+						$display("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
 						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 					end
 				end
 				
 				o_mem_operation_done <= 1'b1;
+
+				log_state_read_after_delay();
 			end
 			
 		end
 	end
-endmodule
 
+	task log_state_write_before_delay;
+		begin
+			$display("		write state inside cache start: ************************");
+
+			$display();
+			$display("		i_address 	  = %0b", i_address);
+
+			$display();
+			$display("		i_set_valid   = %0b", i_set_valid);
+			$display("		i_set_tag 	  = %0b", i_set_tag);
+			$display("		i_set_dirty   = %0b", i_set_dirty);
+			$display("		i_set_use 	  = %0b", i_set_use);
+
+			$display();
+			$display("		i_valid_bytes = %0b", i_valid_bytes);
+			$display("		i_write_data  = %0b", i_write_data);
+		end
+	endtask
+
+	task log_state_write_after_delay;
+		begin
+			$display();
+			$display("		write state inside cache end: ************************");
+		end
+	endtask
+
+
+	task log_state_read_before_delay;
+		begin
+			$display("		************************ read state inside cache start");
+			$display("		i_address 	  = %0b", i_address);
+
+			$display();
+			$display("		i_valid_bytes = %0b", i_valid_bytes);
+			$display("		o_read_data  = %0b", o_read_data);
+			$write("		");
+			$write(data_mem);
+			$write("\n");
+		end
+	endtask
+
+	task log_state_read_after_delay;
+		begin
+			$strobe();
+			$strobe("		********** after delay");
+			$strobe("		o_read_data  = %0b", o_read_data);
+			$strobe("		************************ read state inside cache end");
+		end
+	endtask
+
+endmodule
 
 // LFSR
 module LFSR

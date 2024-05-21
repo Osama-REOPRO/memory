@@ -225,10 +225,11 @@ always @(posedge clk) begin
 			read_st: begin
 				case (sub_state)
 					init: begin
-						op 			     <= `read_op;
-						mem_operation    <= 1'b1;
-						valid_bytes		  <= address;
-						sub_state	     <= busy;
+						op 			     		<= `read_op;
+						mem_operation    		<= 1'b1;
+						valid_bytes <= {(4*b){1'b0}};
+						valid_bytes[address] <= 1'b1;
+						sub_state	     		<= busy;
 					end
 					busy: begin
 						if (mem_operation_done) begin
@@ -238,7 +239,8 @@ always @(posedge clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done) begin
-							valToWrite <= read_data[address +: 7] + 1;
+							$strobe("=======================> increment data: valToWrite <= read_data[%0d -: 8] + 1 = %0d", address*8, valToWrite);
+							valToWrite <= read_data[(address*8) -: 8] + 1;
 							address 	  <= address + 1;
 							state		  <= write_lookup_st;
 							sub_state  <= init;
@@ -340,10 +342,10 @@ cache
 );
 
 // logs
-initial $display("\n\nlogs start //////////////////////////////////////////\n\n");
+initial $display("\n\n(%0t) logs start //////////////////////////////////////////\n\n", $time);
 always @(state) begin
-	$display("time = %0t", $time);
-	$write("-> testbench state: ");
+	$write("(%0t) ", $time);
+	$write("---------------------------------------------------> testbench state: ");
 	case (state)
 		write_lookup_st: 			$write("write_lookup_st\n");
 	   write_st: 					$write("write_st\n");
@@ -357,24 +359,21 @@ always @(state) begin
 end
 
 always @(sub_state) begin
-	$write("---> sub-state: ");
+	$write("(%0t) ", $time);
+	$write("--------------------------> sub-state: ");
 	case (sub_state)
 		init: 	$write("init\n");
-		busy: 	$write("busy\n");  
-		finish: 	$write("finish\n\n");
+		busy: 	$write("busy\n");
+		finish: 	$write("finish\n-----------------------------------------------------------------------------****\n\n");
 	endcase
 end
 
-always @(hit_occurred) $write("--------> hit_occurred = %b\n", hit_occurred);
-always @(empty_found)  $write("--------> empty_found = %b\n", empty_found);
-always @(clean_found)  $write("--------> clean_found = %b\n", clean_found);
+always @(hit_occurred) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred);
+always @(empty_found)  $write("(%0t) ######### empty_found = %b\n", $time, empty_found);
+always @(clean_found)  $write("(%0t) ######### clean_found = %b\n", $time, clean_found);
 
 always @(cache.data_mem) begin
-	$display();
-	$display();
-	$display("-- memory state --");
 	$display(cache.data_mem);
-	$display("------------------");
 end
 wire [7:0] previous_read_data = read_data[address-1 +: 8];
 
