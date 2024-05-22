@@ -120,10 +120,12 @@ always @(posedge clk) begin
 			write_st: begin
 				case (sub_state)
 					init: begin
-						write_data [7:0] <= valToWrite;
+						write_data [(((address % (4*b))+1)*8)-1 -: 8] <= valToWrite;
+						$display("write_data [%0d -: 8] <= %0d", ((address+1)*8)-1, valToWrite);
 						op 			     <= `write_op;
 						mem_operation    <= 1'b1;
-						valid_bytes			  <= address;
+						valid_bytes 	  <= {(4*b){1'b0}};
+						valid_bytes[address % (4*b)] <= 1'b1;
 
 						set_dirty		  <= 1'b1;
 						set_use			  <= 1'b1;
@@ -225,11 +227,17 @@ always @(posedge clk) begin
 			read_st: begin
 				case (sub_state)
 					init: begin
-						op 			     		<= `read_op;
-						mem_operation    		<= 1'b1;
-						valid_bytes <= {(4*b){1'b0}};
-						valid_bytes[address] <= 1'b1;
-						sub_state	     		<= busy;
+						op 			     				  		<= `read_op;
+						mem_operation    				  		<= 1'b1;
+						valid_bytes 					  		<= {(4*b){1'b0}};
+						valid_bytes[address % (4*b)] <= 1'b1;
+						$strobe("\n\n\n");
+						$strobe("valid_bytes[address % ((4*b)-1)] <= 1'b1");
+						$strobe("valid_bytes[%0d %% ((4*%0d)-1)] <= 1'b1",address, b);
+						$strobe("valid_bytes[%0d] <= 1'b1", address % (4*b));
+						$strobe("valid_bytes = %b", valid_bytes);
+						$strobe("\n\n\n");
+						sub_state	     				  		<= busy;
 					end
 					busy: begin
 						if (mem_operation_done) begin
@@ -239,7 +247,7 @@ always @(posedge clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done) begin
-							valToWrite <= read_data[((address+1)*8)-1 -: 8] + 8'd1;
+							valToWrite <= read_data[(((address % (4*b))+1)*8)-1 -: 8] + 8'd1;
 							address 	  <= address + 1;
 							state		  <= write_lookup_st;
 							sub_state  <= init;
@@ -373,8 +381,8 @@ always @(clean_found)  $write("(%0t) ######### clean_found = %b\n", $time, clean
 
 initial begin
 	$monitor(cache.data_mem);
-	$monitor("(t=%0t) address = %b", $time, address);
-	$monitor("\n(t=%0t) +++++++++++++++++++++++++++++++++++++++++ valToWrite: %b ++++++++++++++++++++++++++++++++++++++++++++++\n", $time, valToWrite);
+	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ address = %0d ++++++++++++++++++++++++++++++++++\n", $time, address);
+	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ valToWrite: %b +++++++++++++++++++++++++++++++++++\n", $time, valToWrite);
 end
 wire [7:0] previous_read_data = read_data[address-1 +: 8];
 

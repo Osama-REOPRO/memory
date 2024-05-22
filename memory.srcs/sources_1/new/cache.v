@@ -215,17 +215,17 @@ module cache
 			$display("		write state inside cache start: ************************");
 
 			$display();
-			$display("		i_address 	  = %0b", i_address);
+			$display("		i_address 	  = %0d", i_address);
 
 			$display();
-			$display("		i_set_valid   = %0b", i_set_valid);
-			$display("		i_set_tag 	  = %0b", i_set_tag);
-			$display("		i_set_dirty   = %0b", i_set_dirty);
-			$display("		i_set_use 	  = %0b", i_set_use);
+			$display("		i_set_valid   = %b", i_set_valid);
+			$display("		i_set_tag 	  = %b", i_set_tag);
+			$display("		i_set_dirty   = %b", i_set_dirty);
+			$display("		i_set_use 	  = %b", i_set_use);
 
 			$display();
-			$display("		i_valid_bytes = %0b", i_valid_bytes);
-			$display("		i_write_data  = %0b", i_write_data);
+			$display("		i_valid_bytes = %b", i_valid_bytes);
+			$display("		i_write_data  = %b", i_write_data);
 		end
 	endtask
 
@@ -240,11 +240,11 @@ module cache
 	task log_state_read_before_delay;
 		begin
 			$display("		************************ read state inside cache start");
-			$display("		i_address 	  = %0b", i_address);
+			$display("		i_address 	  = %0d", i_address);
 
 			$display();
-			$display("		i_valid_bytes = %0b", i_valid_bytes);
-			$display("		o_read_data  = %0b", o_read_data);
+			$display("		i_valid_bytes = %b", i_valid_bytes);
+			$display("		o_read_data  = %b", o_read_data);
 			$write("		");
 			$write(data_mem);
 			$write("\n");
