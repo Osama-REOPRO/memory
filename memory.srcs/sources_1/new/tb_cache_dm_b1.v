@@ -239,16 +239,7 @@ always @(posedge clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done) begin
-							$strobe();
-							$display("address display = %b", address);
-							$strobe("address strobe = %b", address);
 							valToWrite <= read_data[((address+1)*8)-1 -: 8] + 8'd1;
-							// valToWrite <= read_data[7-:8] + 8'd1;
-							$strobe(" increment data: valToWrite <= read_data[%0d -: 8] + 1 = %b + 1 = %b +++++++++++++++++++++++++++++++++++++++++++++++++++++", (address*8)-1, read_data[(address*8)-1 -: 8], read_data[(address*8)-1 -: 8] + 8'd1);
-							$strobe(" read_data: %b", read_data);
-							$strobe(" valToWrite: %b", valToWrite);
-							$strobe();
-
 							address 	  <= address + 1;
 							state		  <= write_lookup_st;
 							sub_state  <= init;
