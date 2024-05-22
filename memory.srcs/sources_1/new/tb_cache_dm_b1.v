@@ -239,8 +239,16 @@ always @(posedge clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done) begin
-							$strobe("=======================> increment data: valToWrite <= read_data[%0d -: 8] + 1 = %0d", address*8, valToWrite);
-							valToWrite <= read_data[(address*8) -: 8] + 1;
+							$strobe();
+							$display("address display = %b", address);
+							$strobe("address strobe = %b", address);
+							valToWrite <= read_data[((address+1)*8)-1 -: 8] + 8'd1;
+							// valToWrite <= read_data[7-:8] + 8'd1;
+							$strobe(" increment data: valToWrite <= read_data[%0d -: 8] + 1 = %b + 1 = %b +++++++++++++++++++++++++++++++++++++++++++++++++++++", (address*8)-1, read_data[(address*8)-1 -: 8], read_data[(address*8)-1 -: 8] + 8'd1);
+							$strobe(" read_data: %b", read_data);
+							$strobe(" valToWrite: %b", valToWrite);
+							$strobe();
+
 							address 	  <= address + 1;
 							state		  <= write_lookup_st;
 							sub_state  <= init;
@@ -364,7 +372,7 @@ always @(sub_state) begin
 	case (sub_state)
 		init: 	$write("init\n");
 		busy: 	$write("busy\n");
-		finish: 	$write("finish\n-----------------------------------------------------------------------------****\n\n");
+		finish: 	$strobe("finish\n-----------------------------------------------------------------------------****\n\n");
 	endcase
 end
 
@@ -372,8 +380,10 @@ always @(hit_occurred) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_
 always @(empty_found)  $write("(%0t) ######### empty_found = %b\n", $time, empty_found);
 always @(clean_found)  $write("(%0t) ######### clean_found = %b\n", $time, clean_found);
 
-always @(cache.data_mem) begin
-	$display(cache.data_mem);
+initial begin
+	$monitor(cache.data_mem);
+	$monitor("(t=%0t) address = %b", $time, address);
+	$monitor("\n(t=%0t) +++++++++++++++++++++++++++++++++++++++++ valToWrite: %b ++++++++++++++++++++++++++++++++++++++++++++++\n", $time, valToWrite);
 end
 wire [7:0] previous_read_data = read_data[address-1 +: 8];
 
