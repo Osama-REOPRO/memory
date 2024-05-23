@@ -67,8 +67,8 @@ module cache
 	reg [size_N-1:0] clean_N;
 
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
-	LFSR #(.size(size_N)) rand_gen (.i_clk(i_clk), .i_rst(i_rst), .o_num(random_N));
-	wire target_N = Direct_mapped ? 0       : 
+	LFSR #(.size(size_N)) rand_gen (.i_clk(get_new_random_num), .i_rst(i_rst), .o_num(random_N));
+	wire [size_N-1:0] target_N = Direct_mapped ? 0       : 
 						 o_hit_occurred  ? hit_N 	 :
 						 o_empty_found   ? empty_N :
 						 o_clean_found   ? clean_N :
@@ -197,7 +197,8 @@ module cache
 					$display("		ib = %b", ib);
 					$display("		i_valid_bytes[%0d] = %b", ib, i_valid_bytes[ib]);
 					if (i_valid_bytes[ib]) begin
-						$display("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
+						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
+						$write(" = %0d\n", data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
 						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 					end
 				end
@@ -259,6 +260,10 @@ module cache
 			$strobe("		************************ read state inside cache end");
 		end
 	endtask
+
+	initial begin
+		$monitor("\n(%0t) ################## target_N = ", $time, target_N);
+	end
 
 endmodule
 

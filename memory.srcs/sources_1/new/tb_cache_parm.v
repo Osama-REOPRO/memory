@@ -156,6 +156,7 @@ always @(posedge clk) begin
 						valid_bytes			  <= {4*b{1'b1}}; // all valid
 						set_valid		  <= 1'b1;
 						set_tag			  <= 1'b1;
+						set_use			  <= 1'b0;
 
 						sub_state	     <= busy;
 					end
