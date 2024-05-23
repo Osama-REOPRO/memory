@@ -11,13 +11,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="1,000.000001 us"></ZoomEndTime>
-      <Cursor1Time time="1,000.000000 us"></Cursor1Time>
+      <ZoomStartTime time="5,166.666666 us"></ZoomStartTime>
+      <ZoomEndTime time="5,791.464073 us"></ZoomEndTime>
+      <Cursor1Time time="6,000.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="209"></NameColumnWidth>
-      <ValueColumnWidth column_width="98"></ValueColumnWidth>
+      <ValueColumnWidth column_width="93"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="45" />
    <wvobject fp_name="group348" type="group">
@@ -311,7 +311,6 @@
       <obj_property name="ElementShortName">i_valid_bytes[3:0]</obj_property>
       <obj_property name="ObjectShortName">i_valid_bytes[3:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/cache/o_read_data" type="array">
       <obj_property name="ElementShortName">o_read_data[31:0]</obj_property>
@@ -408,6 +407,42 @@
             <obj_property name="ObjectShortName">[0][0:0][3:0][7:0]</obj_property>
             <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][7]" type="array">
+            <obj_property name="ElementShortName">[7][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[7][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][6]" type="array">
+            <obj_property name="ElementShortName">[6][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[6][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][5]" type="array">
+            <obj_property name="ElementShortName">[5][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[5][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][4]" type="array">
+            <obj_property name="ElementShortName">[4][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[4][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][3]" type="array">
+            <obj_property name="ElementShortName">[3][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[3][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][2]" type="array">
+            <obj_property name="ElementShortName">[2][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[2][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][1]" type="array">
+            <obj_property name="ElementShortName">[1][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[1][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0][0]" type="array">
+            <obj_property name="ElementShortName">[0][0:0][3:0][7:0]</obj_property>
+            <obj_property name="ObjectShortName">[0][0:0][3:0][7:0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/tb_cache_dm_b1/cache/data_mem[0]" type="array">
+         <obj_property name="ElementShortName">[0][7:0][0:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][7:0][0:0][3:0][7:0]</obj_property>
       </wvobject>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem" type="array">
@@ -415,6 +450,52 @@
       <obj_property name="ObjectShortName">tag_mem[0:0][7:0][26:0]</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0]" type="array">
+         <obj_property name="ElementShortName">[0][7:0][26:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][7:0][26:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][7]" type="array">
+            <obj_property name="ElementShortName">[7][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[7][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][6]" type="array">
+            <obj_property name="ElementShortName">[6][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[6][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][5]" type="array">
+            <obj_property name="ElementShortName">[5][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[5][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][4]" type="array">
+            <obj_property name="ElementShortName">[4][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[4][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][3]" type="array">
+            <obj_property name="ElementShortName">[3][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[3][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][2]" type="array">
+            <obj_property name="ElementShortName">[2][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[2][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][1]" type="array">
+            <obj_property name="ElementShortName">[1][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[1][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_cache_dm_b1/cache/tag_mem[0][0]" type="array">
+            <obj_property name="ElementShortName">[0][26:0]</obj_property>
+            <obj_property name="ObjectShortName">[0][26:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+      </wvobject>
    </wvobject>
    <wvobject fp_name="/tb_cache_dm_b1/cache/valid_mem" type="array">
       <obj_property name="ElementShortName">valid_mem[0:0][7:0]</obj_property>
