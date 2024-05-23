@@ -67,14 +67,24 @@ module cache
 	reg [size_N-1:0] clean_N;
 
 	wire [size_N-1:0] random_N; // randomly generated N with LFSR
-	LFSR #(.size(size_N)) rand_gen (.i_clk(get_new_random_num), .i_rst(i_rst), .o_num(random_N));
+	reg get_new_random_num;
+	reg rand_gen_clk;
+	always @(posedge i_clk) begin
+		if (i_rst) begin 
+			rand_gen_clk <= 1'b0;
+		end else if (get_new_random_num) begin
+			rand_gen_clk 		 	<= 1'b1;
+			get_new_random_num 	<= 1'b0;
+		end else 
+			rand_gen_clk 		 	<= 1'b0;
+	end
+	LFSR #(.size(size_N)) rand_gen (.i_clk(i_rst ? i_clk : rand_gen_clk), .i_rst(i_rst), .o_num(random_N));
 	wire [size_N-1:0] target_N = Direct_mapped ? 0       : 
 						 o_hit_occurred  ? hit_N 	 :
 						 o_empty_found   ? empty_N :
 						 o_clean_found   ? clean_N :
 						 {random_N[size_N-1:1], use_mem [set_adrs]}; // N to evacuate then replace #note0001
 
-	reg hit_check_done;
 	wire write_would_conflict = !o_hit_occurred && !o_empty_found && !o_clean_found;
 
 	// state machine
@@ -103,8 +113,6 @@ module cache
 	always @(*) begin
 		if (i_rst) begin
 
-			hit_check_done = 1'b0;
-
 			o_hit_occurred = 1'b0;
 			o_empty_found  = 1'b0;
 			o_clean_found  = 1'b0;
@@ -112,6 +120,8 @@ module cache
 			hit_N   = {size_N{1'b0}};
 			empty_N = {size_N{1'b0}};
 			clean_N = {size_N{1'b0}};
+			
+			get_new_random_num = 1'b0;
 
 			i = 0;
 
@@ -119,6 +129,7 @@ module cache
 			o_hit_occurred = 1'b0;
 			o_clean_found  = 1'b0;
 			o_empty_found  = 1'b0;
+			get_new_random_num = 1'b1;
 			#10;
 			for (i=0; i<N; i=i+1) begin
 				if (valid_mem[i][set_adrs]) begin

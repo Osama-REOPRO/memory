@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="960.441292 us"></ZoomStartTime>
-      <ZoomEndTime time="1,547.911742 us"></ZoomEndTime>
-      <Cursor1Time time="1,450.000000 us"></Cursor1Time>
+      <ZoomStartTime time="3,669.548642 us"></ZoomStartTime>
+      <ZoomEndTime time="4,385.559621 us"></ZoomEndTime>
+      <Cursor1Time time="3,927.424805 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="222"></NameColumnWidth>
-      <ValueColumnWidth column_width="165"></ValueColumnWidth>
+      <NameColumnWidth column_width="234"></NameColumnWidth>
+      <ValueColumnWidth column_width="480"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="46" />
+   <WVObjectSize size="48" />
    <wvobject fp_name="group348" type="group">
       <obj_property name="label">parms</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -365,7 +365,6 @@
       <wvobject fp_name="/tb_top/tbn/cache/data_mem[1]" type="array">
          <obj_property name="ElementShortName">[1][3:0][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][3:0][1:0][3:0][7:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/tbn/cache/data_mem[1][3]" type="array">
             <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -391,7 +390,6 @@
       <wvobject fp_name="/tb_top/tbn/cache/data_mem[0]" type="array">
          <obj_property name="ElementShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/tbn/cache/data_mem[0][3]" type="array">
             <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -463,12 +461,6 @@
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_top/tbn/cache/hit_check_done" type="logic">
-      <obj_property name="ElementShortName">hit_check_done</obj_property>
-      <obj_property name="ObjectShortName">hit_check_done</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb_top/tbn/cache/write_would_conflict" type="logic">
       <obj_property name="ElementShortName">write_would_conflict</obj_property>
       <obj_property name="ObjectShortName">write_would_conflict</obj_property>
@@ -478,9 +470,32 @@
    <wvobject fp_name="/tb_top/tbn/previous_read_data" type="array">
       <obj_property name="ElementShortName">previous_read_data[7:0]</obj_property>
       <obj_property name="ObjectShortName">previous_read_data[7:0]</obj_property>
+      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/tb_top/tbn/cache/target_N" type="array">
       <obj_property name="ElementShortName">target_N[0:0]</obj_property>
       <obj_property name="ObjectShortName">target_N[0:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/tbn/cache/random_N" type="array">
+      <obj_property name="ElementShortName">random_N[0:0]</obj_property>
+      <obj_property name="ObjectShortName">random_N[0:0]</obj_property>
+      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/tbn/cache/get_new_random_num" type="logic">
+      <obj_property name="ElementShortName">get_new_random_num</obj_property>
+      <obj_property name="ObjectShortName">get_new_random_num</obj_property>
+      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_top/tbn/cache/rand_gen_clk" type="logic">
+      <obj_property name="ElementShortName">rand_gen_clk</obj_property>
+      <obj_property name="ObjectShortName">rand_gen_clk</obj_property>
+      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
 </wave_config>
