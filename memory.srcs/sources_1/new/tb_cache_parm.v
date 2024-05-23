@@ -1,14 +1,14 @@
-// directly mapped, block size 2
+// variable parameters
 
 `timescale 1us / 1ns
 `include "cache_ops.vh"
 
-module tb_cache_dm_b2;
-
-
-localparam C = 8;   // capacity (total words)
-localparam b = 2;   // block size (words per block)
-localparam N = 1;   // degree of associativity (blocks per set)
+module tb_cache_parm
+#(
+	parameter C = 8,   // capacity (total words)
+	parameter b = 2,   // block size (words per block)
+	parameter N = 1    // degree of associativity (blocks per set)
+);
 
 reg  			  clk, rst;
 
