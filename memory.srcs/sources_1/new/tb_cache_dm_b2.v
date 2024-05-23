@@ -4,104 +4,321 @@
 `include "cache_ops.vh"
 
 module tb_cache_dm_b2;
-reg  			clk, rst;
-reg  			mem_write;
-reg 			word_op;
-reg 			set_dirty;
-reg  [31:0] address;
-reg  [31:0] write_data;
-wire [31:0] read_data;
-reg  			mem_operation;
-wire 			mem_operation_done;
-wire 			success;
-wire 			word_missing;
+
+
+localparam C = 8;   // capacity (total words)
+localparam b = 2;   // block size (words per block)
+localparam N = 1;   // degree of associativity (blocks per set)
+
+reg  			  clk, rst;
+
+reg [`op_N:0] op;
+
+reg  [31:0]   address;
+
+reg 			  set_valid;
+reg			  set_tag;
+reg 			  set_dirty;
+reg 			  set_use;
+
+reg  			  mem_operation;
+
+wire 			  hit_occurred;
+wire 			  empty_found;
+wire 			  clean_found;
+
+reg [(4*b)-1:0] 	valid_bytes;
+
+reg  [(32*b)-1:0]	write_data;
+wire [(32*b)-1:0]	read_data;
+
+wire 							mem_operation_done;
 
 always #0.1 clk <= !clk; // clock runs at 10 MHz
 
 initial begin
-	{clk, mem_operation, mem_write, address, write_data, word_op} = 0;
+	{	clk, rst,
+	             
+		op,
+		             
+		address,
+		             
+		set_dirty,
+		set_use,
+		             
+		mem_operation,
+		             		
+		valid_bytes,
+		                  
+		write_data } = 0;
+
+
 	rst = 1;
 	#0.2
 	rst = 0;
 end
 
 reg [7:0] valToWrite;
-integer 	 adrsToWrite;
 
 integer state;
-localparam idle_st 		  = 0, 
-			  read_init_st   = 1, 
-			  await_read_st  = 2, 
-			  write_init_st  = 3, 
-			  await_write_st = 4;
-
+localparam write_lookup_st 	 	= 0,
+			  write_st 		  		 	= 1,
+			  write_fill_empty_w_st = 2,
+			  write_evac_r_st  		= 3,
+			  read_lookup_st		 	= 4,
+			  read_st 		  		 	= 5,
+			  read_fill_empty_w_st	= 6,
+			  read_evac_r_st			= 7;
+		  
+integer sub_state;
+localparam init   = 0,
+			  busy   = 1,
+			  finish = 2;
 always @(posedge clk) begin
 	if(rst) begin
-		mem_operation  <= 0;
-		mem_write 		<= 0;
-		set_dirty  <= 0;
-		address        <= 0;
-		write_data 		<= 0;
-		valToWrite 		<= 0;
-		adrsToWrite 	<= 0;
+		mem_operation  <= 1'b0;
+		address        <= 1'b0;
+		write_data 		<= 1'b0;
+		valToWrite 		<= 1'b0;
 		state 			<= 0;
+		sub_state		<= 0;
+		
+		set_valid		<= 1'b0;
+		set_tag			<= 1'b0;
+		set_dirty		<= 1'b0;
+		set_use			<= 1'b0;
+
 	end else begin
 		case (state)
-			idle_st: begin
-				if (!mem_operation_done) state = mem_write ? read_init_st : write_init_st;
-				// reverse the operation each time
-			end
-			write_init_st: begin
-				mem_operation <= 1;
-				mem_write 	  <= 1;
-				if  (word_missing) write_data 	   <= 32'b0; // fill with zeros
-				else 					 write_data [7:0] <= valToWrite;
-				state 		  <= await_write_st;
-				word_op 		  <= word_missing || set_dirty;
-			end
-			await_write_st: begin
-				if (mem_operation_done) begin
-					mem_operation 	  <= 0;
-					state 		  	  <= idle_st;
-					if (success) begin
-						set_dirty  <= 1'b0;
-						word_op 		  <= 1'b0;
-						if (word_op) mem_write <= 1'b0; // repeat if previous word refill
-					end else begin
-						if (!word_missing) begin
-							set_dirty  <= 1;
-							word_op 		  <= 1;
+			///////////// write
+			write_lookup_st: begin
+
+				case (sub_state)
+					init: begin
+						op 			  <= `lookup_op;
+						mem_operation <= 1'b1;
+						sub_state 	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
 						end
-						mem_write	  <= 0; // so write operation repeat
 					end
-				end
-			end
-			read_init_st: begin
-				mem_operation <= 1;
-				mem_write 	  <= 0;
-				state 		  <= await_read_st;
-			end
-			await_read_st: begin
-				if (mem_operation_done) begin
-					mem_operation <= 0;
-					state 		  <= idle_st;
-					if (success) begin
-						valToWrite <= read_data[7:0] + 1;
-						address 	  <= address + 1;
-					end else begin
-						mem_write	  <= 1; // repeat read on fail, (loops forever)
+					finish: begin
+						if (!mem_operation_done) begin
+							if 	  (hit_occurred) 					  state <= write_st;					 // write right away
+							else if (empty_found || clean_found)  state <= write_fill_empty_w_st; // fill with zeroes then write
+							else 											  state <= write_evac_r_st;
+
+							sub_state <= init;
+						end
 					end
-				end
+				endcase
 			end
+
+			write_st: begin
+				case (sub_state)
+					init: begin
+						write_data [(((address % (4*b))+1)*8)-1 -: 8] <= valToWrite;
+						$display("write_data [%0d -: 8] <= %0d", ((address+1)*8)-1, valToWrite);
+						op 			     <= `write_op;
+						mem_operation    <= 1'b1;
+						valid_bytes 	  <= {(4*b){1'b0}};
+						valid_bytes[address % (4*b)] <= 1'b1;
+
+						set_dirty		  <= 1'b1;
+						set_use			  <= 1'b1;
+
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							state		 <= read_lookup_st;
+							sub_state <= init;
+						end
+					end
+				endcase
+			end
+
+			write_fill_empty_w_st: begin
+				case (sub_state)
+					init: begin
+						write_data <= {(32*b){1'b0}};
+						op 			     <= `write_op;
+						mem_operation    <= 1'b1;
+						valid_bytes			  <= {4*b{1'b1}}; // all valid
+						set_valid		  <= 1'b1;
+						set_tag			  <= 1'b1;
+
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							state		 <= write_st;
+							sub_state <= init;
+						end
+					end
+				endcase
+			end
+
+				// we read the data but do nothing with it
+				write_evac_r_st: begin
+					case (sub_state)
+						init: begin
+							op 			  <= `read_op;
+							mem_operation <= 1'b1;
+							valid_bytes	  <= {4*b{1'b1}};
+							sub_state	  <= busy;
+						end
+						busy: begin
+							if (mem_operation_done) begin
+								mem_operation <= 1'b0;
+								sub_state 	  <= finish;
+							end
+						end
+						finish: begin
+							if (!mem_operation_done) begin
+								state		  <= write_fill_empty_w_st;
+								sub_state  <= init;
+							end
+						end
+					endcase
+				end
+
+
+			read_lookup_st: begin
+				case (sub_state)
+					init: begin
+						op 			  <= `lookup_op;
+						mem_operation <= 1'b1;
+						sub_state 	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							if 	  (hit_occurred) 					  state <= read_st;				  // read right away
+							else if (empty_found || clean_found)  state <= read_fill_empty_w_st; // fill with zeroes then write missing
+							else 											  state <= read_evac_r_st;
+
+							sub_state <= init;
+						end
+					end
+				endcase
+			end
+
+			read_st: begin
+				case (sub_state)
+					init: begin
+						op 			     				  		<= `read_op;
+						mem_operation    				  		<= 1'b1;
+						valid_bytes 					  		<= {(4*b){1'b0}};
+						valid_bytes[address % (4*b)] <= 1'b1;
+						$strobe("\n\n\n");
+						$strobe("valid_bytes[address % ((4*b)-1)] <= 1'b1");
+						$strobe("valid_bytes[%0d %% ((4*%0d)-1)] <= 1'b1",address, b);
+						$strobe("valid_bytes[%0d] <= 1'b1", address % (4*b));
+						$strobe("valid_bytes = %b", valid_bytes);
+						$strobe("\n\n\n");
+						sub_state	     				  		<= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							valToWrite <= read_data[(((address % (4*b))+1)*8)-1 -: 8] + 8'd1;
+							address 	  <= address + 1;
+							state		  <= write_lookup_st;
+							sub_state  <= init;
+						end
+					end
+				endcase
+			end
+
+
+			// just fill with 0s
+			read_fill_empty_w_st: begin
+				case (sub_state)
+					init: begin
+						write_data <= {(32*b){1'b0}};
+						op 			     <= `write_op;
+						mem_operation    <= 1'b1;
+						valid_bytes		  <= {4*b{1'b1}};
+
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							state		 <= read_st;
+							sub_state <= init;
+						end
+					end
+				endcase
+			end
+
+			read_evac_r_st: begin
+				case (sub_state)
+					init: begin
+						op 			     <= `read_op;
+						mem_operation    <= 1'b1;
+						valid_bytes		  <= {4*b{1'b1}};
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done) begin
+							mem_operation <= 1'b0;
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done) begin
+							state		  <= read_st;
+							sub_state  <= init;
+						end
+					end
+				endcase
+			end
+
+
 		endcase
 	end
 end
 
+
+
+
 cache 
 #(
-	.C(8), // capacity (words)
-	.b(2), // block size (words in block)
-	.N(1)  // degree of associativity
+	.C(C), // capacity (words)
+	.b(b), // block size (words in block)
+	.N(N)  // degree of associativity
 ) 
 cache 
 (
@@ -109,8 +326,11 @@ cache
 	.i_rst(rst),
 
 	.i_op(op),
+
 	.i_address(address),
 
+	.i_set_valid(set_valid),
+	.i_set_tag(set_tag),
 	.i_set_dirty(set_dirty),
 	.i_set_use(set_use),
 
@@ -120,12 +340,50 @@ cache
 	.o_empty_found(empty_found),
 	.o_clean_found(clean_found),
 
-	.i_n_bytes(n_bytes),
+	.i_valid_bytes(valid_bytes),
 
 	.i_write_data(write_data),
 	.o_read_data(read_data),
 
 	.o_mem_operation_done(mem_operation_done)
 );
+
+// logs
+initial $display("\n\n(%0t) logs start //////////////////////////////////////////\n\n", $time);
+always @(state) begin
+	$write("(%0t) ", $time);
+	$write("---------------------------------------------------> testbench state: ");
+	case (state)
+		write_lookup_st: 			$write("write_lookup_st\n");
+	   write_st: 					$write("write_st\n");
+		write_fill_empty_w_st: 	$write("write_fill_empty_w_st\n");
+		write_evac_r_st: 			$write("write_evac_r_st\n");
+		read_lookup_st: 			$write("read_lookup_st\n");
+		read_st: 					$write("read_st\n");
+		read_fill_empty_w_st: 	$write("read_fill_empty_w_st\n");
+		read_evac_r_st: 			$write("read_evac_r_st\n");
+	endcase
+end
+
+always @(sub_state) begin
+	$write("(%0t) ", $time);
+	$write("--------------------------> sub-state: ");
+	case (sub_state)
+		init: 	$write("init\n");
+		busy: 	$write("busy\n");
+		finish: 	$strobe("finish\n-----------------------------------------------------------------------------****\n\n");
+	endcase
+end
+
+always @(hit_occurred) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred);
+always @(empty_found)  $write("(%0t) ######### empty_found = %b\n", $time, empty_found);
+always @(clean_found)  $write("(%0t) ######### clean_found = %b\n", $time, clean_found);
+
+initial begin
+	$monitor(cache.data_mem);
+	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ address = %0d ++++++++++++++++++++++++++++++++++\n", $time, address);
+	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ valToWrite: %b +++++++++++++++++++++++++++++++++++\n", $time, valToWrite);
+end
+wire [7:0] previous_read_data = read_data[address-1 +: 8];
 
 endmodule
