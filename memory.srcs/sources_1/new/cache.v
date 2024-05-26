@@ -83,7 +83,8 @@ module cache
 						 o_hit_occurred  ? hit_N 	 :
 						 o_empty_found   ? empty_N :
 						 o_clean_found   ? clean_N :
-						 {random_N[size_N-1:1], use_mem [set_adrs]}; // N to evacuate then replace #note0001
+						 size_N > 2		  ? {random_N[size_N-1:1], !use_mem [set_adrs]} : // N to evacuate then replace #note0001
+						 !use_mem [set_adrs];
 
 	wire write_would_conflict = !o_hit_occurred && !o_empty_found && !o_clean_found;
 
@@ -197,7 +198,7 @@ module cache
 				if (i_set_valid) valid_mem [target_N][set_adrs] <= 1'b1;
 				if (i_set_tag)   tag_mem 	[target_N][set_adrs] <= tag_adrs;
 				if (i_set_dirty) dirty_mem [target_N][set_adrs] <= 1'b1;
-				if (i_set_use)   use_mem 				 [set_adrs] <= !use_mem [set_adrs]; // inverted on write
+				if (i_set_use)   use_mem 				 [set_adrs] <= target_N [0]; // #note0001
 
 				o_mem_operation_done <= 1'b1;
 			end else if (state == busy_st && i_op == `read_op && !o_mem_operation_done) begin ////////////////////////////////////// read
@@ -289,7 +290,10 @@ module LFSR
 );
 	always@(posedge i_clk) begin
 		if(i_rst) o_num <= {clamped_size{1'b1}};
-		else o_num = {o_num[clamped_size-2:0],(o_num[clamped_size-1]^o_num[clamped_size-2])};
+		else begin
+			o_num = {o_num[clamped_size-2:0],(o_num[clamped_size-1]^o_num[clamped_size-2])};
+			$display("~~~~ new random number generated (%b) ~~~~", o_num);
+		end
 		// shift left once
 		// right-most bit is xor of 2 left-most bits
 	end
