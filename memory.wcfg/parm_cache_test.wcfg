@@ -11,13 +11,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="3,669.548642 us"></ZoomStartTime>
-      <ZoomEndTime time="4,385.559621 us"></ZoomEndTime>
-      <Cursor1Time time="3,927.424805 us"></Cursor1Time>
+      <ZoomStartTime time="5.233333334 ms"></ZoomStartTime>
+      <ZoomEndTime time="13.233333334 ms"></ZoomEndTime>
+      <Cursor1Time time="11.900000000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="234"></NameColumnWidth>
-      <ValueColumnWidth column_width="480"></ValueColumnWidth>
+      <NameColumnWidth column_width="301"></NameColumnWidth>
+      <ValueColumnWidth column_width="494"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="48" />
    <wvobject fp_name="group348" type="group">
@@ -365,6 +365,7 @@
       <wvobject fp_name="/tb_top/tbn/cache/data_mem[1]" type="array">
          <obj_property name="ElementShortName">[1][3:0][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][3:0][1:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/tbn/cache/data_mem[1][3]" type="array">
             <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -390,6 +391,7 @@
       <wvobject fp_name="/tb_top/tbn/cache/data_mem[0]" type="array">
          <obj_property name="ElementShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_top/tbn/cache/data_mem[0][3]" type="array">
             <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -436,6 +438,7 @@
       <obj_property name="ObjectShortName">use_mem[3:0]</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject fp_name="/tb_top/tbn/cache/byte_offset_adrs" type="array">
       <obj_property name="ElementShortName">byte_offset_adrs[1:0]</obj_property>
