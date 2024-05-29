@@ -140,12 +140,13 @@ always @(posedge clk) begin
 					end
 					busy: begin
 						if (mem_operation_done[1]) begin
-							mem_operation <= 1'b0;
+							mem_operation[1] <= 1'b0;
+
 							sub_state 	  <= finish;
 						end
 					end
 					finish: begin
-						if (!mem_operation_done) begin
+						if (!mem_operation_done[1]) begin
 							state		 <= read_lookup_st;
 							sub_state <= init;
 						end
@@ -156,24 +157,25 @@ always @(posedge clk) begin
 			write_fill_empty_w_st: begin
 				case (sub_state)
 					init: begin
-						write_data <= {(32*b){1'b0}};
-						op 			     <= `write_op;
-						mem_operation    <= 1'b1;
-						valid_bytes			  <= {4*b{1'b1}}; // all valid
-						set_valid		  <= 1'b1;
-						set_tag			  <= 1'b1;
-						set_use			  <= 1'b0;
+						write_data[1] 		  <= {(32*b){1'b0}};
+						op[1] 			     <= `write_op;
+						mem_operation[1]    <= 1'b1;
+						valid_bytes[1]		  <= {4*b{1'b1}}; // all valid
+						set_valid[1]		  <= 1'b1;
+						set_tag[1]			  <= 1'b1;
+						set_use[1]			  <= 1'b0;
 
-						sub_state	     <= busy;
+						sub_state	     	  <= busy;
 					end
 					busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b0;
+						if (mem_operation_done[1]) begin
+							mem_operation[1] <= 1'b0;
+
 							sub_state 	  <= finish;
 						end
 					end
 					finish: begin
-						if (!mem_operation_done) begin
+						if (!mem_operation_done[1]) begin
 							state		 <= write_st;
 							sub_state <= init;
 						end
@@ -185,19 +187,21 @@ always @(posedge clk) begin
 				write_evac_r_st: begin
 					case (sub_state)
 						init: begin
-							op 			  <= `read_op;
-							mem_operation <= 1'b1;
-							valid_bytes	  <= {4*b{1'b1}};
-							sub_state	  <= busy;
+							op[1] 			  <= `read_op;
+							mem_operation[1] <= 1'b1;
+							valid_bytes[1]	  <= {4*b{1'b1}};
+
+							sub_state		  <= busy;
 						end
 						busy: begin
-							if (mem_operation_done) begin
-								mem_operation <= 1'b0;
+							if (mem_operation_done[1]) begin
+								mem_operation[1] <= 1'b0;
+
 								sub_state 	  <= finish;
 							end
 						end
 						finish: begin
-							if (!mem_operation_done) begin
+							if (!mem_operation_done[1]) begin
 								state		  <= write_fill_empty_w_st;
 								sub_state  <= init;
 							end
@@ -209,21 +213,23 @@ always @(posedge clk) begin
 			read_lookup_st: begin
 				case (sub_state)
 					init: begin
-						op 			  <= `lookup_op;
-						mem_operation <= 1'b1;
-						sub_state 	  <= busy;
+						op[1] 			  <= `lookup_op;
+						mem_operation[1] <= 1'b1;
+
+						sub_state	 	  <= busy;
 					end
 					busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b0;
-							sub_state 	  <= finish;
+						if (mem_operation_done[1]) begin
+							mem_operation[1] <= 1'b0;
+
+							sub_state	 	  <= finish;
 						end
 					end
 					finish: begin
-						if (!mem_operation_done) begin
-							if 	  (hit_occurred) 					  state <= read_st;				  // read right away
-							else if (empty_found || clean_found)  state <= read_fill_empty_w_st; // fill with zeroes then write missing
-							else 											  state <= read_evac_r_st;
+						if (!mem_operation_done[1]) begin
+							if 	  (hit_occurred[1])	 					  state <= read_st;				  // read right away
+							else if (empty_found[1] || clean_found[1])  state <= read_fill_empty_w_st; // fill with zeroes then write missing
+							else 													  state <= read_evac_r_st;
 
 							sub_state <= init;
 						end
@@ -234,28 +240,31 @@ always @(posedge clk) begin
 			read_st: begin
 				case (sub_state)
 					init: begin
-						op 			     				  		<= `read_op;
-						mem_operation    				  		<= 1'b1;
-						valid_bytes 					  		<= {(4*b){1'b0}};
-						valid_bytes[address % (4*b)] <= 1'b1;
+						op[1] 			     				  		<= `read_op;
+						mem_operation[1]    				  		<= 1'b1;
+						valid_bytes[1] 					  		<= {(4*b){1'b0}};
+						valid_bytes[address % (4*b)][1] <= 1'b1;
 						$strobe("\n\n\n");
 						$strobe("valid_bytes[address % ((4*b)-1)] <= 1'b1");
-						$strobe("valid_bytes[%0d %% ((4*%0d)-1)] <= 1'b1",address, b);
-						$strobe("valid_bytes[%0d] <= 1'b1", address % (4*b));
-						$strobe("valid_bytes = %b", valid_bytes);
+						$strobe("valid_bytes[%0d %% ((4*%0d)-1)] <= 1'b1",address[1], b);
+						$strobe("valid_bytes[%0d] <= 1'b1", address[1] % (4*b));
+						$strobe("valid_bytes = %b", valid_bytes[1]);
 						$strobe("\n\n\n");
+
 						sub_state	     				  		<= busy;
 					end
 					busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b0;
+						if (mem_operation_done[1]) begin
+							mem_operation[1] <= 1'b0;
+
 							sub_state 	  <= finish;
 						end
 					end
 					finish: begin
-						if (!mem_operation_done) begin
-							valToWrite <= read_data[(((address % (4*b))+1)*8)-1 -: 8] + 8'd1;
-							address 	  <= address + 1;
+						if (!mem_operation_done[1]) begin
+							valToWrite[1] <= read_data[(((address % (4*b))+1)*8)-1 -: 8][1] + 8'd1;
+							address[1] 	  <= address[1] + 1;
+
 							state		  <= write_lookup_st;
 							sub_state  <= init;
 						end
@@ -268,22 +277,24 @@ always @(posedge clk) begin
 			read_fill_empty_w_st: begin
 				case (sub_state)
 					init: begin
-						write_data <= {(32*b){1'b0}};
-						op 			     <= `write_op;
-						mem_operation    <= 1'b1;
-						valid_bytes		  <= {4*b{1'b1}};
+						write_data[1] <= {(32*b){1'b0}};
+						op[1] 			     <= `write_op;
+						mem_operation[1]    <= 1'b1;
+						valid_bytes[1]		  <= {4*b{1'b1}};
 
 						sub_state	     <= busy;
 					end
 					busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b0;
+						if (mem_operation_done[1]) begin
+							mem_operation[1] <= 1'b0;
+
 							sub_state 	  <= finish;
 						end
 					end
 					finish: begin
-						if (!mem_operation_done) begin
-							state		 <= read_st;
+						if (!mem_operation_done[1]) begin
+							state[1]	 <= read_st[1];
+
 							sub_state <= init;
 						end
 					end
@@ -293,19 +304,21 @@ always @(posedge clk) begin
 			read_evac_r_st: begin
 				case (sub_state)
 					init: begin
-						op 			     <= `read_op;
-						mem_operation    <= 1'b1;
-						valid_bytes		  <= {4*b{1'b1}};
+						op[1] 			     <= `read_op;
+						mem_operation[1]    <= 1'b1;
+						valid_bytes[1]		  <= {4*b{1'b1}};
+
 						sub_state	     <= busy;
 					end
 					busy: begin
-						if (mem_operation_done) begin
-							mem_operation <= 1'b0;
+						if (mem_operation_done[1]) begin
+							mem_operation[1] <= 1'b0;
+
 							sub_state 	  <= finish;
 						end
 					end
 					finish: begin
-						if (!mem_operation_done) begin
+						if (!mem_operation_done[1]) begin
 							state		  <= read_st;
 							sub_state  <= init;
 						end
