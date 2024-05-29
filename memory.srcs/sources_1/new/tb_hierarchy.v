@@ -11,47 +11,58 @@ localparam L1_N = 1;   // degree of associativity (blocks per set)
 localparam L2_N = L1_N*2;
 
 
-reg  			  		clk, rst;
+reg  			  			clk, rst;
 
-reg [`op_N:0] 		op						 [1:2];
+reg [`op_N:0] 			op						 [1:2];
 
-reg  [31:0]   		address 				 [1:2];
+reg  [31:0]   			address 				 [1:2];
 
-reg 			  		set_valid 			 [1:2];
-reg			  		set_tag 				 [1:2];
-reg 			  		set_dirty 			 [1:2];
-reg 			  		set_use 				 [1:2];
+reg 			  			set_valid 			 [1:2];
+reg			  			set_tag 				 [1:2];
+reg 			  			set_dirty 			 [1:2];
+reg 			  			set_use 				 [1:2];
 
-reg  			  		mem_operation 		 [1:2];
+reg  			  			mem_operation 		 [1:2];
 
-wire 			  		hit_occurred  		 [1:2];
-wire 			  		empty_found	 		 [1:2];
-wire 			  		clean_found	 		 [1:2];
+wire 			  			hit_occurred  		 [1:2];
+wire 			  			empty_found	 		 [1:2];
+wire 			  			clean_found	 		 [1:2];
 
-reg  [(4*b)-1:0] 	valid_bytes 		 [1:2];
+reg  [(4*L1_b)-1:0] 	valid_bytes_L1;
+reg  [(4*L2_b)-1:0] 	valid_bytes_L2;
 
-reg  [(32*b)-1:0]	write_data 			 [1:2];
-wire [(32*b)-1:0]	read_data 			 [1:2];
+reg  [(32*L1_b)-1:0]	write_data_L1;
+reg  [(32*L2_b)-1:0]	write_data_L2;
 
-wire 					mem_operation_done [1:2];
+wire [(32*L1_b)-1:0]	read_data_L1;
+wire [(32*L2_b)-1:0]	read_data_L2;
+
+wire 						mem_operation_done [1:2];
 
 always #0.1 clk <= !clk; // clock runs at 10 MHz
 
 initial begin
 	{	clk, rst,
 	             
-		op,
+		op[1],
+		op[2],
+					 
+		address[1],
+		address[2],
 		             
-		address,
+		set_dirty[1],
+		set_dirty[2],
+		set_use[1],
+		set_use[2],
 		             
-		set_dirty,
-		set_use,
-		             
-		mem_operation,
+		mem_operation[1],
+		mem_operation[2],
 		             		
-		valid_bytes,
+		valid_bytes_L1,
+		valid_bytes_L2,
 		                  
-		write_data } = 0;
+		write_data_L1,
+		write_data_L2 } = 0;
 
 
 	rst = 1;
@@ -75,13 +86,13 @@ integer sub_state;
 localparam init   = 0,
 			  busy   = 1,
 			  finish = 2;
-always @(posedge clk) begin
+always @(posedge clk) begin : block_0
+	integer il;
 	if(rst) begin
-		integer il;
 		for (il=1; il<=2; il=il+1) begin
 			mem_operation [il] <= 1'b0;
 			address       [il] <= 1'b0;
-			write_data	  [il] <= 1'b0;
+			write_data_L1 [il] <= 1'b0;
 			valToWrite 	  [il] <= 1'b0;
 			state 		  [il] <= 0;
 			sub_state	  [il] <= 0;
@@ -126,12 +137,12 @@ always @(posedge clk) begin
 			write_st: begin
 				case (sub_state)
 					init: begin
-						write_data[1] [(((address % (4*b))+1)*8)-1 -: 8] <= valToWrite[1];
-						$display("write_data [%0d -: 8] <= %0d", ((address+1)*8)-1, valToWrite[1]);
+						write_data_L1 [(((address[1] % (4*L1_b))+1)*8)-1 -: 8] <= valToWrite[1];
+						$display("write_data_L1 [%0d -: 8] <= %0d", ((address[1]+1)*8)-1, valToWrite[1]);
 						op[1] 			     <= `write_op;
 						mem_operation[1]    <= 1'b1;
-						valid_bytes[1] 	  <= {(4*b){1'b0}};
-						valid_bytes[address % (4*b)][1] <= 1'b1;
+						valid_bytes_L1 	  <= {(4*L1_b){1'b0}};
+						valid_bytes_L1[address[1] % (4*L1_b)] <= 1'b1;
 
 						set_dirty[1]		  <= 1'b1;
 						set_use[1]			  <= 1'b1;
@@ -157,10 +168,10 @@ always @(posedge clk) begin
 			write_fill_empty_w_st: begin
 				case (sub_state)
 					init: begin
-						write_data[1] 		  <= {(32*b){1'b0}};
+						write_data_L1 		  <= {(32*L1_b){1'b0}};
 						op[1] 			     <= `write_op;
 						mem_operation[1]    <= 1'b1;
-						valid_bytes[1]		  <= {4*b{1'b1}}; // all valid
+						valid_bytes_L1		  <= {4*L1_b{1'b1}}; // all valid
 						set_valid[1]		  <= 1'b1;
 						set_tag[1]			  <= 1'b1;
 						set_use[1]			  <= 1'b0;
@@ -189,7 +200,7 @@ always @(posedge clk) begin
 						init: begin
 							op[1] 			  <= `read_op;
 							mem_operation[1] <= 1'b1;
-							valid_bytes[1]	  <= {4*b{1'b1}};
+							valid_bytes_L1	  <= {4*L1_b{1'b1}};
 
 							sub_state		  <= busy;
 						end
@@ -242,13 +253,13 @@ always @(posedge clk) begin
 					init: begin
 						op[1] 			     				  		<= `read_op;
 						mem_operation[1]    				  		<= 1'b1;
-						valid_bytes[1] 					  		<= {(4*b){1'b0}};
-						valid_bytes[address % (4*b)][1] <= 1'b1;
+						valid_bytes_L1 					  		<= {(4*L1_b){1'b0}};
+						valid_bytes_L1[address[1] % (4*L1_b)] <= 1'b1;
 						$strobe("\n\n\n");
-						$strobe("valid_bytes[address % ((4*b)-1)] <= 1'b1");
-						$strobe("valid_bytes[%0d %% ((4*%0d)-1)] <= 1'b1",address[1], b);
-						$strobe("valid_bytes[%0d] <= 1'b1", address[1] % (4*b));
-						$strobe("valid_bytes = %b", valid_bytes[1]);
+						$strobe("valid_bytes_L1[address %% ((4*L1_b)-1)] <= 1'b1");
+						$strobe("valid_bytes_L1[%0d %% ((4*%0d)-1)] <= 1'b1",address[1], L1_b);
+						$strobe("valid_bytes_L1[%0d] <= 1'b1", address[1] % (4*L1_b));
+						$strobe("valid_bytes_L1 = %b", valid_bytes_L1);
 						$strobe("\n\n\n");
 
 						sub_state	     				  		<= busy;
@@ -262,7 +273,7 @@ always @(posedge clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							valToWrite[1] <= read_data[(((address % (4*b))+1)*8)-1 -: 8][1] + 8'd1;
+							valToWrite[1] <= read_data_L1[(((address[1] % (4*L1_b))+1)*8)-1 -: 8] + 8'd1;
 							address[1] 	  <= address[1] + 1;
 
 							state		  <= write_lookup_st;
@@ -277,10 +288,10 @@ always @(posedge clk) begin
 			read_fill_empty_w_st: begin
 				case (sub_state)
 					init: begin
-						write_data[1] <= {(32*b){1'b0}};
+						write_data_L1 <= {(32*L1_b){1'b0}};
 						op[1] 			     <= `write_op;
 						mem_operation[1]    <= 1'b1;
-						valid_bytes[1]		  <= {4*b{1'b1}};
+						valid_bytes_L1		  <= {4*L1_b{1'b1}};
 
 						sub_state	     <= busy;
 					end
@@ -306,7 +317,7 @@ always @(posedge clk) begin
 					init: begin
 						op[1] 			     <= `read_op;
 						mem_operation[1]    <= 1'b1;
-						valid_bytes[1]		  <= {4*b{1'b1}};
+						valid_bytes_L1		  <= {4*L1_b{1'b1}};
 
 						sub_state	     <= busy;
 					end
@@ -360,10 +371,10 @@ l1_cache
 	.o_empty_found(empty_found[1]),
 	.o_clean_found(clean_found[1]),
 
-	.i_valid_bytes(valid_bytes[1]),
+	.i_valid_bytes(valid_bytes_L1),
 
-	.i_write_data(write_data[1]),
-	.o_read_data(read_data[1]),
+	.i_write_data(write_data_L1),
+	.o_read_data(read_data_L1),
 
 	.o_mem_operation_done(mem_operation_done[1])
 );
@@ -394,10 +405,10 @@ l2_cache
 	.o_empty_found(empty_found[2]),
 	.o_clean_found(clean_found[2]),
 
-	.i_valid_bytes(valid_bytes[2]),
+	.i_valid_bytes(valid_bytes_L2),
 
-	.i_write_data(write_data[2]),
-	.o_read_data(read_data[2]),
+	.i_write_data(write_data_L2),
+	.o_read_data(read_data_L2),
 
 	.o_mem_operation_done(mem_operation_done[2])
 );
@@ -429,15 +440,15 @@ always @(sub_state) begin
 	endcase
 end
 
-always @(hit_occurred) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred);
-always @(empty_found)  $write("(%0t) ######### empty_found = %b\n", $time, empty_found);
-always @(clean_found)  $write("(%0t) ######### clean_found = %b\n", $time, clean_found);
+always @(hit_occurred[1]) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred[1]);
+always @(empty_found[1])  $write("(%0t) ######### empty_found = %b\n", $time, empty_found[1]);
+always @(clean_found[1])  $write("(%0t) ######### clean_found = %b\n", $time, clean_found[1]);
 
 initial begin
-	$monitor(cache.data_mem);
-	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ address = %0d ++++++++++++++++++++++++++++++++++\n", $time, address);
-	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ valToWrite: %b +++++++++++++++++++++++++++++++++++\n", $time, valToWrite);
+	$monitor(l1_cache.data_mem);
+	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ address = %0d ++++++++++++++++++++++++++++++++++\n", $time, address[1]);
+	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ valToWrite: %b +++++++++++++++++++++++++++++++++++\n", $time, valToWrite[1]);
 end
-wire [7:0] previous_read_data = read_data[address-1 +: 8];
+wire [7:0] previous_read_data = read_data_L1[address[1]-1 +: 8];
 
 endmodule
