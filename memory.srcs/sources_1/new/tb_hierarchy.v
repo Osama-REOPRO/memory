@@ -89,13 +89,14 @@ localparam init   = 0,
 always @(posedge clk) begin : block_0
 	integer il;
 	if(rst) begin
+		state 	 <= 0;
+		sub_state <= 0;
+
 		for (il=1; il<=2; il=il+1) begin
 			mem_operation [il] <= 1'b0;
 			address       [il] <= 1'b0;
 			write_data_L1 [il] <= 1'b0;
 			valToWrite 	  [il] <= 1'b0;
-			state 		  [il] <= 0;
-			sub_state	  [il] <= 0;
 			
 			set_valid	  [il] <= 1'b0;
 			set_tag		  [il] <= 1'b0;
