@@ -125,9 +125,9 @@ always @(posedge clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							if 	  (hit_occurred[1]) 					  state <= write_st;					 // write right away
-							else if (empty_found[1] || clean_found[1])  state <= write_fill_empty_w_st; // fill with zeroes then write
-							else 											  state <= write_evac_r_st;
+							if 	  (hit_occurred[1]) 					  		state <= write_st;					 // write right away
+							else if (empty_found[1] || clean_found[1])  	state <= write_fill_empty_w_st; // fill with zeroes then write
+							else 											  			state <= write_evac_r_st;
 
 							sub_state <= init;
 						end
