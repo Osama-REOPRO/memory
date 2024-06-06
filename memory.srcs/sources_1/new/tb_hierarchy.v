@@ -73,14 +73,14 @@ end
 reg [7:0] valToWrite [1:2];
 
 integer state;
-localparam write_lookup_st 	 	= 0,
-			  write_st 		  		 	= 1,
-			  write_fill_empty_w_st = 2,
-			  write_evac_r_st  		= 3,
-			  read_lookup_st		 	= 4,
-			  read_st 		  		 	= 5,
-			  read_fill_empty_w_st	= 6,
-			  read_evac_r_st			= 7;
+localparam w_lookup_st 	 	= 0,
+			  w_st 		  		 	= 1,
+			  w_fill_empty_w_st = 2,
+			  w_evac_r_st  		= 3,
+			  r_lookup_st		 	= 4,
+			  r_st 		  		 	= 5,
+			  r_fill_empty_w_st	= 6,
+			  r_evac_r_st			= 7;
 		  
 integer sub_state;
 localparam init   = 0,
@@ -107,7 +107,7 @@ always @(posedge clk) begin : block_0
 	end else begin
 		case (state)
 			///////////// write
-			write_lookup_st: begin
+			w_lookup_st: begin
 
 				case (sub_state)
 					init: begin
@@ -125,9 +125,9 @@ always @(posedge clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							if 	  (hit_occurred[1]) 					  		state <= write_st;					 // write right away
-							else if (empty_found[1] || clean_found[1])  	state <= write_fill_empty_w_st; // fill with zeroes then write
-							else 											  			state <= write_evac_r_st;
+							if 	  (hit_occurred[1]) 					  		state <= w_st;					 // write right away
+							else if (empty_found[1] || clean_found[1])  	state <= w_fill_empty_w_st; // fill with zeroes then write
+							else 											  			state <= w_evac_r_st;
 
 							sub_state <= init;
 						end
@@ -135,7 +135,7 @@ always @(posedge clk) begin : block_0
 				endcase
 			end
 
-			write_st: begin
+			w_st: begin
 				case (sub_state)
 					init: begin
 						write_data_L1 [(((address[1] % (4*L1_b))+1)*8)-1 -: 8] <= valToWrite[1];
@@ -159,14 +159,14 @@ always @(posedge clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							state		 <= read_lookup_st;
+							state		 <= r_lookup_st;
 							sub_state <= init;
 						end
 					end
 				endcase
 			end
 
-			write_fill_empty_w_st: begin
+			w_fill_empty_w_st: begin
 				case (sub_state)
 					init: begin
 						write_data_L1 		  <= {(32*L1_b){1'b0}};
@@ -188,39 +188,77 @@ always @(posedge clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							state		 <= write_st;
+							state		 <= w_st;
 							sub_state <= init;
 						end
 					end
 				endcase
 			end
 
-				// we read the data but do nothing with it
-				write_evac_r_st: begin
-					case (sub_state)
-						init: begin
-							op[1] 			  <= `read_op;
-							mem_operation[1] <= 1'b1;
-							valid_bytes_L1	  <= {4*L1_b{1'b1}};
+			// we read the data then write it to a higher level cache
+			w_evac_r_st: begin
+				case (sub_state)
+					init: begin
+						op[1] 			  								<= `read_op;
+						mem_operation[1] 								<= 1'b1;
+						valid_bytes_L1									<= {(4*L1_b){1'b1}}; // read entire block
 
-							sub_state		  <= busy;
-						end
-						busy: begin
-							if (mem_operation_done[1]) begin
-								mem_operation[1] <= 1'b0;
+						sub_state		  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[1]) begin
+							mem_operation[1] <= 1'b0;
 
-								sub_state 	  <= finish;
-							end
+							sub_state 	  <= finish;
 						end
-						finish: begin
-							if (!mem_operation_done[1]) begin
-								state		  <= write_fill_empty_w_st;
-								sub_state  <= init;
-							end
+					end
+					finish: begin
+						if (!mem_operation_done[1]) begin
+							valEvac[1] <= read_data_L1;
+							state		  <= w_h_evac_lookup_st;
+							sub_state  <= init;
 						end
-					endcase
-				end
+					end
+				endcase
+			end
 
+			// lookup higher cache for space to write evacuated data to
+			w_h_evac_lookup_st: begin
+				case (sub_state)
+					init: begin
+						op[2]			  <= `lookup_op;
+						mem_operation[2] <= 1'b1;
+
+						sub_state 	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[2]) begin
+							mem_operation[2] <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[2]) begin
+							if 	  (hit_occurred[2]) 					  		state <= w_h_evac_w_st;		// write right away
+							else if (empty_found[2] || clean_found[2])  	state <= w_h_evac_fill_empty_w_st; 	// fill with zeroes then write
+							else 											  			state <= w_h_evac_r_st; // higher also needs an evac, so read value
+
+							sub_state <= init;
+						end
+					end
+				endcase
+			end
+
+			w_h_evac_w_st: begin
+				// todo
+			end
+			w_h_evac_fill_empty_w_st: begin
+				// todo
+			end
+			w_h_evac_r_st: begin
+				// todo
+			end
 
 			read_lookup_st: begin
 				case (sub_state)
