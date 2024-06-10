@@ -76,6 +76,10 @@ end
 
 reg [7:0] valToWrite [1:2];
 
+wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
+		(L2_b <= 1) ? 1'b0 : 
+		address[2][2   +: ($clog2(L2_b) > 0) ? $clog2(L2_b) : 1];
+
 integer state;
 localparam w_lookup_st 	 		= 0,
 			  w_st 		  		 	= 1,
@@ -262,12 +266,12 @@ always @(posedge clk) begin : block_0
 			w_h_evac_w_st: begin
 				case (sub_state)
 					init: begin
-						// todo: this assignment makes no sense the two sizes are different
-						write_data_L2 [(((address[2] % (4*L2_b))+1)*8)-1 -: 8*4*L1_b] <= val_evac_L1; 
+						// done: this assignment makes no sense the two sizes are different
+						write_data_L2 [(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b] <= val_evac_L1;
 						op[2] 			  <= `write_op;
 						mem_operation[2] <= 1'b1;
-						valid_bytes_L2   <= {(4*L2_b){1'b0}}; // todo: this also makes no sense, not all are valid, the data isn't enough
-						valid_bytes_L2[address[2] % (4*L2_b)] <= 1'b1;
+						valid_bytes_L2   <= {(4*L2_b){1'b0}}; // done: this also makes no sense, not all are valid, the data isn't enough
+						valid_bytes_L2[block_offset_in_adrs_L2 * 4 +: 4*L1_b] <= {(4*L1_b){1'b1}};
 
 						set_dirty[2]	  <= 1'b1;
 						set_use[2]		  <= 1'b1;

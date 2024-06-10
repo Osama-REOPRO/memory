@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="516.666666 us"></ZoomStartTime>
-      <ZoomEndTime time="616.666667 us"></ZoomEndTime>
-      <Cursor1Time time="600.000000 us"></Cursor1Time>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="12.500000001 ms"></ZoomEndTime>
+      <Cursor1Time time="12.500000000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="293"></NameColumnWidth>
-      <ValueColumnWidth column_width="247"></ValueColumnWidth>
+      <NameColumnWidth column_width="290"></NameColumnWidth>
+      <ValueColumnWidth column_width="393"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="2" />
+   <WVObjectSize size="7" />
    <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem" type="array">
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">data_mem[0:0][3:0][1:0][3:0][7:0]</obj_property>
@@ -55,6 +55,30 @@
             <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          </wvobject>
       </wvobject>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/valid_bytes_L1" type="array">
+      <obj_property name="ElementShortName">valid_bytes_L1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">valid_bytes_L1[7:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/write_data_L1" type="array">
+      <obj_property name="ElementShortName">write_data_L1[63:0]</obj_property>
+      <obj_property name="ObjectShortName">write_data_L1[63:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/valid_bytes_L2" type="array">
+      <obj_property name="ElementShortName">valid_bytes_L2[15:0]</obj_property>
+      <obj_property name="ObjectShortName">valid_bytes_L2[15:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/val_evac_L1" type="array">
+      <obj_property name="ElementShortName">val_evac_L1[63:0]</obj_property>
+      <obj_property name="ObjectShortName">val_evac_L1[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/write_data_L2" type="array">
+      <obj_property name="ElementShortName">write_data_L2[127:0]</obj_property>
+      <obj_property name="ObjectShortName">write_data_L2[127:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem" type="array">
       <obj_property name="DisplayName">label</obj_property>
