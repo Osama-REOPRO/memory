@@ -23,12 +23,16 @@ module vr_mem
 );
 	localparam n_blocks = c/b;
 
-	reg [7:0] mem [n_blocks-1:0][b_lower-1:0][b-1:0][3:0];
+	reg [7:0] mem [n_blocks-1:0][b-1:0][3:0];
 	
 	// todo: extract address portions
 	// mem[adrs_block][adrs_block_lower][adrs_word][adrs_byte] <= #20000 i_write_data[7:0];
-	wire adrs_byte = i_address[1:0];
-	wire adrs_word = i_address[2+:$clog2(b)];
+	localparam Byte_offset_nbytes  = 2; // offset of byte within word
+	localparam Block_offset_nbytes = $clog2(b); // offset of word within block (more like word_offset)
+	localparam Block_offset_nbytes = $clog2(b); // offset of word within block (more like word_offset)
+
+	wire [1:0] 							adrs_byte = i_address[1:0];
+	wire [Block_offset_nbytes:0] 	adrs_word = i_address[2+:$clog2(b)];
 	wire adrs_block_lower = i_address[2+$clog2(b)]; // todo
 	wire adrs_block = i_address[31:2+$clog2(b)]; // todo
 
