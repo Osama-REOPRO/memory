@@ -1,0 +1,4 @@
+- if we had a single-byte input and a single byte-address input then everything is kosher
+- the issue happens when I have an input that is larger than 1 byte, well then, what does that address mean?
+	- is it the address of the lowest byte, then we write all input bytes consecutively in ascending address order?
+	- or if all reads and writes should be word-aligned then the [[byte-offset]] part of the address becomes meaningless, that doesn't feel right at all
