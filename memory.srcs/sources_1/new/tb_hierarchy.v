@@ -110,21 +110,37 @@ reg [7:0] valToWrite [1:4];
 wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
 		(L2_b <= 1) ? 1'b0 : 
 		address[2][2   +: ($clog2(L2_b) > 0) ? $clog2(L2_b) : 1];
+wire [($clog2(Phy_b) > 0 ? $clog2(Phy_b)-1 : 0) :0] block_offset_in_adrs_phy = 
+		(Phy_b <= 1) ? 1'b0 : 
+		address[3][2   +: ($clog2(Phy_b) > 0) ? $clog2(Phy_b) : 1];
+wire [($clog2(Vir_b) > 0 ? $clog2(Vir_b)-1 : 0) :0] block_offset_in_adrs_vir = 
+		(Vir_b <= 1) ? 1'b0 : 
+		address[4][2   +: ($clog2(Vir_b) > 0) ? $clog2(Vir_b) : 1];
 
 integer state;
 localparam w_lookup_st 	 		= 0,
 			  w_st 		  		 	= 1,
 			  w_fill_empty_w_st  = 2,
 			  w_evac_r_st  		= 3,
+			  
 			  w_evac_h_lookup_st = 4,
 			  w_evac_h_w_st		= 5,
 			  w_evac_h_fill_empty_w_st = 6,
 			  w_evac_h_evac_r_st			= 7,
 
-			  r_lookup_st		 	= 8,
-			  r_st 		  		 	= 9,
-			  r_fill_empty_w_st	= 10,
-			  r_evac_r_st			= 11;
+			  w_evac_h_evac_phy_lookup_st = 8,
+			  w_evac_h_evac_phy_w_st 		= 9,
+			  w_evac_h_evac_phy_fill_empty_w_st = 10,
+			  w_evac_h_evac_phy_evac_r_st			= 11,
+
+			  w_evac_h_evac_phy_evac_vir_lookup_st = 12,
+			  w_evac_h_evac_phy_evac_vir_w_st		= 13,
+			  w_evac_h_evac_phy_evac_vir_fill_empty_w_st = 14,
+
+			  r_lookup_st		 	= 15,
+			  r_st 		  		 	= 16,
+			  r_fill_empty_w_st	= 17,
+			  r_evac_r_st			= 18;
 		  
 integer sub_state;
 localparam init   = 0,

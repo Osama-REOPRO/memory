@@ -12,12 +12,12 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="12.500000001 ms"></ZoomEndTime>
-      <Cursor1Time time="12.500000000 ms"></Cursor1Time>
+      <ZoomEndTime time="6.648936171 ms"></ZoomEndTime>
+      <Cursor1Time time="0.100000000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="290"></NameColumnWidth>
-      <ValueColumnWidth column_width="393"></ValueColumnWidth>
+      <ValueColumnWidth column_width="388"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="7" />
    <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem" type="array">
@@ -28,33 +28,6 @@
       <obj_property name="isExpanded"></obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
-      <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem[0]" type="array">
-         <obj_property name="ElementShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem[0][3]" type="array">
-            <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[3][1:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem[0][2]" type="array">
-            <obj_property name="ElementShortName">[2][1:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[2][1:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem[0][1]" type="array">
-            <obj_property name="ElementShortName">[1][1:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[1][1:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem[0][0]" type="array">
-            <obj_property name="ElementShortName">[0][1:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][1:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-      </wvobject>
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/valid_bytes_L1" type="array">
       <obj_property name="ElementShortName">valid_bytes_L1[7:0]</obj_property>
@@ -88,39 +61,5 @@
       <obj_property name="isExpanded"></obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
-      <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[1]" type="array">
-         <obj_property name="ElementShortName">[1][1:0][3:0][3:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">[1][1:0][3:0][3:0][7:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[1][1]" type="array">
-            <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[1][0]" type="array">
-            <obj_property name="ElementShortName">[0][3:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][3:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-      </wvobject>
-      <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[0]" type="array">
-         <obj_property name="ElementShortName">[0][1:0][3:0][3:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">[0][1:0][3:0][3:0][7:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
-         <obj_property name="CustomSignalColor">#808080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[0][1]" type="array">
-            <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-         <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[0][0]" type="array">
-            <obj_property name="ElementShortName">[0][3:0][3:0][7:0]</obj_property>
-            <obj_property name="ObjectShortName">[0][3:0][3:0][7:0]</obj_property>
-            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-         </wvobject>
-      </wvobject>
    </wvobject>
 </wave_config>
