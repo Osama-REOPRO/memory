@@ -298,7 +298,6 @@ always @(posedge clk) begin : block_0
 			w_evac_h_w_st: begin
 				case (sub_state)
 					init: begin
-						// done: this assignment makes no sense the two sizes are different
 						write_data_L2 [(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b] <= val_evac_L1;
 						op[2] 			  <= `write_op;
 						mem_operation[2] <= 1'b1;
@@ -412,13 +411,181 @@ always @(posedge clk) begin : block_0
 			end
 
 			w_evac_h_evac_phy_w_st: begin
-				// todo: write evacuated data
+				// write evacuated data
+				case (sub_state)
+					init: begin
+						write_data_phy [(block_offset_in_adrs_phy*4*8) +: 8*4*Phy_b] <= val_evac_L2;
+						op[3] 			  <= `write_op;
+						mem_operation[3] <= 1'b1;
+						valid_bytes_phy   <= {(4*Phy_b){1'b0}}; // done: this also makes no sense, not all are valid, the data isn't enough
+						valid_bytes_phy[block_offset_in_adrs_phy * 4 +: 4*L2_b] <= {(4*L2_b){1'b1}};
+
+						set_dirty[3]	  <= 1'b1;
+						set_use[3]		  <= 1'b1;
+
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[3]) begin
+							mem_operation[3] <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[3]) begin
+							state		 <= w_evac_h_fill_empty_w_st; // go back down and continue
+							sub_state <= init;
+						end
+					end
+				endcase
 			end
+
 			w_evac_h_evac_phy_fill_empty_w_st: begin
-				// todo: fill empty before write
+				// fill empty before write
+				case (sub_state)
+					init: begin
+						write_data_phy		  <= {(32*Phy_b){1'b0}};
+						op[3] 			     <= `write_op;
+						mem_operation[3]    <= 1'b1;
+						valid_bytes_phy		  <= {4*Phy_b{1'b1}}; // all valid
+						set_valid[3]		  <= 1'b1;
+						set_tag[3]			  <= 1'b1;
+						set_use[3]			  <= 1'b0;
+
+						sub_state	     	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[3]) begin
+							mem_operation[3] <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[3]) begin
+							state		 <= w_evac_h_evac_phy_w_st;
+							sub_state <= init;
+						end
+					end
+				endcase
 			end
+
 			w_evac_h_evac_phy_evac_r_st: begin
-				// todo: yet another evacuation
+				// evacuate to virtual
+				case (sub_state)
+					init: begin
+						op[3] 			  <= `read_op;
+						mem_operation[3] <= 1'b1;
+						valid_bytes_phy	  <= {(4*Phy_b){1'b1}}; // read entire block
+
+						sub_state		  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[3]) begin
+							mem_operation[3] <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[3]) begin
+							val_evac_phy <= read_data_phy;
+							// write data to higher levels
+							state		  	<= w_evac_h_evac_phy_evac_vir_lookup_st;
+							sub_state  	<= init;
+						end
+					end
+				endcase
+			end
+
+			w_evac_h_evac_phy_evac_vir_lookup_st: begin
+				// todo: last level of memory, this one can't miss
+				case (sub_state)
+					init: begin
+						op[4]			  <= `lookup_op;
+						mem_operation[4] <= 1'b1;
+
+						sub_state 	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[4]) begin
+							mem_operation[4] <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[4]) begin
+							if   (hit_occurred[4]) state <= w_evac_h_evac_phy_evac_vir_w_st;					// write right away
+							else 						  state <= w_evac_h_evac_phy_evac_vir_fill_empty_w_st; 	// fill with zeroes then write
+
+							sub_state <= init;
+						end
+					end
+				endcase
+
+			end
+
+			w_evac_h_evac_phy_evac_vir_w_st: begin
+				case (sub_state)
+					init: begin
+						write_data_vir [(block_offset_in_adrs_vir*4*8) +: 8*4*Vir_b] <= val_evac_phy;
+						op[4] 			  <= `write_op;
+						mem_operation[4] <= 1'b1;
+						valid_bytes_vir   <= {(4*Vir_b){1'b0}}; // done: this also makes no sense, not all are valid, the data isn't enough
+						valid_bytes_vir[block_offset_in_adrs_vir * 4 +: 4*Phy_b] <= {(4*Phy_b){1'b1}};
+
+						set_dirty[4]	  <= 1'b1;
+						set_use[4]		  <= 1'b1;
+
+						sub_state	     <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[4]) begin
+							mem_operation[4] <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[4]) begin
+							state		 <= w_evac_h_evac_phy_fill_empty_w_st; // go back down and continue
+							sub_state <= init;
+						end
+					end
+				endcase
+			end
+
+			w_evac_h_evac_phy_evac_vir_fill_empty_w_st: begin
+				// fill empty before write
+				// todo
+				case (sub_state)
+					init: begin
+						write_data_phy		  <= {(32*Vir_b){1'b0}};
+						op[4] 			     <= `write_op;
+						mem_operation[4]    <= 1'b1;
+						valid_bytes_vir		  <= {4*Vir_b{1'b1}}; // all valid
+						set_valid[4]		  <= 1'b1;
+						set_tag[4]			  <= 1'b1;
+						set_use[4]			  <= 1'b0;
+
+						sub_state	     	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[4]) begin
+							mem_operation[4] <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[4]) begin
+							state		 <= w_evac_h_evac_phy_evac_vir_w_st;
+							sub_state <= init;
+						end
+					end
+				endcase
 			end
 
 			/////////////////////// read phase
