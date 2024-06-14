@@ -831,6 +831,41 @@ physical_mem
 
 	.o_mem_operation_done(mem_operation_done[3])
 );
+
+cache 
+#(
+	.C(Vir_C), // capacity (words)
+	.b(Vir_b), // block size (words in block)
+	.N(Vir_N)  // degree of associativity
+) 
+virtual_mem
+(
+	.i_clk(clk),
+	.i_rst(rst),
+
+	.i_op(op[4]),
+
+	.i_address(address[4]),
+
+	.i_set_valid(set_valid[4]),
+	.i_set_tag(set_tag[4]),
+	.i_set_dirty(set_dirty[4]),
+	.i_set_use(set_use[4]),
+
+	.i_mem_operation(mem_operation[4]),
+
+	.o_hit_occurred(hit_occurred[4]),
+	.o_empty_found(empty_found[4]),
+	.o_clean_found(clean_found[4]),
+
+	.i_valid_bytes(valid_bytes_vir),
+
+	.i_write_data(write_data_vir),
+	.o_read_data(read_data_vir),
+
+	.o_mem_operation_done(mem_operation_done[4])
+);
+
 // logs
 initial $display("\n\n(%0t) logs start //////////////////////////////////////////\n\n", $time);
 always @(state) begin
