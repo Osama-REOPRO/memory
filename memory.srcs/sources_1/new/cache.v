@@ -39,6 +39,7 @@ module cache
 
 	localparam Single_word_blocks  = (b <= 1); // no block offset
 	localparam Direct_mapped       = (N <= 1); // don't utilize use_bit
+	localparam Fully_associative   = (S <= 1); // set address always 0
 
 	localparam Byte_offset_nbytes  = 2; // offset of byte within word
 	localparam Block_offset_nbytes = $clog2(b); // offset of word within block (more like word_offset)
@@ -55,7 +56,7 @@ module cache
 	// decode address
 	wire [Byte_offset_nbytes-1:0]  											 byte_offset_adrs  =										 i_address[0 +: Byte_offset_nbytes ];
 	wire [(Block_offset_nbytes > 0 ? Block_offset_nbytes-1 : 0) :0] block_offset_adrs = Single_word_blocks ? 1'b0 : i_address[0 +  Byte_offset_nbytes +: Block_offset_nbytes > 0 ? Block_offset_nbytes : 1]; // just so it will compile, not used when Single_word_blocks
-	wire [Set_nbytes-1:0] 			 											 set_adrs 			 =										 i_address[0 +  Byte_offset_nbytes +  Block_offset_nbytes	+:	Set_nbytes ];
+	wire [Set_nbytes-1:0] 			 											 set_adrs 			 =	Fully_associative  ? 1'b0 : i_address[0 +  Byte_offset_nbytes +  Block_offset_nbytes	+:	Set_nbytes ];
 	wire [Tag_nbytes-1:0] 			 											 tag_adrs 			 =										 i_address[0 +  Byte_offset_nbytes +  Block_offset_nbytes	+	Set_nbytes +: Tag_nbytes ];
 
 	// N operations
@@ -209,9 +210,9 @@ module cache
 					$display("		ib = %b", ib);
 					$display("		i_valid_bytes[%0d] = %b", ib, i_valid_bytes[ib]);
 					if (i_valid_bytes[ib]) begin
-						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
-						$write(" = %0d\n", data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
-						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[hit_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
+						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
+						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
+						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 					end
 				end
 				

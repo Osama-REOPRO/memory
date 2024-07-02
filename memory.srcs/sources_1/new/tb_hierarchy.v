@@ -464,7 +464,7 @@ always @(posedge clk) begin : block_0
 						write_data_phy		  <= {(32*Phy_b){1'b0}};
 						op[3] 			     <= `write_op;
 						mem_operation[3]    <= 1'b1;
-						valid_bytes_phy		  <= {4*Phy_b{1'b1}}; // all valid
+						valid_bytes_phy	  <= {(4*Phy_b){1'b1}}; // all valid
 						set_valid[3]		  <= 1'b1;
 						set_tag[3]			  <= 1'b1;
 						set_use[3]			  <= 1'b0;
@@ -660,6 +660,8 @@ always @(posedge clk) begin : block_0
 							valToWrite[1] <= read_data_L1[(((address[1] % (4*L1_b))+1)*8)-1 -: 8] + 8'd1;
 							address[1] 	  <= address[1] + 1;
 							address[2] 	  <= address[1] + 1;
+							address[3] 	  <= address[1] + 1;
+							address[4] 	  <= address[1] + 1;
 
 							state		  <= w_lookup_st;
 							sub_state  <= init;
