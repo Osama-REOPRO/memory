@@ -183,11 +183,11 @@ module cache
 		
 			if (state == busy_st && i_op == `write_op && !o_mem_operation_done) begin ////////////////////////////////////// write
 
-				log_state_write_before_delay();
+//				log_state_write_before_delay();
 
 				#20
 
-				log_state_write_after_delay();
+//				log_state_write_after_delay();
 				
 				for ( ib=0; ib < (4*b); ib=ib+1) begin
 					if (i_valid_bytes[ib]) begin
@@ -203,22 +203,22 @@ module cache
 
 				o_mem_operation_done <= 1'b1;
 			end else if (state == busy_st && i_op == `read_op && !o_mem_operation_done) begin ////////////////////////////////////// read
-				log_state_read_before_delay();
+//				log_state_read_before_delay();
 				#20
 				
 				for (ib=0; ib<(4*b); ib=ib+1) begin
-					$display("		ib = %b", ib);
-					$display("		i_valid_bytes[%0d] = %b", ib, i_valid_bytes[ib]);
+//					$display("		ib = %b", ib);
+//					$display("		i_valid_bytes[%0d] = %b", ib, i_valid_bytes[ib]);
 					if (i_valid_bytes[ib]) begin
-						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
-						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
+//						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
+//						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
 						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
 					end
 				end
 				
 				o_mem_operation_done <= 1'b1;
 
-				log_state_read_after_delay();
+//				log_state_read_after_delay();
 			end
 			
 		end
@@ -274,9 +274,9 @@ module cache
 		end
 	endtask
 
-	initial begin
-		$monitor("\n(%0t) ################## target_N = ", $time, target_N);
-	end
+//	initial begin
+//		$monitor("\n(%0t) ################## target_N = ", $time, target_N);
+//	end
 
 endmodule
 
@@ -293,7 +293,7 @@ module LFSR
 		if(i_rst) o_num <= {clamped_size{1'b1}};
 		else begin
 			o_num = {o_num[clamped_size-2:0],(o_num[clamped_size-1]^o_num[clamped_size-2])};
-			$display("~~~~ new random number generated (%b) ~~~~", o_num);
+//			$display("~~~~ new random number generated (%b) ~~~~", o_num);
 		end
 		// shift left once
 		// right-most bit is xor of 2 left-most bits

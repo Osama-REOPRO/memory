@@ -11,18 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="75,913.240136 us"></ZoomStartTime>
-      <ZoomEndTime time="75,998.031973 us"></ZoomEndTime>
-      <Cursor1Time time="75,983.900000 us"></Cursor1Time>
+      <ZoomStartTime time="14.304561737 ms"></ZoomStartTime>
+      <ZoomEndTime time="18.862687653 ms"></ZoomEndTime>
+      <Cursor1Time time="18.103000000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="231"></NameColumnWidth>
-      <ValueColumnWidth column_width="777"></ValueColumnWidth>
+      <NameColumnWidth column_width="178"></NameColumnWidth>
+      <ValueColumnWidth column_width="1457"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="11" />
-   <wave_markers>
-      <marker time="6984300000" label="" />
-   </wave_markers>
    <wvobject fp_name="/tb_hierarchy/state" type="array">
       <obj_property name="ElementShortName">state[31:0]</obj_property>
       <obj_property name="ObjectShortName">state[31:0]</obj_property>
@@ -46,6 +43,7 @@
       <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem[0]" type="array">
          <obj_property name="ElementShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][3:0][1:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_hierarchy/l1_cache/data_mem[0][3]" type="array">
             <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -80,6 +78,7 @@
       <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[1]" type="array">
          <obj_property name="ElementShortName">[1][1:0][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][1:0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[1][1]" type="array">
             <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
@@ -95,6 +94,7 @@
       <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[0]" type="array">
          <obj_property name="ElementShortName">[0][1:0][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][1:0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
          <obj_property name="isExpanded"></obj_property>
          <wvobject fp_name="/tb_hierarchy/l2_cache/data_mem[0][1]" type="array">
             <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
@@ -162,8 +162,29 @@
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/virtual_mem/data_mem" type="array">
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="ElementShortName">data_mem[15:0][-1:0][15:0][3:0][7:0]</obj_property>
-      <obj_property name="ObjectShortName">data_mem[15:0][-1:0][15:0][3:0][7:0]</obj_property>
+      <obj_property name="ElementShortName">data_mem[3:0][0:0][15:0][3:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_mem[3:0][0:0][15:0][3:0][7:0]</obj_property>
       <obj_property name="label">data_mem_vir[15:0][-1:0][15:0][3:0][7:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_hierarchy/virtual_mem/data_mem[3]" type="array">
+         <obj_property name="ElementShortName">[3][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[3][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/virtual_mem/data_mem[2]" type="array">
+         <obj_property name="ElementShortName">[2][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[2][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/virtual_mem/data_mem[1]" type="array">
+         <obj_property name="ElementShortName">[1][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/virtual_mem/data_mem[0]" type="array">
+         <obj_property name="ElementShortName">[0][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][0:0][15:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
    </wvobject>
 </wave_config>

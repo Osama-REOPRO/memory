@@ -1,6 +1,15 @@
 `timescale 1us / 1ns
 `include "cache_ops.vh"
 
+// logs defs
+`undef log_substates
+`define log_valToWrite
+
+`define log_L1_data
+`define log_L2_data
+`define log_phy_data
+`define log_vir_data
+
 module tb_hierarchy;
 
 localparam L1_C  = 8;   	// capacity (total words)
@@ -15,8 +24,8 @@ localparam Vir_b = Phy_b*2;
 
 localparam L1_N  = 1;   	// degree of associativity (blocks per set)
 localparam L2_N  = L1_N*2;
-localparam Phy_N = L2_N*2;
-localparam Vir_N = Vir_b; // fully associative
+localparam Phy_N = Phy_C/Phy_b; // fully associative (it was L2_N*2 before)
+localparam Vir_N = Vir_C/Vir_b; // fully associative (it was Vir_b before)
 
 
 reg  			  clk, rst;
@@ -105,7 +114,7 @@ initial begin
 	rst = 0;
 end
 
-reg [7:0] valToWrite [1:4];
+reg [7:0] valToWrite;
 
 wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
 		(L2_b <= 1) ? 1'b0 : 
@@ -151,12 +160,12 @@ always @(posedge clk) begin : block_0
 	if(rst) begin
 		state 	 <= 0;
 		sub_state <= 0;
+		valToWrite <= 1'b0;
 
 		for (il=1; il<=4; il=il+1) begin
 			mem_operation [il] <= 1'b0;
 			address       [il] <= 1'b0;
 			write_data_L1 [il] <= 1'b0;
-			valToWrite 	  [il] <= 1'b0;
 			
 			set_valid	  [il] <= 1'b0;
 			set_tag		  [il] <= 1'b0;
@@ -198,8 +207,7 @@ always @(posedge clk) begin : block_0
 			w_st: begin
 				case (sub_state)
 					init: begin
-						write_data_L1 [(((address[1] % (4*L1_b))+1)*8)-1 -: 8] <= valToWrite[1];
-						$display("write_data_L1 [%0d -: 8] <= %0d", ((address[1]+1)*8)-1, valToWrite[1]);
+						write_data_L1 [(((address[1] % (4*L1_b))+1)*8)-1 -: 8] <= valToWrite;
 						op[1] 			     <= `write_op;
 						mem_operation[1]    <= 1'b1;
 						valid_bytes_L1 	  <= {(4*L1_b){1'b0}};
@@ -639,12 +647,12 @@ always @(posedge clk) begin : block_0
 						mem_operation[1]    				  		<= 1'b1;
 						valid_bytes_L1 					  		<= {(4*L1_b){1'b0}};
 						valid_bytes_L1[address[1] % (4*L1_b)] <= 1'b1;
-						$strobe("\n\n\n");
-						$strobe("valid_bytes_L1[address %% ((4*L1_b)-1)] <= 1'b1");
-						$strobe("valid_bytes_L1[%0d %% ((4*%0d)-1)] <= 1'b1",address[1], L1_b);
-						$strobe("valid_bytes_L1[%0d] <= 1'b1", address[1] % (4*L1_b));
-						$strobe("valid_bytes_L1 = %b", valid_bytes_L1);
-						$strobe("\n\n\n");
+//						$strobe("\n\n\n");
+//						$strobe("valid_bytes_L1[address %% ((4*L1_b)-1)] <= 1'b1");
+//						$strobe("valid_bytes_L1[%0d %% ((4*%0d)-1)] <= 1'b1",address[1], L1_b);
+//						$strobe("valid_bytes_L1[%0d] <= 1'b1", address[1] % (4*L1_b));
+//						$strobe("valid_bytes_L1 = %b", valid_bytes_L1);
+//						$strobe("\n\n\n");
 
 						sub_state	     				  		<= busy;
 					end
@@ -657,7 +665,7 @@ always @(posedge clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							valToWrite[1] <= read_data_L1[(((address[1] % (4*L1_b))+1)*8)-1 -: 8] + 8'd1;
+							valToWrite <= read_data_L1[(((address[1] % (4*L1_b))+1)*8)-1 -: 8] + 8'd1;
 							address[1] 	  <= address[1] + 1;
 							address[2] 	  <= address[1] + 1;
 							address[3] 	  <= address[1] + 1;
@@ -872,38 +880,122 @@ virtual_mem
 initial $display("\n\n(%0t) logs start //////////////////////////////////////////\n\n", $time);
 always @(state) begin
 	$write("(%0t) ", $time);
-	$write("---------------------------------------------------> testbench state: ");
+	$write("testbench state: (%0d) ", state);
 	case (state)
-		w_lookup_st: 			$write("write_lookup_st\n");
-	   w_st: 					$write("write_st\n");
-		w_fill_empty_w_st: 	$write("write_fill_empty_w_st\n");
-		w_evac_r_st: 			$write("write_evac_r_st\n");
-		r_lookup_st: 			$write("read_lookup_st\n");
-		r_st: 					$write("read_st\n");
-		r_fill_empty_w_st: 	$write("read_fill_empty_w_st\n");
-		r_evac_r_st: 			$write("read_evac_r_st\n");
+		w_lookup_st : $write("write_lookup_st\n");
+		w_st : $write("w_st\n");
+		w_fill_empty_w_st : $write("w_fill_empty_w_st\n");
+		w_evac_r_st : $write("w_evac_r_st\n");
+		
+		w_evac_h_lookup_st : $write("w_evac_h_lookup_st\n");
+		w_evac_h_w_st : $write("w_evac_h_w_st\n");
+		w_evac_h_fill_empty_w_st : $write("w_evac_h_fill_empty_w_st\n");
+		w_evac_h_evac_r_st : $write("w_evac_h_evac_r_st\n");
+		
+		w_evac_h_evac_phy_lookup_st : $write("w_evac_h_evac_phy_lookup_st\n");
+		w_evac_h_evac_phy_w_st : $write("w_evac_h_evac_phy_w_st\n");
+		w_evac_h_evac_phy_fill_empty_w_st : $write("w_evac_h_evac_phy_fill_empty_w_st\n");
+		w_evac_h_evac_phy_evac_r_st : $write("w_evac_h_evac_phy_evac_r_st\n");
+		
+		w_evac_h_evac_phy_evac_vir_lookup_st : $write("w_evac_h_evac_phy_evac_vir_lookup_st\n");
+		w_evac_h_evac_phy_evac_vir_w_st : $write("w_evac_h_evac_phy_evac_vir_w_st\n");
+		w_evac_h_evac_phy_evac_vir_fill_empty_w_st : $write("w_evac_h_evac_phy_evac_vir_fill_empty_w_st\n");
+		
+		r_lookup_st : $write("r_lookup_st\n");
+		r_st : $write("r_st\n");
+		r_fill_empty_w_st : $write("r_fill_empty_w_st\n");
+		r_evac_r_st : $write("r_evac_r_st\n");
+
 	endcase
 end
 
+`ifdef log_substates
 always @(sub_state) begin
 	$write("(%0t) ", $time);
-	$write("--------------------------> sub-state: ");
+	$write("---> sub-state: ");
 	case (sub_state)
 		init: 	$write("init\n");
 		busy: 	$write("busy\n");
 		finish: 	$strobe("finish\n-----------------------------------------------------------------------------****\n\n");
 	endcase
 end
+`endif
 
-always @(hit_occurred[1]) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred[1]);
-always @(empty_found[1])  $write("(%0t) ######### empty_found = %b\n", $time, empty_found[1]);
-always @(clean_found[1])  $write("(%0t) ######### clean_found = %b\n", $time, clean_found[1]);
+//always @(hit_occurred[1]) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred[1]);
+//always @(empty_found[1])  $write("(%0t) ######### empty_found = %b\n", $time, empty_found[1]);
+//always @(clean_found[1])  $write("(%0t) ######### clean_found = %b\n", $time, clean_found[1]);
+
+`ifdef log_L1_data
+always @(l1_cache.data_mem) begin
+	$display();
+	$display("l1_cache.data_mem:");
+	$display(l1_cache.data_mem);
+	$display();
+end
+`endif
+
+`ifdef log_L2_data
+always @(l2_cache.data_mem) begin
+	$display();
+	$display("l2_cache.data_mem:");
+	for (integer i = 0; i<L2_N; i=i+1) begin
+		$write("(N=%0d) ", i);
+		$write(l2_cache.data_mem[i]);
+		$display();
+	end
+	$display();
+end
+`endif
+
+`ifdef log_phy_data
+always @(physical_mem.data_mem) begin
+	$display();
+	$display("physical_mem.data_mem:");
+	for (integer i = 0; i<Phy_N; i=i+1) begin
+		$write("(N=%0d) ", i);
+		$write(physical_mem.data_mem[i]);
+		$display();
+	end
+	$display();
+end
+`endif
+
+`ifdef log_vir_data
+always @(virtual_mem.data_mem) begin
+	$display();
+	$display("physical_mem.data_mem:");
+	for (integer i = 0; i<Vir_N; i=i+1) begin
+		$write("(N=%0d) ", i);
+		$write(virtual_mem.data_mem[i]);
+		$display();
+	end
+	$display();
+end
+`endif
+
 
 initial begin
-	$monitor(l1_cache.data_mem);
-	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ address = %0d ++++++++++++++++++++++++++++++++++\n", $time, address[1]);
-	$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ valToWrite: %b +++++++++++++++++++++++++++++++++++\n", $time, valToWrite[1]);
+//	`ifdef log_L1_data
+//		$monitor("l1_cache.data_mem: %h", l1_cache.data_mem);
+//	`endif
+//	`ifdef log_L2_data
+//		$monitor("l2_cache.data_mem: ", l2_cache.data_mem);
+//	`endif
+//	`ifdef log_phy_data
+//		$monitor("physical_mem.data_mem: ", physical_mem.data_mem);
+//	`endif
+//	`ifdef log_vir_data
+//		$monitor("physical_mem.data_mem: ", physical_mem.data_mem);
+//	`endif
+
+//	`ifdef log_L1_data
+//		$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ address = %0d ++++++++++++++++++++++++++++++++++\n", $time, address[1]);
+//	`endif
+
+	`ifdef log_valToWrite
+		$monitor("\n(%0t) ++++++++++++++++++++++++++++++++++ valToWrite: %b (%0d) +++++++++++++++++++++++++++++++++++\n", $time, valToWrite, valToWrite);
+	`endif
 end
-wire [7:0] previous_read_data = read_data_L1[address[1]-1 +: 8];
+//wire [7:0] previous_read_data = read_data_L1[address[1]-1 +: 8];
 
 endmodule
