@@ -84,7 +84,7 @@ module cache
 						 o_hit_occurred  ? hit_N 	 :
 						 o_empty_found   ? empty_N :
 						 o_clean_found   ? clean_N :
-						 size_N > 2		  ? {random_N[size_N-1:1], !use_mem [set_adrs]} : // N to evacuate then replace #note0001
+						 size_N >= 2	  ? {random_N[size_N-1:1], !use_mem [set_adrs]} : // N to evacuate then replace #note0001
 						 !use_mem [set_adrs];
 
 	wire write_would_conflict = !o_hit_occurred && !o_empty_found && !o_clean_found;
@@ -133,7 +133,7 @@ module cache
 			o_empty_found  = 1'b0;
 			get_new_random_num = 1'b1;
 			#10;
-			for (i=0; i<N; i=i+1) begin
+			for (i=N-1; i>=0; i=i-1) begin // going backwards so the lowest hit is returned not highest! (stylistic choice)
 				if (valid_mem[i][set_adrs]) begin
 					if (tag_adrs == tag_mem[i][set_adrs]) begin
 						o_hit_occurred = 1'b1;

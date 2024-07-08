@@ -586,10 +586,10 @@ always @(posedge clk) begin : block_0
 				// todo
 				case (sub_state)
 					init: begin
-						write_data_phy		  <= {(32*Vir_b){1'b0}};
+						write_data_vir		  <= {(32*Vir_b){1'b0}};
 						op[4] 			     <= `write_op;
 						mem_operation[4]    <= 1'b1;
-						valid_bytes_vir		  <= {4*Vir_b{1'b1}}; // all valid
+						valid_bytes_vir		  <= {(4*Vir_b){1'b1}}; // all valid
 						set_valid[4]		  <= 1'b1;
 						set_tag[4]			  <= 1'b1;
 						set_use[4]			  <= 1'b0;
@@ -921,9 +921,9 @@ always @(sub_state) begin
 end
 `endif
 
-//always @(hit_occurred[1]) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred[1]);
-//always @(empty_found[1])  $write("(%0t) ######### empty_found = %b\n", $time, empty_found[1]);
-//always @(clean_found[1])  $write("(%0t) ######### clean_found = %b\n", $time, clean_found[1]);
+always @(hit_occurred[1]) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred[1]);
+always @(empty_found[1])  $write("(%0t) ######### empty_found = %b\n", $time, empty_found[1]);
+always @(clean_found[1])  $write("(%0t) ######### clean_found = %b\n", $time, clean_found[1]);
 
 `ifdef log_L1_data
 always @(l1_cache.data_mem) begin
@@ -963,7 +963,7 @@ end
 `ifdef log_vir_data
 always @(virtual_mem.data_mem) begin
 	$display();
-	$display("physical_mem.data_mem:");
+	$display("virtual_mem.data_mem:");
 	for (integer i = 0; i<Vir_N; i=i+1) begin
 		$write("(N=%0d) ", i);
 		$write(virtual_mem.data_mem[i]);

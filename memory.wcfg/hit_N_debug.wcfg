@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_hierarchy_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_hierarchy" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="44.000000001 ms"></ZoomEndTime>
+      <Cursor1Time time="44.000000000 ms"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="205"></NameColumnWidth>
+      <ValueColumnWidth column_width="151"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="10" />
+   <wvobject fp_name="/tb_hierarchy/physical_mem/data_mem" type="array">
+      <obj_property name="ElementShortName">data_mem[3:0][0:0][7:0][3:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_mem[3:0][0:0][7:0][3:0][7:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_hierarchy/physical_mem/data_mem[3]" type="array">
+         <obj_property name="ElementShortName">[3][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[3][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/physical_mem/data_mem[2]" type="array">
+         <obj_property name="ElementShortName">[2][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[2][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/physical_mem/data_mem[1]" type="array">
+         <obj_property name="ElementShortName">[1][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/physical_mem/data_mem[0]" type="array">
+         <obj_property name="ElementShortName">[0][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][0:0][7:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider68">
+      <obj_property name="label">target N</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/hit_occurred" type="array">
+      <obj_property name="ElementShortName">hit_occurred[1:4]</obj_property>
+      <obj_property name="ObjectShortName">hit_occurred[1:4]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/physical_mem/hit_N" type="array">
+      <obj_property name="ElementShortName">hit_N[1:0]</obj_property>
+      <obj_property name="ObjectShortName">hit_N[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/physical_mem/o_empty_found" type="logic">
+      <obj_property name="ElementShortName">o_empty_found</obj_property>
+      <obj_property name="ObjectShortName">o_empty_found</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/physical_mem/empty_N" type="array">
+      <obj_property name="ElementShortName">empty_N[1:0]</obj_property>
+      <obj_property name="ObjectShortName">empty_N[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/physical_mem/o_clean_found" type="logic">
+      <obj_property name="ElementShortName">o_clean_found</obj_property>
+      <obj_property name="ObjectShortName">o_clean_found</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/physical_mem/clean_N" type="array">
+      <obj_property name="ElementShortName">clean_N[1:0]</obj_property>
+      <obj_property name="ObjectShortName">clean_N[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/physical_mem/random_N" type="array">
+      <obj_property name="ElementShortName">random_N[1:0]</obj_property>
+      <obj_property name="ObjectShortName">random_N[1:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/physical_mem/target_N" type="array">
+      <obj_property name="ElementShortName">target_N[1:0]</obj_property>
+      <obj_property name="ObjectShortName">target_N[1:0]</obj_property>
+   </wvobject>
+</wave_config>
