@@ -57,14 +57,14 @@ reg  [(4*L1_b)-1:0] 	 valid_bytes_L1;
 reg  [(4*L2_b)-1:0] 	 valid_bytes_L2;
 reg  [(4*Phy_b)-1:0]	 valid_bytes_phy;
 reg  [(4*Vir_b)-1:0]	 valid_bytes_vir;
-always @(*) valid_bytes_L1 = i_valid_bytes // first cache level is driven from outside directly
+// always @(*) valid_bytes_L1 = i_valid_bytes; // first cache level is driven from outside directly
 
 reg  [(32*L1_b)-1:0]	 write_data_L1;
 reg  [(32*L2_b)-1:0]	 write_data_L2;
 reg  [(32*Phy_b)-1:0] write_data_phy;
 reg  [(32*Vir_b)-1:0] write_data_vir;
 // always @(*) write_data_L1 = i_op == `write_op ? i_write_data : o_read_data; // first cache level is driven from outside directly
-// it is assigned read data in case we need to 
+// it is assigned read data in case we need to
 
 wire [(32*L1_b)-1:0]	 read_data_L1;
 wire [(32*L2_b)-1:0]	 read_data_L2;
@@ -92,57 +92,44 @@ wire [($clog2(Vir_b) > 0 ? $clog2(Vir_b)-1 : 0) :0] block_offset_in_adrs_vir =
 
 integer state;
 localparam idle_st				= 0,
-			  w_lookup_st 	 		= 1,
-			  w_st 		  		 	= 2,
-			  w_fill_empty_w_st  = 3,
-			  w_evac_r_st  		= 4,
+			  done_st				= 1,
+			  w_lookup_st 	 		= 2,
+			  w_st 		  		 	= 3,
+			  w_fill_empty_w_st  = 4,
+			  w_evac_r_st  		= 5,
 			  
-			  w_evac_h_lookup_st = 5,
-			  w_evac_h_w_st		= 6,
-			  w_evac_h_fill_empty_w_st = 7,
-			  w_evac_h_evac_r_st			= 8,
+			  w_evac_h_lookup_st = 6,
+			  w_evac_h_w_st		= 7,
+			  w_evac_h_fill_empty_w_st = 8,
+			  w_evac_h_evac_r_st			= 9,
 
-			  w_evac_h_evac_phy_lookup_st = 9,
-			  w_evac_h_evac_phy_w_st 		= 10,
-			  w_evac_h_evac_phy_fill_empty_w_st = 11,
-			  w_evac_h_evac_phy_evac_r_st			= 12,
+			  w_evac_h_evac_phy_lookup_st = 10,
+			  w_evac_h_evac_phy_w_st 		= 11,
+			  w_evac_h_evac_phy_fill_empty_w_st = 12,
+			  w_evac_h_evac_phy_evac_r_st			= 13,
 
-			  w_evac_h_evac_phy_evac_vir_lookup_st = 13,
-			  w_evac_h_evac_phy_evac_vir_w_st		= 14,
-			  w_evac_h_evac_phy_evac_vir_fill_empty_w_st = 15,
+			  w_evac_h_evac_phy_evac_vir_lookup_st = 14,
+			  w_evac_h_evac_phy_evac_vir_w_st		= 15,
+			  w_evac_h_evac_phy_evac_vir_fill_empty_w_st = 16,
 
-			  r_lookup_st		 	= 16,
-			  r_h_lookup_st		= 17,
-			  r_phy_lookup_st		= 18,
-			  r_vir_lookup_st		= 19,
+			  r_lookup_st		 	= 17,
+			  r_h_lookup_st		= 18,
+			  r_phy_lookup_st		= 19,
+			  r_vir_lookup_st		= 20,
 
-			  r_st 		  		 	= 20,
-			  r_h_st 		  		= 21,
-			  r_phy_st 		  		= 22,
-			  r_vir_st 		  		= 23,
+			  r_st 		  		 	= 21,
+			  r_h_st 		  		= 22,
+			  r_phy_st 		  		= 23,
+			  r_vir_st 		  		= 24,
 
-			  r_data_doesnt_exist_st = 24;
-
-always @(*) begin
-	// we only enter the idle state when read or write done, no other way
-	if (state == idle_st) begin
-		if (i_mem_operation) begin
-			o_mem_operation_done = 1'b0;
-			case (i_op)
-				`write_op: state = w_lookup_st
-				`read_op: state = r_lookup_st
-				default: state = idle_st
-			endcase
-		end
-	end else begin
-		o_mem_operation_done = 1'b1;
-	end
-end
+			  r_data_doesnt_exist_st = 25;
 		  
 integer sub_state;
 localparam init   = 0,
 			  busy   = 1,
 			  finish = 2;
+
+integer i;
 always @(posedge i_clk) begin : block_0
 	if(i_rst) begin
 		state 	 <= 0;
@@ -158,7 +145,7 @@ always @(posedge i_clk) begin : block_0
 			write_data_phy,
 			write_data_vir } = 0;
 
-		for (integer i=1; i<=4; i=i+1) begin
+		for (i=1; i<=4; i=i+1) begin
 			op[i]					<= 1'b0;
 			mem_operation [i] <= 1'b0;
 			
@@ -170,6 +157,23 @@ always @(posedge i_clk) begin : block_0
 
 	end else begin
 		case (state)
+			idle_st: begin
+				// we only enter the idle state when read or write done, no other way
+				o_mem_operation_done = 1'b0;
+				if (i_mem_operation) begin
+					case (i_op)
+						`write_op: state = w_lookup_st;
+						`read_op: state = r_lookup_st;
+						default: state = idle_st;
+					endcase
+				end
+			end
+
+			done_st: begin
+				o_mem_operation_done = 1'b1;
+				if (!i_mem_operation) state = idle_st;
+			end
+			
 			///////////// write
 			w_lookup_st: begin
 
@@ -190,7 +194,7 @@ always @(posedge i_clk) begin : block_0
 					finish: begin
 						if (!mem_operation_done[1]) begin
 							if 	  (hit_occurred[1]) 					  		state <= w_st;					 // write right away
-							else if (empty_found[1] || clean_found[1])  	state <= w_fill_empty_w_st; // fill with zeroes then write
+							else if (empty_found[1] || clean_found[1])  	state <= w_fill_empty_w_st; // fill with missing data from above
 							else 											  			state <= w_evac_r_st;
 
 							sub_state <= init;
@@ -202,9 +206,9 @@ always @(posedge i_clk) begin : block_0
 			w_st: begin
 				case (sub_state)
 					init: begin
-						case i_op
-							`write_op: write_data_L1 [(((i_address % (4*L1_b))+1)*8)-1 -: 8] <= i_write_data;
-							`read_op: write_data_L1 [(((i_address % (4*L1_b))+1)*8)-1 -: 8] <= o_read_data
+						case (i_op)
+							`write_op: write_data_L1 <= i_write_data;
+							`read_op: write_data_L1 <= o_read_data;
 						endcase
 						op[1] 			     <= `write_op;
 						mem_operation[1]    <= 1'b1;
@@ -225,7 +229,7 @@ always @(posedge i_clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							state		 <= idle_st;
+							state		 <= done_st;
 							sub_state <= init;
 						end
 					end
@@ -736,7 +740,7 @@ always @(posedge i_clk) begin : block_0
 						if (!mem_operation_done[1]) begin
 							o_read_data <= read_data_L1;
 
-							state		  <= idle_st;
+							state		  <= done_st;
 							sub_state  <= init;
 						end
 					end
@@ -776,8 +780,8 @@ always @(posedge i_clk) begin : block_0
 					init: begin
 						op[3] 			     				  		<= `read_op;
 						mem_operation[3]    				  		<= 1'b1;
-						valid_bytes_L3 					  		<= {(4*L3_b){1'b0}};
-						valid_bytes_L3[i_address % (4*L3_b)] <= 1'b1;
+						valid_bytes_phy 					  		<= {(4*Phy_b){1'b0}};
+						valid_bytes_phy[i_address % (4*Phy_b)] <= 1'b1;
 
 						sub_state	     				  		<= busy;
 					end
@@ -790,7 +794,7 @@ always @(posedge i_clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[3]) begin
-							o_read_data <= read_data_L3;
+							o_read_data <= read_data_phy;
 
 							state		  <= w_lookup_st;
 							sub_state  <= init;
@@ -804,8 +808,8 @@ always @(posedge i_clk) begin : block_0
 					init: begin
 						op[4] 			     				  		<= `read_op;
 						mem_operation[4]    				  		<= 1'b1;
-						valid_bytes_L4 					  		<= {(4*L4_b){1'b0}};
-						valid_bytes_L4[i_address % (4*L4_b)] <= 1'b1;
+						valid_bytes_vir 					  		<= {(4*Vir_b){1'b0}};
+						valid_bytes_vir[i_address % (4*Vir_b)] <= 1'b1;
 
 						sub_state	     				  		<= busy;
 					end
@@ -818,7 +822,7 @@ always @(posedge i_clk) begin : block_0
 					end
 					finish: begin
 						if (!mem_operation_done[4]) begin
-							o_read_data <= read_data_L4;
+							o_read_data <= read_data_vir;
 
 							state		  <= w_lookup_st;
 							sub_state  <= init;
