@@ -93,7 +93,14 @@ wire [($clog2(Vir_b) > 0 ? $clog2(Vir_b)-1 : 0) :0] block_offset_in_adrs_vir =
 integer state;
 localparam idle_st				= 0,
 			  done_st				= 1,
+			  lookup_st				= 2,
+			  post_lookup_st		= 3,
+
 			  w_lookup_st 	 		= 2,
+			  w_h_lookup_st 	 	= 3,
+			  w_phy_lookup_st 	= 4,
+			  w_vir_lookup_st 	= 5,
+
 			  w_st 		  		 	= 3,
 			  w_fill_empty_w_st  = 4,
 			  w_evac_r_st  		= 5,
@@ -172,6 +179,74 @@ always @(posedge i_clk) begin : block_0
 			done_st: begin
 				o_mem_operation_done = 1'b1;
 				if (!i_mem_operation) state = idle_st;
+			end
+
+			lookup_st: begin
+				integer lookup_sub_state = 0;
+				localparam lookup_L1   = 0,
+							  lookup_L2	  = 1,
+							  lookup_phy  = 2,
+							  lookup_vir  = 3;
+
+				case (lookup_sub_state)
+
+					lookup_L1: begin
+						case (sub_state)
+							init: begin
+								op[1]			  <= `lookup_op;
+								mem_operation[1] <= 1'b1;
+
+								sub_state 	  <= busy;
+							end
+							busy: begin
+								if (mem_operation_done[1]) begin
+									mem_operation[1] <= 1'b0;
+
+									sub_state 	  <= finish;
+								end
+							end
+							finish: begin
+								if (!mem_operation_done[1]) begin
+									if (hit_occurred[1]) state <= i_op == `write_op ? w_st : r_st;
+									else lookup_sub_state <= lookup_L2;
+
+									// else if (empty_found[1] || clean_found[1])  	state <= w_fill_empty_w_st; // fill with missing data from above
+									// else 											  			state <= w_evac_r_st;
+
+									sub_state <= init;
+								end
+							end
+
+						endcase
+					end
+
+				lookup_L2: begin
+					case (sub_state)
+						init: begin
+							op[2]			  <= `lookup_op;
+							mem_operation[2] <= 1'b1;
+
+							sub_state 	  <= busy;
+						end
+						busy: begin
+							if (mem_operation_done[2]) begin
+								mem_operation[2] <= 1'b0;
+
+								sub_state 	  <= finish;
+							end
+						end
+						finish: begin
+							if (!mem_operation_done[2]) begin
+								if 	  (hit_occurred[2]) 					  		state <= w_evac_h_w_st;		// write right away
+								else if (empty_found[2] || clean_found[2])  	state <= w_evac_h_fill_empty_w_st; 	// fill with zeroes then write
+								else 											  			state <= w_evac_h_evac_r_st; // higher also needs an evac, so read value
+
+								sub_state <= init;
+							end
+						end
+					endcase
+
+				endcase
 			end
 			
 			///////////// write
@@ -834,8 +909,6 @@ always @(posedge i_clk) begin : block_0
 		endcase
 	end
 end
-
-
 
 
 cache 
