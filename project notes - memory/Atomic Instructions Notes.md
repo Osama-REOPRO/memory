@@ -1,0 +1,1 @@
+- you need a read-modify-write which whishbone already has
