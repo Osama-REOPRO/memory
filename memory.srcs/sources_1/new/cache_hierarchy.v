@@ -91,6 +91,13 @@ integer lookup_sub_state = 0;
 integer read_sub_state = 0;
 integer write_sub_state = 0;
 
+wire evac_needed_L1 = !hit_occurred[1] && !empty_found[1]; // read existing value to evacuate it, works for a read op or write op
+wire evac_needed_L2 = evac_needed_L1 && !hit_occurred[2] && !empty_found[2]; // read existing value to evacuate it, works for a read op or write op
+wire read_needed_L1 = evac_needed_L1 || (hit_occurred[1] && i_op == `read_op);
+wire read_needed_L2 = evac_needed_L2 || hit_occurred[2];
+wire read_needed_Main = ((i_op == `read_op) && !hit_occurred[1] && !hit_occurred[2]) || evac_needed_L2 || (evac_needed_L1 && !hit_occurred[2]);
+
+
 integer i;
 
 always @(posedge i_clk) begin
@@ -217,7 +224,8 @@ always @(posedge i_clk) begin
 			read_st: begin
 				localparam read_L1_st   = 0,
 							  read_L2_st	= 1,
-							  read_done_st = 2;
+							  read_Main_st = 2
+							  read_done_st = 3;
 
 				case (read_sub_state)
 					read_L1_st: begin
@@ -326,15 +334,90 @@ always @(posedge i_clk) begin
 
 
 			write_st: begin
-				// todo
+				localparam write_L1_st   = 0,
+							  write_L2_st	 = 1,
+							  write_Main_st = 2
+							  write_done_st = 3;
+
+			   case (write_sub_state)
+					
+					write_L1_st: begin
+						case (sub_state)
+							init: begin
+
+								case (i_op)
+									// note: no need to differentiate betrween read_op
+									// and write_op in the case where a hit occurred on
+									// L1, because if a hit had occurred on L1 we
+									// wouldn't have entered the write state to begin
+									// with
+
+									if (hit_occurred[1]) write_data_L1 <= i_write_data; // write directly
+
+									else if (hit_occurred[2]) begin
+										if (i_op == `read_op) write_data_L1 <= read_data_L2[(32*L1_b)-1:0];
+										else begin
+											// combine data read from 2nd level with new data coming from input
+											for (i=0; i<(4*L1_b); i=i+1) begin
+												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
+													i_write_data[((i+1)*8)-1 : i*8] : read_data_L2[((i+1)*8)-1 : i*8];
+											end
+										end
+
+									end else begin
+										if (i_op == `read_op) write_data_L1 <= i_read_data[(32*L1_b)-1:0];
+										else begin
+											// combine data read from main with new data coming from input
+											for (i=0; i<(4*L1_b); i=i+1) begin
+												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
+													i_write_data[((i+1)*8)-1 : i*8] : i_read_data[((i+1)*8)-1 : i*8];
+											end
+										end
+									end
+
+								endcase
+
+								// todo: bookmark
+
+								op[1] 			     <= `write_op;
+								mem_operation[1]    <= 1'b1;
+								valid_bytes_L1 	  <= {(4*L1_b){1'b0}};
+								valid_bytes_L1[i_address % (4*L1_b)] <= 1'b1;
+
+								set_dirty[1]		  <= 1'b1;
+								set_use[1]			  <= 1'b1;
+
+								sub_state	     <= busy;
+							end
+							busy: begin
+								if (mem_operation_done[1]) begin
+									mem_operation[1] <= 1'b0;
+
+									sub_state 	  <= finish;
+								end
+							end
+							finish: begin
+								if (!mem_operation_done[1]) begin
+									state		 <= done_st;
+									sub_state <= init;
+								end
+							end
+						endcase
+					end
+
+					write_L2_st: begin
+					end
+
+					write_Main_st: begin
+					end
+
+					write_done_st: begin
+					end
+
+			   endcase
 			end
 
 		endcase
 	end
 end
-wire evac_needed_L1 = !hit_occurred[1] && !empty_found[1]; // read existing value to evacuate it, works for a read op or write op
-wire evac_needed_L2 = evac_needed_L1 && !hit_occurred[2] && !empty_found[2]; // read existing value to evacuate it, works for a read op or write op
-wire read_needed_L1 = evac_needed_L1 || (hit_occurred[1] && i_op == `read_op);
-wire read_needed_L2 = evac_needed_L2 || hit_occurred[2];
-wire read_needed_Main = ((i_op == `read_op) && !hit_occurred[1] && !hit_occurred[2]) || evac_needed_L2 || (evac_needed_L1 && !hit_occurred[2]);
 endmodule
