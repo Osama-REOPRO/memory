@@ -50,10 +50,12 @@ reg set_dirty;
 reg set_use;
 
 reg mem_operation [1:2];
+wire mem_operation_done [1:2];
 
 wire hit_occurred [1:2];
 wire empty_found  [1:2];
 wire clean_found  [1:2];
+
 
 reg  [(4*L1_b)-1:0] valid_bytes_L1;
 reg  [(4*L2_b)-1:0] valid_bytes_L2;
@@ -67,7 +69,34 @@ wire [(32*L2_b)-1:0] read_data_L2;
 reg [(32*L1_b)-1:0] val_evac_L1;
 reg [(32*L2_b)-1:0] val_evac_L2;
 
-wire mem_operation_done [1:2];
+// conditional signals
+wire both_missed = !hit_occurred[1] && !hit_occurred[2];
+wire only_second_hit = !hit_occurred[1] && hit_occurred[2];
+
+wire is_write_op = i_op == `write_op;
+wire is_read_op = i_op == `read_op;
+
+wire write_needed_L1 = is_write_op || (is_read_op && !hit_occurred[1]);
+wire conflict_occurred_L1 = write_needed_L1 && !hit_occurred[1] && !empty_found[1];
+wire evac_needed_L1 = conflict_occurred_L1 && !clean_found[1];
+// because we are inclusive now, conflict means one of two things:
+// - either the conflicting value is clean, in which case we simply overwrite
+// it, because being inclusive it must exist in the upper level
+// - or it is dirty, in which case we need to read and write it to upper level,
+// and we are confident that it does exist in upper level because inclusive
+
+wire write_needed_L2 = evac_needed_L1 || both_missed;
+wire conflict_occurred_L2 = write_needed_L2 && !hit_occurred[2] && !empty_found[2];
+wire evac_needed_L2 = conflict_occurred_L2 && !clean_found[2];
+
+wire read_needed_L1 = is_read_op || evac_needed_L1;
+wire read_needed_L2 = only_second_hit || evac_needed_L2;
+// you only need to read it in 2 cases:
+// - read when hit and lower miss to write to lower level
+// - read to evac to higher level
+
+wire read_needed_Main = both_missed;
+wire write_needed_main = evac_needed_L2;
 
 
 wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
@@ -75,6 +104,7 @@ wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 =
 		i_address[2   +: ($clog2(L2_b) > 0) ? $clog2(L2_b) : 1];
 
 
+// state machine
 integer state;
 localparam idle_st				= 0,
 			  done_st				= 1,
@@ -90,13 +120,6 @@ localparam init   = 0,
 integer lookup_sub_state = 0;
 integer read_sub_state = 0;
 integer write_sub_state = 0;
-
-wire evac_needed_L1 = !hit_occurred[1] && !empty_found[1]; // read existing value to evacuate it, works for a read op or write op
-wire evac_needed_L2 = evac_needed_L1 && !hit_occurred[2] && !empty_found[2]; // read existing value to evacuate it, works for a read op or write op
-wire read_needed_L1 = evac_needed_L1 || (hit_occurred[1] && i_op == `read_op);
-wire read_needed_L2 = evac_needed_L2 || hit_occurred[2];
-wire read_needed_Main = ((i_op == `read_op) && !hit_occurred[1] && !hit_occurred[2]) || evac_needed_L2 || (evac_needed_L1 && !hit_occurred[2]);
-
 
 integer i;
 
@@ -260,7 +283,7 @@ always @(posedge i_clk) begin
 							init: begin
 								op 			   <= `read_op;
 								mem_operation[2]  <= 1'b1;
-								valid_bytes_L1 <= {(4*L1_b){1'b1}}; // how about all valid? while reading that it
+								valid_bytes_L2 <= {(4*L2_b){1'b1}}; // how about all valid? while reading that it
 
 								sub_state		<= busy;
 							end
@@ -285,7 +308,7 @@ always @(posedge i_clk) begin
 							init: begin
 								o_op 			   <= `read_op;
 								o_mem_operation  <= 1'b1;
-								o_valid_bytes <= {(4*L1_b){1'b1}}; // how about all valid? while reading that it
+								o_valid_bytes <= {(4*L2_b){1'b1}}; // how about all valid? while reading that it
 
 								sub_state		<= busy;
 							end
@@ -336,7 +359,7 @@ always @(posedge i_clk) begin
 			write_st: begin
 				localparam write_L1_st   = 0,
 							  write_L2_st	 = 1,
-							  write_Main_st = 2
+							  write_Main_st = 2,
 							  write_done_st = 3;
 
 			   case (write_sub_state)
@@ -345,41 +368,49 @@ always @(posedge i_clk) begin
 						case (sub_state)
 							init: begin
 
-								case (i_op)
+								if (hit_occurred[1]) begin
+									write_data_L1  <= i_write_data; // write directly
+									valid_bytes_L1 <= i_valid_bytes; // write only some bytes not all
 									// note: no need to differentiate betrween read_op
 									// and write_op in the case where a hit occurred on
 									// L1, because if a hit had occurred on L1 we
 									// wouldn't have entered the write state to begin
 									// with
 
-									if (hit_occurred[1]) write_data_L1 <= i_write_data; // write directly
-
-									else if (hit_occurred[2]) begin
-										if (i_op == `read_op) write_data_L1 <= read_data_L2[(32*L1_b)-1:0];
-										else begin
+								end else if (hit_occurred[2]) begin
+									valid_bytes_L1 <= {(4*L1_b){1'b1}}; // overwrite all bytes
+									case (i_op)
+										`read_op: begin
+											write_data_L1 <= read_data_L2[[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b]];
+											// todo: check if this works
+											// this complication is because we can't just always use the lower part of the data from L2, 
+											// because what if the data we want isn't in the lower part but the middle one or upper one? 
+											// I need to change what part of it I get based on address
+										end
+										`write_op: begin
 											// combine data read from 2nd level with new data coming from input
 											for (i=0; i<(4*L1_b); i=i+1) begin
 												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
 													i_write_data[((i+1)*8)-1 : i*8] : read_data_L2[((i+1)*8)-1 : i*8];
 											end
 										end
-
-									end else begin
-										if (i_op == `read_op) write_data_L1 <= i_read_data[(32*L1_b)-1:0];
-										else begin
+									endcase
+								end else begin
+									// data must have been fetched from main memory
+									case (i_op)
+										`read_op: write_data_L1 <= i_read_data[[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b]];
+										`write_op: begin
 											// combine data read from main with new data coming from input
 											for (i=0; i<(4*L1_b); i=i+1) begin
 												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
 													i_write_data[((i+1)*8)-1 : i*8] : i_read_data[((i+1)*8)-1 : i*8];
 											end
 										end
-									end
-
-								endcase
+									endcase
+								end
 
 								op 			     <= `write_op;
 								mem_operation[1]    <= 1'b1;
-								valid_bytes_L1 	  <= i_valid_bytes;
 
 								set_dirty		  <= 1'b1;
 								set_use			  <= 1'b1;
@@ -395,9 +426,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[1]) begin
-									// the only situation in which we write to the second cache is 
-									// if there was an evac from first cache (read or write op)
-									state <= evac_needed_L1 ? write_L2_st : write_done_st;
+									state <= write_needed_L2 ? write_L2_st : write_done_st;
 
 									sub_state <= init;
 								end
@@ -405,6 +434,7 @@ always @(posedge i_clk) begin
 						endcase
 					end
 
+					// todo: bookmark
 					write_L2_st: begin
 						case (sub_state)
 							init: begin
