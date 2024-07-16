@@ -130,6 +130,16 @@ always @(posedge clk) begin
 	end
 end
 
+
+// connections between cache and main mem
+wire [2:0] m_op;
+wire [31:0] m_address;
+wire [(4*L2_b)-1:0] m_valid_bytes;
+wire [(32*L2_b)-1:0] m_write_data;
+wire [(32*L2_b)-1:0] m_read_data;
+wire m_mem_operation;
+wire m_mem_operation_done;
+
 cache_hierarchy
 #(
 	// capacity (total words)
@@ -157,7 +167,53 @@ cache_hierarchy
 	.o_read_data(r_data),
 
 	.i_mem_operation(mem_op),
-	.o_mem_operation_done(done)
+	.o_mem_operation_done(done),
+	
+	// interface with higher memory
+	.o_op(m_op),
+	.o_address(m_address),
+
+	.o_valid_bytes(m_valid_bytes),
+
+	.o_write_data(m_write_data),
+	.i_read_data(m_read_data),
+
+	.o_mem_operation(m_mem_operation),
+	.i_mem_operation_done(m_mem_operation_done)
+);
+
+cache 
+#(
+	.C(L2_C), // capacity (words)
+	.b(L2_b), // block size (words in block)
+	.N(L2_N)  // degree of associativity
+) 
+main_mem
+(
+	.i_clk(i_clk),
+	.i_rst(i_rst),
+
+	.i_op(m_op),
+
+	.i_address(m_address),
+
+	.i_set_valid(1'b1),
+	.i_set_tag(1'b1),
+	.i_set_dirty(1'b0),
+	.i_set_use(1'b0),
+
+	.i_mem_operation(m_mem_operation),
+
+	.o_hit_occurred(),
+	.o_empty_found(),
+	.o_clean_found(),
+
+	.i_valid_bytes(m_valid_bytes),
+
+	.i_write_data(m_write_data),
+	.o_read_data(m_read_data),
+
+	.o_mem_operation_done(m_mem_operation_done)
 );
 
 endmodule
