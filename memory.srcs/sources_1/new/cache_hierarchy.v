@@ -108,30 +108,30 @@ wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 =
 
 // state machine
 integer state;
-localparam idle_st				= 0,
-			  done_st				= 1,
-			  lookup_st				= 2,
-			  read_st				= 3,
-			  write_st				= 4;
+localparam idle_st	= 0,
+			  done_st	= 1,
+			  lookup_st	= 2,
+			  read_st	= 3,
+			  write_st	= 4;
 
 integer sub_state;
 localparam init   = 0,
 			  busy   = 1,
 			  finish = 2;
 
-integer lookup_sub_state = 0;
+integer lookup_sub_state;
 localparam lookup_L1_st   = 0,
 			  lookup_L2_st	  = 1,
 			  lookup_done_st = 2;
 
 
-integer read_sub_state = 0;
+integer read_sub_state;
 localparam read_L1_st   = 0,
 			  read_L2_st	= 1,
 			  read_Main_st = 2,
 			  read_done_st = 3;
 
-integer write_sub_state = 0;
+integer write_sub_state;
 localparam write_L1_st   = 0,
 			  write_L2_st	 = 1,
 			  write_Main_st = 2,
@@ -142,8 +142,12 @@ integer i;
 
 always @(posedge i_clk) begin
 	if(i_rst) begin
+		i <= 0;
 		state 	 <= 0;
 		sub_state <= 0;
+		lookup_sub_state <= 0;
+		read_sub_state <= 0;
+		write_sub_state <= 0;
 
 		{ 	valid_bytes_L1,
 			valid_bytes_L2,
@@ -160,13 +164,18 @@ always @(posedge i_clk) begin
 			op[2],
 
 			mem_operation[1],
-			mem_operation[2] } = 0;
+			mem_operation[2],
+			o_op,
+			o_address,
+			o_valid_bytes,
+			o_write_data,
+			o_mem_operation } = 0;
 
 	end else begin
 		case (state)
 
 			idle_st: begin
-				o_mem_operation_done = 1'b0;
+				o_mem_operation_done <= 1'b0;
 				if (i_mem_operation) begin
 					state <= lookup_st;
 				end
@@ -275,7 +284,7 @@ always @(posedge i_clk) begin
 								if (!mem_operation_done[1]) begin
 									o_read_data <= read_data_L1;
 
-									state		  <= read_needed_L2 ? read_L2_st : read_done_st;
+									read_sub_state		  <= read_needed_L2 ? read_L2_st : read_done_st;
 									sub_state  <= init;
 								end
 							end
@@ -300,7 +309,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									state		  <= read_needed_Main ? read_Main_st : read_done_st;
+									read_sub_state		  <= read_needed_Main ? read_Main_st : read_done_st;
 									sub_state  <= init;
 								end
 							end
@@ -325,7 +334,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!i_mem_operation_done) begin
-									state		  <= read_done_st;
+									read_sub_state		  <= read_done_st;
 									sub_state  <= init;
 								end
 							end

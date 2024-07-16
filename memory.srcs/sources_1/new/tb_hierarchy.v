@@ -186,7 +186,7 @@ cache
 #(
 	.C(L2_C), // capacity (words)
 	.b(L2_b), // block size (words in block)
-	.N(L2_N)  // degree of associativity
+	.N(1)  // degree of associativity
 ) 
 main_mem
 (
