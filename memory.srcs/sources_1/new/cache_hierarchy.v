@@ -98,6 +98,8 @@ wire read_needed_L2 = only_second_hit || evac_needed_L2;
 wire read_needed_Main = both_missed;
 wire write_needed_main = evac_needed_L2;
 
+wire evac_needed_both = evac_needed_L1 && evac_needed_L2;
+
 
 wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
 		(L2_b <= 1) ? 1'b0 : 
@@ -434,60 +436,49 @@ always @(posedge i_clk) begin
 						endcase
 					end
 
-					// todo: bookmark
 					write_L2_st: begin
 						case (sub_state)
 							init: begin
 
-								case (i_op)
-									if (hit_occurred[2]) write_data_L1 <= i_write_data; // write directly
+								// in second cache we write in only two cases:
+								// - evac dirty from below
+								// 		happens on both reads and writes
+								// - fill missing from above
+								// 		could only happen on read miss both
 
-									else if (hit_occurred[2]) begin
-										if (i_op == `read_op) write_data_L1 <= read_data_L2[(32*L1_b)-1:0];
-										else begin
-											// combine data read from 2nd level with new data coming from input
-											for (i=0; i<(4*L1_b); i=i+1) begin
-												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
-													i_write_data[((i+1)*8)-1 : i*8] : read_data_L2[((i+1)*8)-1 : i*8];
-											end
-										end
-
-									end else begin
-										if (i_op == `read_op) write_data_L1 <= i_read_data[(32*L1_b)-1:0];
-										else begin
-											// combine data read from main with new data coming from input
-											for (i=0; i<(4*L1_b); i=i+1) begin
-												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
-													i_write_data[((i+1)*8)-1 : i*8] : i_read_data[((i+1)*8)-1 : i*8];
-											end
-										end
-									end
-
-								endcase
+								if (both_missed) begin
+									// if both missed, aint no other place the data
+									// could be coming from but above!
+									write_data_L2 <= i_read_data;
+									valid_bytes_L2 <= {(4*L2_b){1'b1}}; // write all bytes
+									set_dirty		  <= 1'b0;
+								end else begin
+									// the only other case is an evac from below
+									write_data_L2[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b] <= read_data_L1; // todo: this is iffy, test it
+									valid_bytes_L2 <= {(4*L2_b){1'b0}};
+									valid_bytes_L2[(block_offset_in_adrs_L2*4) +: 4*L1_b] <= {(4*L2_b){1'b1}}; // todo: test this
+									set_dirty		  <= 1'b1; // an evac from below only happens if dirty
+								end
 
 								// todo: bookmark
 
 								op 			     <= `write_op;
-								mem_operation[1]    <= 1'b1;
-								valid_bytes_L1 	  <= i_valid_bytes;
+								mem_operation[2]    <= 1'b1;
 
-								set_dirty		  <= 1'b1;
 								set_use			  <= 1'b1;
 
 								sub_state	     <= busy;
 							end
 							busy: begin
-								if (mem_operation_done[1]) begin
-									mem_operation[1] <= 1'b0;
+								if (mem_operation_done[2]) begin
+									mem_operation[2] <= 1'b0;
 
 									sub_state 	  <= finish;
 								end
 							end
 							finish: begin
-								if (!mem_operation_done[1]) begin
-									// the only situation in which we write to the second cache is 
-									// if there was an evac from first cache (read or write op)
-									state <= evac_needed_L1 ? write_L2_st : write_done_st;
+								if (!mem_operation_done[2]) begin
+									state <= write_needed_main ? write_Main_st : write_done_st;
 
 									sub_state <= init;
 								end
@@ -496,9 +487,45 @@ always @(posedge i_clk) begin
 					end
 
 					write_Main_st: begin
+						case (sub_state)
+							init: begin
+
+								// we only write back to main mem, meaning it only gets evacuations
+
+								if (evac_needed_L2) begin
+									o_write_data <= read_data_L2;
+									o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
+								end else begin
+									// the only other case is an evac from L1 right up to Main
+									o_write_data[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b] <= read_data_L1; // todo: this is iffy, test it
+									o_valid_bytes <= {(4*L2_b){1'b0}};
+									o_valid_bytes[(block_offset_in_adrs_L2*4) +: 4*L1_b] <= {(4*L2_b){1'b1}}; // todo: test this
+								end
+
+								op 			     <= `write_op;
+								o_mem_operation  <= 1'b1;
+
+								sub_state	     <= busy;
+							end
+							busy: begin
+								if (i_mem_operation_done) begin
+									o_mem_operation <= 1'b0;
+
+									sub_state 	  <= finish;
+								end
+							end
+							finish: begin
+								if (!i_mem_operation_done) begin
+									state <= write_done_st;
+
+									sub_state <= init;
+								end
+							end
+						endcase
 					end
 
 					write_done_st: begin
+						state <= done_st;
 					end
 
 			   endcase
@@ -507,4 +534,73 @@ always @(posedge i_clk) begin
 		endcase
 	end
 end
+
+// modules
+cache 
+#(
+	.C(L1_C), // capacity (words)
+	.b(L1_b), // block size (words in block)
+	.N(L1_N)  // degree of associativity
+) 
+l1_cache
+(
+	.i_clk(i_clk),
+	.i_rst(i_rst),
+
+	.i_op(op),
+
+	.i_address(i_address),
+
+	.i_set_valid(set_valid),
+	.i_set_tag(set_tag),
+	.i_set_dirty(set_dirty),
+	.i_set_use(set_use),
+
+	.i_mem_operation(mem_operation[1]),
+
+	.o_hit_occurred(hit_occurred[1]),
+	.o_empty_found(empty_found[1]),
+	.o_clean_found(clean_found[1]),
+
+	.i_valid_bytes(valid_bytes_L1),
+
+	.i_write_data(write_data_L1),
+	.o_read_data(read_data_L1),
+
+	.o_mem_operation_done(mem_operation_done[1])
+);
+
+cache 
+#(
+	.C(L2_C), // capacity (words)
+	.b(L2_b), // block size (words in block)
+	.N(L2_N)  // degree of associativity
+) 
+l2_cache
+(
+	.i_clk(i_clk),
+	.i_rst(i_rst),
+
+	.i_op(op),
+
+	.i_address(i_address),
+
+	.i_set_valid(set_valid),
+	.i_set_tag(set_tag),
+	.i_set_dirty(set_dirty),
+	.i_set_use(set_use),
+
+	.i_mem_operation(mem_operation[2]),
+
+	.o_hit_occurred(hit_occurred[2]),
+	.o_empty_found(empty_found[2]),
+	.o_clean_found(clean_found[2]),
+
+	.i_valid_bytes(valid_bytes_L2),
+
+	.i_write_data(write_data_L2),
+	.o_read_data(read_data_L2),
+
+	.o_mem_operation_done(mem_operation_done[2])
+);
 endmodule
