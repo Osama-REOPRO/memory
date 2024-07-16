@@ -377,15 +377,12 @@ always @(posedge i_clk) begin
 
 								endcase
 
-								// todo: bookmark
-
-								op[1] 			     <= `write_op;
+								op 			     <= `write_op;
 								mem_operation[1]    <= 1'b1;
-								valid_bytes_L1 	  <= {(4*L1_b){1'b0}};
-								valid_bytes_L1[i_address % (4*L1_b)] <= 1'b1;
+								valid_bytes_L1 	  <= i_valid_bytes;
 
-								set_dirty[1]		  <= 1'b1;
-								set_use[1]			  <= 1'b1;
+								set_dirty		  <= 1'b1;
+								set_use			  <= 1'b1;
 
 								sub_state	     <= busy;
 							end
@@ -398,7 +395,10 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[1]) begin
-									state		 <= done_st;
+									// the only situation in which we write to the second cache is 
+									// if there was an evac from first cache (read or write op)
+									state <= evac_needed_L1 ? write_L2_st : write_done_st;
+
 									sub_state <= init;
 								end
 							end
@@ -406,6 +406,63 @@ always @(posedge i_clk) begin
 					end
 
 					write_L2_st: begin
+						case (sub_state)
+							init: begin
+
+								case (i_op)
+									if (hit_occurred[2]) write_data_L1 <= i_write_data; // write directly
+
+									else if (hit_occurred[2]) begin
+										if (i_op == `read_op) write_data_L1 <= read_data_L2[(32*L1_b)-1:0];
+										else begin
+											// combine data read from 2nd level with new data coming from input
+											for (i=0; i<(4*L1_b); i=i+1) begin
+												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
+													i_write_data[((i+1)*8)-1 : i*8] : read_data_L2[((i+1)*8)-1 : i*8];
+											end
+										end
+
+									end else begin
+										if (i_op == `read_op) write_data_L1 <= i_read_data[(32*L1_b)-1:0];
+										else begin
+											// combine data read from main with new data coming from input
+											for (i=0; i<(4*L1_b); i=i+1) begin
+												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
+													i_write_data[((i+1)*8)-1 : i*8] : i_read_data[((i+1)*8)-1 : i*8];
+											end
+										end
+									end
+
+								endcase
+
+								// todo: bookmark
+
+								op 			     <= `write_op;
+								mem_operation[1]    <= 1'b1;
+								valid_bytes_L1 	  <= i_valid_bytes;
+
+								set_dirty		  <= 1'b1;
+								set_use			  <= 1'b1;
+
+								sub_state	     <= busy;
+							end
+							busy: begin
+								if (mem_operation_done[1]) begin
+									mem_operation[1] <= 1'b0;
+
+									sub_state 	  <= finish;
+								end
+							end
+							finish: begin
+								if (!mem_operation_done[1]) begin
+									// the only situation in which we write to the second cache is 
+									// if there was an evac from first cache (read or write op)
+									state <= evac_needed_L1 ? write_L2_st : write_done_st;
+
+									sub_state <= init;
+								end
+							end
+						endcase
 					end
 
 					write_Main_st: begin
