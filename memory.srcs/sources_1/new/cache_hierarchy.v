@@ -27,7 +27,7 @@ module cache_hierarchy
 	output reg [(32*L1_b)-1:0] o_read_data,
 
 	input					   	   i_mem_operation,
-	output reg				      o_mem_operation_done
+	output reg				      o_mem_operation_done,
 	
 	// interface with higher memory, same as level 2 cache
 	output reg [`op_N:0]	      o_op,
@@ -120,8 +120,23 @@ localparam init   = 0,
 			  finish = 2;
 
 integer lookup_sub_state = 0;
+localparam lookup_L1_st   = 0,
+			  lookup_L2_st	  = 1,
+			  lookup_done_st = 2;
+
+
 integer read_sub_state = 0;
+localparam read_L1_st   = 0,
+			  read_L2_st	= 1,
+			  read_Main_st = 2,
+			  read_done_st = 3;
+
 integer write_sub_state = 0;
+localparam write_L1_st   = 0,
+			  write_L2_st	 = 1,
+			  write_Main_st = 2,
+			  write_done_st = 3;
+
 
 integer i;
 
@@ -153,11 +168,7 @@ always @(posedge i_clk) begin
 			idle_st: begin
 				o_mem_operation_done = 1'b0;
 				if (i_mem_operation) begin
-					case (i_op)
-						`write_op: state = w_lookup_st;
-						`read_op: state = r_lookup_st;
-						default: state = idle_st;
-					endcase
+					state <= lookup_st;
 				end
 			end
 
@@ -167,10 +178,6 @@ always @(posedge i_clk) begin
 			end
 
 			lookup_st: begin
-				localparam lookup_L1_st   = 0,
-							  lookup_L2_st	  = 1,
-							  lookup_done_st = 2;
-
 				case (lookup_sub_state)
 
 					lookup_L1_st: begin
@@ -247,11 +254,6 @@ always @(posedge i_clk) begin
 
 
 			read_st: begin
-				localparam read_L1_st   = 0,
-							  read_L2_st	= 1,
-							  read_Main_st = 2
-							  read_done_st = 3;
-
 				case (read_sub_state)
 					read_L1_st: begin
 						case (sub_state)
@@ -359,11 +361,6 @@ always @(posedge i_clk) begin
 
 
 			write_st: begin
-				localparam write_L1_st   = 0,
-							  write_L2_st	 = 1,
-							  write_Main_st = 2,
-							  write_done_st = 3;
-
 			   case (write_sub_state)
 					
 					write_L1_st: begin
@@ -383,7 +380,7 @@ always @(posedge i_clk) begin
 									valid_bytes_L1 <= {(4*L1_b){1'b1}}; // overwrite all bytes
 									case (i_op)
 										`read_op: begin
-											write_data_L1 <= read_data_L2[[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b]];
+											write_data_L1 <= read_data_L2[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b];
 											// todo: check if this works
 											// this complication is because we can't just always use the lower part of the data from L2, 
 											// because what if the data we want isn't in the lower part but the middle one or upper one? 
@@ -392,20 +389,20 @@ always @(posedge i_clk) begin
 										`write_op: begin
 											// combine data read from 2nd level with new data coming from input
 											for (i=0; i<(4*L1_b); i=i+1) begin
-												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
-													i_write_data[((i+1)*8)-1 : i*8] : read_data_L2[((i+1)*8)-1 : i*8];
+												write_data_L1[(i*8)-1 +: 8] <= i_valid_bytes[i] ?
+													i_write_data[(i*8)-1 +: 8] : read_data_L2[(i*8)-1 +: 8];
 											end
 										end
 									endcase
 								end else begin
 									// data must have been fetched from main memory
 									case (i_op)
-										`read_op: write_data_L1 <= i_read_data[[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b]];
+										`read_op: write_data_L1 <= i_read_data[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b];
 										`write_op: begin
 											// combine data read from main with new data coming from input
 											for (i=0; i<(4*L1_b); i=i+1) begin
-												write_data_L1[((i+1)*8)-1 : i*8] <= i_valid_bytes[i] ?
-													i_write_data[((i+1)*8)-1 : i*8] : i_read_data[((i+1)*8)-1 : i*8];
+												write_data_L1[(i*8)-1 +: 8] <= i_valid_bytes[i] ?
+													i_write_data[(i*8)-1 +: 8] : i_read_data[(i*8)-1 +: 8];
 											end
 										end
 									endcase
