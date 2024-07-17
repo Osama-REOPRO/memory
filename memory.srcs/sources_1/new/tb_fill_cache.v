@@ -14,6 +14,9 @@ reg [(32*b)-1:0] write_data;
 wire [(32*b)-1:0] read_data;
 wire mem_operation_done;
 
+reg set_tag = 1;
+reg set_valid = 1;
+
 always #1 clk = ~clk;
 
 initial begin
@@ -68,14 +71,14 @@ always @(posedge clk) begin
 					finish: begin
 						if (!mem_operation_done) begin
 							sub_state <= init;
-							if (test_val < 256) begin
+//							if (test_val < 256) begin
 								test_val <= test_val+1;
 								address <= address+1;
-							end else begin
-								test_val <= 0;
-								address <= 0;
-								state <= read_test_vals_st;
-							end
+//							end else begin
+//								test_val <= 0;
+//								address <= 0;
+//								state <= read_test_vals_st;
+//							end
 						end
 					end
 				endcase
@@ -86,6 +89,10 @@ always @(posedge clk) begin
 			
 		endcase
 	end
+end
+
+initial begin
+	$monitor(test_mem.tag_adrs);
 end
 
 

@@ -31,10 +31,43 @@ wire [(32*L1_b)-1:0] r_data;
 wire done;
 reg mem_op = 0;
 
+
+
 integer state;
 localparam idle_st 				= 0,
-			  write_test_vals_st = 1,
-			  read_test_vals_st 	= 2;
+			  setup_main_mem_st  = 1,
+			  write_test_vals_st = 2,
+			  read_test_vals_st 	= 3;
+
+wire manual = state == setup_main_mem_st;
+
+// connections between cache and main mem
+
+wire [2:0] m_op_cache;
+reg  [2:0] m_op_manual;
+wire [2:0] m_op = manual? m_op_manual : m_op_cache;
+
+wire [31:0] m_address_cache;
+reg  [31:0] m_address_manual;
+wire [31:0] m_address = manual? m_address_manual : m_address_cache;
+
+wire [(4*L2_b)-1:0] m_valid_bytes_cache;
+reg  [(4*L2_b)-1:0] m_valid_bytes_manual;
+wire [(4*L2_b)-1:0] m_valid_bytes = manual? m_valid_bytes_manual : m_valid_bytes_cache;
+
+wire [(32*L2_b)-1:0] m_write_data_cache;
+reg  [(32*L2_b)-1:0] m_write_data_manual;
+wire [(32*L2_b)-1:0] m_write_data = manual? m_write_data_manual : m_write_data_cache;
+
+wire [(32*L2_b)-1:0] m_read_data;
+
+wire m_mem_operation_cache;
+reg  m_mem_operation_manual;
+wire m_mem_operation = manual? m_mem_operation_manual : m_mem_operation_cache;
+
+wire m_mem_operation_done;
+
+
 
 integer test_val = 0;
 integer sub_state;
@@ -55,11 +88,43 @@ end
 always @(posedge clk) begin
 	if (rst) begin
 		{clk, mem_op, op, adrs, valid_bytes, w_data, test_val, sub_state, state} <= 0;
+		{m_op_manual, m_address_manual, m_valid_bytes_manual, m_mem_operation_manual} <= 0;
 	end else begin
 		case (state)
 
 			idle_st: begin
-				state <= write_test_vals_st;
+				state <= setup_main_mem_st;
+			end
+
+			setup_main_mem_st: begin
+				case (sub_state)
+					init: begin
+						m_write_data_manual <= 0;
+						m_op_manual	     				  <= `write_op;
+						m_mem_operation_manual		  <= 1'b1;
+						m_valid_bytes_manual			  <= {(4*L2_b){1'b1}};
+
+						sub_state	     				  <= busy;
+					end
+					busy: begin
+						if (m_mem_operation_done) begin
+							m_mem_operation_manual <= 1'b0;
+
+							sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!m_mem_operation_done) begin
+							sub_state <= init;
+							if (m_address_manual < L2_C*4) begin
+								m_address_manual <= m_address_manual+1;
+							end else begin
+								m_address_manual <= 0;
+								state <= write_test_vals_st;
+							end
+						end
+					end
+				endcase
 			end
 
 			write_test_vals_st: begin
@@ -84,7 +149,7 @@ always @(posedge clk) begin
 					finish: begin
 						if (!done) begin
 							sub_state <= init;
-							if (test_val <= 100) begin
+							if (test_val < L2_C*4) begin
 								test_val <= test_val+1;
 								adrs <= adrs+1;
 							end else begin
@@ -96,6 +161,7 @@ always @(posedge clk) begin
 					end
 				endcase
 			end
+
 			read_test_vals_st: begin
 				case (sub_state)
 					init: begin
@@ -116,7 +182,7 @@ always @(posedge clk) begin
 					finish: begin
 						if (!done) begin
 							sub_state <= init;
-							if (adrs <= 100) begin
+							if (adrs < L2_C*4) begin
 								adrs <= adrs+1;
 							end else begin
 								adrs <= 0;
@@ -130,15 +196,6 @@ always @(posedge clk) begin
 	end
 end
 
-
-// connections between cache and main mem
-wire [2:0] m_op;
-wire [31:0] m_address;
-wire [(4*L2_b)-1:0] m_valid_bytes;
-wire [(32*L2_b)-1:0] m_write_data;
-wire [(32*L2_b)-1:0] m_read_data;
-wire m_mem_operation;
-wire m_mem_operation_done;
 
 cache_hierarchy
 #(
@@ -170,15 +227,15 @@ cache_hierarchy
 	.o_mem_operation_done(done),
 	
 	// interface with higher memory
-	.o_op(m_op),
-	.o_address(m_address),
+	.o_op(m_op_cache),
+	.o_address(m_address_cache),
 
-	.o_valid_bytes(m_valid_bytes),
+	.o_valid_bytes(m_valid_bytes_cache),
 
-	.o_write_data(m_write_data),
+	.o_write_data(m_write_data_cache),
 	.i_read_data(m_read_data),
 
-	.o_mem_operation(m_mem_operation),
+	.o_mem_operation(m_mem_operation_cache),
 	.i_mem_operation_done(m_mem_operation_done)
 );
 
@@ -190,8 +247,8 @@ cache
 ) 
 main_mem
 (
-	.i_clk(i_clk),
-	.i_rst(i_rst),
+	.i_clk(clk),
+	.i_rst(rst),
 
 	.i_op(m_op),
 
@@ -217,125 +274,3 @@ main_mem
 );
 
 endmodule
-
-// logs
-// initial $display("\n\n(%0t) logs start //////////////////////////////////////////\n\n", $time);
-// always @(state) begin
-// 	$write("(%0t) ", $time);
-// 	$write("testbench state: (%0d) ", state);
-// 	case (state)
-// 		w_lookup_st : $write("write_lookup_st\n");
-// 		w_st : $write("w_st\n");
-// 		w_fill_empty_w_st : $write("w_fill_empty_w_st\n");
-// 		w_evac_r_st : $write("w_evac_r_st\n");
-// 		
-// 		w_evac_h_lookup_st : $write("w_evac_h_lookup_st\n");
-// 		w_evac_h_w_st : $write("w_evac_h_w_st\n");
-// 		w_evac_h_fill_empty_w_st : $write("w_evac_h_fill_empty_w_st\n");
-// 		w_evac_h_evac_r_st : $write("w_evac_h_evac_r_st\n");
-// 		
-// 		w_evac_h_evac_phy_lookup_st : $write("w_evac_h_evac_phy_lookup_st\n");
-// 		w_evac_h_evac_phy_w_st : $write("w_evac_h_evac_phy_w_st\n");
-// 		w_evac_h_evac_phy_fill_empty_w_st : $write("w_evac_h_evac_phy_fill_empty_w_st\n");
-// 		w_evac_h_evac_phy_evac_r_st : $write("w_evac_h_evac_phy_evac_r_st\n");
-// 		
-// 		w_evac_h_evac_phy_evac_vir_lookup_st : $write("w_evac_h_evac_phy_evac_vir_lookup_st\n");
-// 		w_evac_h_evac_phy_evac_vir_w_st : $write("w_evac_h_evac_phy_evac_vir_w_st\n");
-// 		w_evac_h_evac_phy_evac_vir_fill_empty_w_st : $write("w_evac_h_evac_phy_evac_vir_fill_empty_w_st\n");
-// 		
-// 		r_lookup_st : $write("r_lookup_st\n");
-// 		r_st : $write("r_st\n");
-// 		r_fill_empty_w_st : $write("r_fill_empty_w_st\n");
-// 		r_evac_r_st : $write("r_evac_r_st\n");
-// 
-// 	endcase
-// end
-// 
-// `ifdef log_substates
-// always @(sub_state) begin
-// 	$write("(%0t) ", $time);
-// 	$write("---> sub-state: ");
-// 	case (sub_state)
-// 		init: 	$write("init\n");
-// 		busy: 	$write("busy\n");
-// 		finish: 	$strobe("finish\n-----------------------------------------------------------------------------****\n\n");
-// 	endcase
-// end
-// `endif
-// 
-// always @(hit_occurred[1]) $write("(%0t) ######### hit_occurred = %b\n", $time, hit_occurred[1]);
-// always @(empty_found[1])  $write("(%0t) ######### empty_found = %b\n", $time, empty_found[1]);
-// always @(clean_found[1])  $write("(%0t) ######### clean_found = %b\n", $time, clean_found[1]);
-// 
-// `ifdef log_L1_data
-// always @(l1_cache.data_mem) begin
-// 	$display();
-// 	$display("l1_cache.data_mem:");
-// 	$display(l1_cache.data_mem);
-// 	$display();
-// end
-// `endif
-// 
-// `ifdef log_L2_data
-// always @(l2_cache.data_mem) begin
-// 	$display();
-// 	$display("l2_cache.data_mem:");
-// 	for (integer i = 0; i<L2_N; i=i+1) begin
-// 		$write("(N=%0d) ", i);
-// 		$write(l2_cache.data_mem[i]);
-// 		$display();
-// 	end
-// 	$display();
-// end
-// `endif
-// 
-// `ifdef log_phy_data
-// always @(physical_mem.data_mem) begin
-// 	$display();
-// 	$display("physical_mem.data_mem:");
-// 	for (integer i = 0; i<Phy_N; i=i+1) begin
-// 		$write("(N=%0d) ", i);
-// 		$write(physical_mem.data_mem[i]);
-// 		$display();
-// 	end
-// 	$display();
-// end
-// `endif
-// 
-// `ifdef log_vir_data
-// always @(virtual_mem.data_mem) begin
-// 	$display();
-// 	$display("virtual_mem.data_mem:");
-// 	for (integer i = 0; i<Vir_N; i=i+1) begin
-// 		$write("(N=%0d) ", i);
-// 		$write(virtual_mem.data_mem[i]);
-// 		$display();
-// 	end
-// 	$display();
-// end
-// `endif
-
-
-// initial begin
-//	`ifdef log_L1_data
-//		$monitor("l1_cache.data_mem: %h", l1_cache.data_mem);
-//	`endif
-//	`ifdef log_L2_data
-//		$monitor("l2_cache.data_mem: ", l2_cache.data_mem);
-//	`endif
-//	`ifdef log_phy_data
-//		$monitor("physical_mem.data_mem: ", physical_mem.data_mem);
-//	`endif
-//	`ifdef log_vir_data
-//		$monitor("physical_mem.data_mem: ", physical_mem.data_mem);
-//	`endif
-
-//	`ifdef log_L1_data
-//		$monitor("\n(t=%0t) ++++++++++++++++++++++++++++++++++ address = %0d ++++++++++++++++++++++++++++++++++\n", $time, address[1]);
-//	`endif
-
-//	`ifdef log_valToWrite
-//		$monitor("\n(%0t) ++++++++++++++++++++++++++++++++++ valToWrite: %b (%0d) +++++++++++++++++++++++++++++++++++\n", $time, valToWrite, valToWrite);
-//	`endif
-// end
-//wire [7:0] previous_read_data = read_data_L1[address[1]-1 +: 8];

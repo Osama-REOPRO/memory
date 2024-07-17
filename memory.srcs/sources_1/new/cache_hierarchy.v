@@ -109,10 +109,10 @@ wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 =
 // state machine
 integer state;
 localparam idle_st	= 0,
-			  done_st	= 1,
-			  lookup_st	= 2,
-			  read_st	= 3,
-			  write_st	= 4;
+			  lookup_st	= 1,
+			  read_st	= 2,
+			  write_st	= 3,
+			  done_st	= 4;
 
 integer sub_state;
 localparam init   = 0,
@@ -126,10 +126,11 @@ localparam lookup_L1_st   = 0,
 
 
 integer read_sub_state;
-localparam read_L1_st   = 0,
-			  read_L2_st	= 1,
-			  read_Main_st = 2,
-			  read_done_st = 3;
+localparam read_begin_st = 0,
+			  read_L1_st    = 1,
+			  read_L2_st	 = 2,
+			  read_Main_st  = 3,
+			  read_done_st  = 4;
 
 integer write_sub_state;
 localparam write_L1_st   = 0,
@@ -264,6 +265,37 @@ always @(posedge i_clk) begin
 
 			read_st: begin
 				case (read_sub_state)
+					read_begin_st: begin
+						// determining which state to start from
+						if ( hit_occurred[1] || (!empty_found[1] && !clean_found[1]) ) begin // either it hit or needs to be evacuated
+							read_sub_state <= read_L1_st;
+						end else if ( hit_occurred[2] || (!empty_found[2] && !clean_found[2]) ) begin // either it hit or needs to be evacuated
+							read_sub_state <= read_L2_st;
+						end else begin
+							read_sub_state <= read_Main_st;
+						end
+
+							// we read L1 either if it hit or if it needs to be evacuated, 
+							// likewise for L2, we read it if it hit or if it needs evacuateion, 
+							// we read main only if both miss
+							//
+							// if L2 didn't hit also, do we need to read it?
+							// probably only if no empty or clean, if empty
+							// or clean found no need to read it, if not
+							// empty we will need to read to evacuate
+							//
+							// no need to read L1 because empty or clean
+							// but should we read L2 or main?
+							// if we are writing a few bytes out of the block
+							// then we need to fetch the rest of the bytes,
+							// that is why we need to read when no hit occures
+							// in write_op's
+							//
+							// Note: you might object: what if we do need to read
+							// main but you are sending me to L2? 
+							// Answer: here we are only determining the beginning, we
+							// will go to later read stages from there!
+					end
 					read_L1_st: begin
 						case (sub_state)
 							init: begin
