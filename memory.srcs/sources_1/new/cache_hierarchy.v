@@ -161,8 +161,7 @@ always @(posedge i_clk) begin
 			set_dirty,
 			set_use,
 
-			op[1],
-			op[2],
+			op,
 
 			mem_operation[1],
 			mem_operation[2],
