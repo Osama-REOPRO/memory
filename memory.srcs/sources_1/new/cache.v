@@ -1,4 +1,3 @@
-`timescale 1us / 1ns
 `include "cache_ops.vh"
 
 module cache
@@ -110,6 +109,8 @@ module cache
 			endcase
 		end
 	end
+	
+	reg delay_started;
 
 	// hit check
 	always @(*) begin
@@ -133,6 +134,7 @@ module cache
 			o_empty_found  = 1'b0;
 			get_new_random_num = 1'b1;
 			#10;
+			o_mem_operation_done = 1'b1;
 			for (i=N-1; i>=0; i=i-1) begin // going backwards so the lowest hit is returned not highest! (stylistic choice)
 				if (valid_mem[i][set_adrs]) begin
 					if (tag_adrs == tag_mem[i][set_adrs]) begin
@@ -146,7 +148,6 @@ module cache
 					o_empty_found = 1'b1;
 					empty_N = i;
 				end
-				o_mem_operation_done = 1'b1;
 			end
 		end
 	end
@@ -161,6 +162,7 @@ module cache
 		if (i_rst) begin
 		
 			o_mem_operation_done <= 1'b0;
+			delay_started <= 1'b0;
 
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
@@ -181,11 +183,12 @@ module cache
 			end
 		end else begin
 		
-			if (state == busy_st && i_op == `write_op && !o_mem_operation_done) begin ////////////////////////////////////// write
-
+			if (state == busy_st && i_op == `write_op && !o_mem_operation_done && !delay_started) begin ////////////////////////////////////// write
 //				log_state_write_before_delay();
 
+				delay_started <= 1'b1;
 				#20
+				delay_started <= 1'b0;
 
 //				log_state_write_after_delay();
 				
@@ -202,17 +205,19 @@ module cache
 				if (i_set_use)   use_mem 				 [set_adrs] <= target_N [0]; // #note0001
 
 				o_mem_operation_done <= 1'b1;
-			end else if (state == busy_st && i_op == `read_op && !o_mem_operation_done) begin ////////////////////////////////////// read
+			end else if (state == busy_st && i_op == `read_op && !o_mem_operation_done && !delay_started) begin ////////////////////////////////////// read
 //				log_state_read_before_delay();
+				delay_started <= 1'b1;
 				#20
+				delay_started <= 1'b0;
 				
 				for (ib=0; ib<(4*b); ib=ib+1) begin
 //					$display("		ib = %b", ib);
 //					$display("		i_valid_bytes[%0d] = %b", ib, i_valid_bytes[ib]);
 					if (i_valid_bytes[ib]) begin
-//						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
-//						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
-						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ];
+						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
+						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ]);
+						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ];
 					end
 				end
 				
