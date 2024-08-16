@@ -315,7 +315,7 @@ always @(posedge i_clk) begin
 								if (!mem_operation_done[1]) begin
 									o_read_data <= read_data_L1;
 
-									read_sub_state		  <= read_needed_L2 ? read_L2_st : read_done_st;
+									read_sub_state		  <= read_needed_L2 ? read_L2_st : read_needed_Main? read_Main_st : read_done_st;
 									sub_state  <= init;
 								end
 							end
@@ -455,6 +455,7 @@ always @(posedge i_clk) begin
 								set_valid	<= 1'b1;
 								set_dirty  	<= 1'b1;
 								set_use	  	<= 1'b1;
+								set_tag 		<= 1'b1;
 
 								sub_state   <= busy;
 							end
