@@ -60,7 +60,7 @@ module cache
 
 	// N operations
 	integer i;
-	localparam size_N = $clog2(N);
+	localparam size_N = ($clog2(N)>0)? $clog2(N): 1;
 
 	reg [size_N-1:0] hit_N; // which of the N-ways the hit occurred in
 	reg [size_N-1:0] empty_N; // which of the N-ways is empty

@@ -436,6 +436,7 @@ always @(posedge i_clk) begin
 									endcase
 								end else begin
 									// data must have been fetched from main memory
+									valid_bytes_L1 <= {(4*L1_b){1'b1}}; // overwrite all bytes
 									case (i_op)
 										`read_op: write_data_L1 <= i_read_data[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b];
 										`write_op: begin
@@ -449,12 +450,13 @@ always @(posedge i_clk) begin
 								end
 
 								op 			     <= `write_op;
-								mem_operation[1]    <= 1'b1;
+								mem_operation[1] <= 1'b1;
 
-								set_dirty		  <= 1'b1;
-								set_use			  <= 1'b1;
+								set_valid	<= 1'b1;
+								set_dirty  	<= 1'b1;
+								set_use	  	<= 1'b1;
 
-								sub_state	     <= busy;
+								sub_state   <= busy;
 							end
 							busy: begin
 								if (mem_operation_done[1]) begin
@@ -465,7 +467,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[1]) begin
-									state <= write_needed_L2 ? write_L2_st : write_done_st;
+									write_sub_state <= write_needed_L2 ? write_L2_st : write_done_st;
 
 									sub_state <= init;
 								end
@@ -503,6 +505,7 @@ always @(posedge i_clk) begin
 								mem_operation[2]    <= 1'b1;
 
 								set_use			  <= 1'b1;
+								set_valid	<= 1'b1;
 
 								sub_state	     <= busy;
 							end
@@ -515,7 +518,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									state <= write_needed_main ? write_Main_st : write_done_st;
+									write_sub_state <= write_needed_main ? write_Main_st : write_done_st;
 
 									sub_state <= init;
 								end
@@ -553,7 +556,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!i_mem_operation_done) begin
-									state <= write_done_st;
+									write_sub_state <= write_done_st;
 
 									sub_state <= init;
 								end
@@ -562,6 +565,7 @@ always @(posedge i_clk) begin
 					end
 
 					write_done_st: begin
+						write_sub_state <= 0;
 						state <= done_st;
 					end
 

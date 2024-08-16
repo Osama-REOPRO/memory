@@ -116,8 +116,8 @@ always @(posedge clk) begin
 					finish: begin
 						if (!m_mem_operation_done) begin
 							sub_state <= init;
-							if (m_address_manual < L2_C*4) begin
-								m_address_manual <= m_address_manual+1;
+							if (m_address_manual+((32*L2_b)/8) < L2_C*4) begin
+								m_address_manual <= m_address_manual+((32*L2_b)/8);
 							end else begin
 								m_address_manual <= 0;
 								state <= write_test_vals_st;
