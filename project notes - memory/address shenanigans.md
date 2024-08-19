@@ -24,6 +24,7 @@ module main;
             $write(", 128_word_index=%0d", adrs[3:2]);
             $write(", word_half=%0d", adrs[1]);
             $write(", 128_half=%0d", adrs[3:1]);
+            $write(", 128_64_index=%0d", adrs[3]);
             adrs=adrs+1;
             
             $display();

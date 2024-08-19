@@ -11,19 +11,20 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="7.100300001 ms"></ZoomEndTime>
-      <Cursor1Time time="3.430000000 ms"></Cursor1Time>
+      <ZoomStartTime time="1,464.538755 us"></ZoomStartTime>
+      <ZoomEndTime time="1,520.558072 us"></ZoomEndTime>
+      <Cursor1Time time="1,530.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="227"></NameColumnWidth>
-      <ValueColumnWidth column_width="472"></ValueColumnWidth>
+      <NameColumnWidth column_width="222"></NameColumnWidth>
+      <ValueColumnWidth column_width="103"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="84" />
+   <WVObjectSize size="60" />
    <wave_markers>
       <marker time="1918020000" label="" />
       <marker time="1536020000" label="" />
-      <marker time="1178020000" label="" />
+      <marker time="1478000000" label="" />
+      <marker time="1558000000" label="" />
    </wave_markers>
    <wvobject type="divider" fp_name="divider33">
       <obj_property name="label">TB</obj_property>
@@ -110,6 +111,18 @@
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="BkColor">#808080</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/i_mem_operation" type="logic">
+      <obj_property name="ElementShortName">i_mem_operation</obj_property>
+      <obj_property name="ObjectShortName">i_mem_operation</obj_property>
+      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/o_mem_operation_done" type="logic">
+      <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
+      <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
+      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/i_op" type="array">
       <obj_property name="ElementShortName">i_op[2:0]</obj_property>
       <obj_property name="ObjectShortName">i_op[2:0]</obj_property>
@@ -128,18 +141,6 @@
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/i_mem_operation" type="logic">
-      <obj_property name="ElementShortName">i_mem_operation</obj_property>
-      <obj_property name="ObjectShortName">i_mem_operation</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/o_mem_operation_done" type="logic">
-      <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
-      <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/i_write_data" type="array">
       <obj_property name="ElementShortName">i_write_data[63:0]</obj_property>
@@ -160,38 +161,59 @@
       <obj_property name="CustomSignalColor">#FF00FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="group144" type="group">
-      <obj_property name="label">Sub-States</obj_property>
-      <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
-      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/lookup_sub_state" type="array">
-         <obj_property name="ElementShortName">lookup_sub_state[31:0]</obj_property>
-         <obj_property name="ObjectShortName">lookup_sub_state[31:0]</obj_property>
-         <obj_property name="CustomSignalColor">#800080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/read_sub_state" type="array">
-         <obj_property name="ElementShortName">read_sub_state[31:0]</obj_property>
-         <obj_property name="ObjectShortName">read_sub_state[31:0]</obj_property>
-         <obj_property name="CustomSignalColor">#FFFFFF</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/write_sub_state" type="array">
-         <obj_property name="ElementShortName">write_sub_state[31:0]</obj_property>
-         <obj_property name="ObjectShortName">write_sub_state[31:0]</obj_property>
-         <obj_property name="CustomSignalColor">#800080</obj_property>
-         <obj_property name="UseCustomSignalColor">true</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-   </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/sub_state" type="array">
       <obj_property name="ElementShortName">sub_state[31:0]</obj_property>
       <obj_property name="ObjectShortName">sub_state[31:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/cache_sub_state" type="array">
+      <obj_property name="ElementShortName">cache_sub_state[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cache_sub_state[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="group118" type="group">
+      <obj_property name="label">neededs</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/write_needed_L1" type="logic">
+         <obj_property name="ElementShortName">write_needed_L1</obj_property>
+         <obj_property name="ObjectShortName">write_needed_L1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/evac_needed_L1" type="logic">
+         <obj_property name="ElementShortName">evac_needed_L1</obj_property>
+         <obj_property name="ObjectShortName">evac_needed_L1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/write_needed_L2" type="logic">
+         <obj_property name="ElementShortName">write_needed_L2</obj_property>
+         <obj_property name="ObjectShortName">write_needed_L2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/evac_needed_L2" type="logic">
+         <obj_property name="ElementShortName">evac_needed_L2</obj_property>
+         <obj_property name="ObjectShortName">evac_needed_L2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/read_needed_L1" type="logic">
+         <obj_property name="ElementShortName">read_needed_L1</obj_property>
+         <obj_property name="ObjectShortName">read_needed_L1</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/read_needed_L2" type="logic">
+         <obj_property name="ElementShortName">read_needed_L2</obj_property>
+         <obj_property name="ObjectShortName">read_needed_L2</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/read_needed_Main" type="logic">
+         <obj_property name="ElementShortName">read_needed_Main</obj_property>
+         <obj_property name="ObjectShortName">read_needed_Main</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/write_needed_main" type="logic">
+         <obj_property name="ElementShortName">write_needed_main</obj_property>
+         <obj_property name="ObjectShortName">write_needed_main</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/evac_needed_both" type="logic">
+         <obj_property name="ElementShortName">evac_needed_both</obj_property>
+         <obj_property name="ObjectShortName">evac_needed_both</obj_property>
+      </wvobject>
    </wvobject>
    <wvobject type="divider" fp_name="divider152">
       <obj_property name="label">L1</obj_property>
@@ -276,7 +298,6 @@
    <wvobject fp_name="group133" type="group">
       <obj_property name="label">data mem L1</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][3]" type="array">
          <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -292,6 +313,26 @@
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][0]" type="array">
          <obj_property name="ElementShortName">[0][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][1:0][3:0][7:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group103" type="group">
+      <obj_property name="label">mem flags</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/tag_mem" type="array">
+         <obj_property name="ElementShortName">tag_mem[0:0][3:0][26:0]</obj_property>
+         <obj_property name="ObjectShortName">tag_mem[0:0][3:0][26:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/valid_mem" type="array">
+         <obj_property name="ElementShortName">valid_mem[0:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">valid_mem[0:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/dirty_mem" type="array">
+         <obj_property name="ElementShortName">dirty_mem[0:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_mem[0:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/use_mem" type="array">
+         <obj_property name="ElementShortName">use_mem[3:0]</obj_property>
+         <obj_property name="ObjectShortName">use_mem[3:0]</obj_property>
       </wvobject>
    </wvobject>
    <wvobject type="divider" fp_name="divider139">
@@ -351,7 +392,6 @@
    <wvobject fp_name="group115" type="group">
       <obj_property name="label">data mem l2</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/data_mem[1][1]" type="array">
          <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
@@ -374,18 +414,6 @@
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="BkColor">#808080</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/i_clk" type="logic">
-      <obj_property name="ElementShortName">i_clk</obj_property>
-      <obj_property name="ObjectShortName">i_clk</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/i_rst" type="logic">
-      <obj_property name="ElementShortName">i_rst</obj_property>
-      <obj_property name="ObjectShortName">i_rst</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb_hierarchy/main_mem/i_op" type="array">
       <obj_property name="ElementShortName">i_op[2:0]</obj_property>
       <obj_property name="ObjectShortName">i_op[2:0]</obj_property>
@@ -399,51 +427,15 @@
       <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/i_set_valid" type="logic">
-      <obj_property name="ElementShortName">i_set_valid</obj_property>
-      <obj_property name="ObjectShortName">i_set_valid</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/i_set_tag" type="logic">
-      <obj_property name="ElementShortName">i_set_tag</obj_property>
-      <obj_property name="ObjectShortName">i_set_tag</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/i_set_dirty" type="logic">
-      <obj_property name="ElementShortName">i_set_dirty</obj_property>
-      <obj_property name="ObjectShortName">i_set_dirty</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/i_set_use" type="logic">
-      <obj_property name="ElementShortName">i_set_use</obj_property>
-      <obj_property name="ObjectShortName">i_set_use</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb_hierarchy/main_mem/i_mem_operation" type="logic">
       <obj_property name="ElementShortName">i_mem_operation</obj_property>
       <obj_property name="ObjectShortName">i_mem_operation</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/o_hit_occurred" type="logic">
-      <obj_property name="ElementShortName">o_hit_occurred</obj_property>
-      <obj_property name="ObjectShortName">o_hit_occurred</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/o_empty_found" type="logic">
-      <obj_property name="ElementShortName">o_empty_found</obj_property>
-      <obj_property name="ObjectShortName">o_empty_found</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/o_clean_found" type="logic">
-      <obj_property name="ElementShortName">o_clean_found</obj_property>
-      <obj_property name="ObjectShortName">o_clean_found</obj_property>
+   <wvobject fp_name="/tb_hierarchy/main_mem/o_mem_operation_done" type="logic">
+      <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
+      <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
@@ -465,118 +457,9 @@
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/o_mem_operation_done" type="logic">
-      <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
-      <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb_hierarchy/main_mem/data_mem" type="array">
       <obj_property name="ElementShortName">data_mem[0:0][3:0][3:0][3:0][7:0]</obj_property>
       <obj_property name="ObjectShortName">data_mem[0:0][3:0][3:0][3:0][7:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/tag_mem" type="array">
-      <obj_property name="ElementShortName">tag_mem[0:0][3:0][25:0]</obj_property>
-      <obj_property name="ObjectShortName">tag_mem[0:0][3:0][25:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/valid_mem" type="array">
-      <obj_property name="ElementShortName">valid_mem[0:0][3:0]</obj_property>
-      <obj_property name="ObjectShortName">valid_mem[0:0][3:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/dirty_mem" type="array">
-      <obj_property name="ElementShortName">dirty_mem[0:0][3:0]</obj_property>
-      <obj_property name="ObjectShortName">dirty_mem[0:0][3:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/use_mem" type="array">
-      <obj_property name="ElementShortName">use_mem[3:0]</obj_property>
-      <obj_property name="ObjectShortName">use_mem[3:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/byte_offset_adrs" type="array">
-      <obj_property name="ElementShortName">byte_offset_adrs[1:0]</obj_property>
-      <obj_property name="ObjectShortName">byte_offset_adrs[1:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/block_offset_adrs" type="array">
-      <obj_property name="ElementShortName">block_offset_adrs[1:0]</obj_property>
-      <obj_property name="ObjectShortName">block_offset_adrs[1:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/set_adrs" type="array">
-      <obj_property name="ElementShortName">set_adrs[1:0]</obj_property>
-      <obj_property name="ObjectShortName">set_adrs[1:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/tag_adrs" type="array">
-      <obj_property name="ElementShortName">tag_adrs[25:0]</obj_property>
-      <obj_property name="ObjectShortName">tag_adrs[25:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/hit_N" type="array">
-      <obj_property name="ElementShortName">hit_N[0:0]</obj_property>
-      <obj_property name="ObjectShortName">hit_N[0:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/empty_N" type="array">
-      <obj_property name="ElementShortName">empty_N[0:0]</obj_property>
-      <obj_property name="ObjectShortName">empty_N[0:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/clean_N" type="array">
-      <obj_property name="ElementShortName">clean_N[0:0]</obj_property>
-      <obj_property name="ObjectShortName">clean_N[0:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/random_N" type="array">
-      <obj_property name="ElementShortName">random_N[0:0]</obj_property>
-      <obj_property name="ObjectShortName">random_N[0:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/get_new_random_num" type="logic">
-      <obj_property name="ElementShortName">get_new_random_num</obj_property>
-      <obj_property name="ObjectShortName">get_new_random_num</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/rand_gen_clk" type="logic">
-      <obj_property name="ElementShortName">rand_gen_clk</obj_property>
-      <obj_property name="ObjectShortName">rand_gen_clk</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/target_N" type="array">
-      <obj_property name="ElementShortName">target_N[0:0]</obj_property>
-      <obj_property name="ObjectShortName">target_N[0:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/write_would_conflict" type="logic">
-      <obj_property name="ElementShortName">write_would_conflict</obj_property>
-      <obj_property name="ObjectShortName">write_would_conflict</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/state" type="array">
-      <obj_property name="ElementShortName">state[1:0]</obj_property>
-      <obj_property name="ObjectShortName">state[1:0]</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>

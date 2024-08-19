@@ -115,28 +115,26 @@ localparam idle_st	= 0,
 			  done_st	= 4;
 
 integer sub_state;
-localparam init   = 0,
-			  busy   = 1,
-			  finish = 2;
 
-integer lookup_sub_state;
 localparam lookup_L1_st   = 0,
 			  lookup_L2_st	  = 1,
 			  lookup_done_st = 2;
 
-
-integer read_sub_state;
 localparam read_begin_st = 0,
 			  read_L1_st    = 1,
 			  read_L2_st	 = 2,
 			  read_Main_st  = 3,
 			  read_done_st  = 4;
 
-integer write_sub_state;
 localparam write_L1_st   = 0,
 			  write_L2_st	 = 1,
 			  write_Main_st = 2,
 			  write_done_st = 3;
+
+integer cache_sub_state;
+localparam init   = 0,
+			  busy   = 1,
+			  finish = 2;
 
 
 integer i;
@@ -145,10 +143,8 @@ always @(posedge i_clk) begin
 	if(i_rst) begin
 		i <= 0;
 		state 	 <= 0;
+		cache_sub_state <= 0;
 		sub_state <= 0;
-		lookup_sub_state <= 0;
-		read_sub_state <= 0;
-		write_sub_state <= 0;
 
 		{ 	valid_bytes_L1,
 			valid_bytes_L2,
@@ -187,53 +183,53 @@ always @(posedge i_clk) begin
 			end
 
 			lookup_st: begin
-				case (lookup_sub_state)
+				case (sub_state)
 
 					lookup_L1_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 								op			  <= `lookup_op;
 								mem_operation[1] <= 1'b1;
 
-								sub_state 	  <= busy;
+								cache_sub_state 	  <= busy;
 							end
 							busy: begin
 								if (mem_operation_done[1]) begin
 									mem_operation[1] <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!mem_operation_done[1]) begin
-									if (hit_occurred[1]) lookup_sub_state <= lookup_done_st;
-									else 						lookup_sub_state <= lookup_L2_st;
+									if (hit_occurred[1]) sub_state <= lookup_done_st;
+									else 						sub_state <= lookup_L2_st;
 
-									sub_state <= init;
+									cache_sub_state <= init;
 								end
 							end
 						endcase
 					end
 
 					lookup_L2_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 								op			  <= `lookup_op;
 								mem_operation[2] <= 1'b1;
 
-								sub_state 	  <= busy;
+								cache_sub_state 	  <= busy;
 							end
 							busy: begin
 								if (mem_operation_done[2]) begin
 									mem_operation[2] <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									lookup_sub_state <= lookup_done_st; // whether we hit or not
-									sub_state <= init;
+									sub_state <= lookup_done_st; // whether we hit or not
+									cache_sub_state <= init;
 								end
 							end
 						endcase
@@ -251,7 +247,7 @@ always @(posedge i_clk) begin
 							end
 						endcase
 
-						lookup_sub_state <= 0;
+						sub_state <= 0;
 					end
 
 				endcase
@@ -263,15 +259,15 @@ always @(posedge i_clk) begin
 
 
 			read_st: begin
-				case (read_sub_state)
+				case (sub_state)
 					read_begin_st: begin
 						// determining which state to start from
 						if ( hit_occurred[1] || (!empty_found[1] && !clean_found[1]) ) begin // either it hit or needs to be evacuated
-							read_sub_state <= read_L1_st;
+							sub_state <= read_L1_st;
 						end else if ( hit_occurred[2] || (!empty_found[2] && !clean_found[2]) ) begin // either it hit or needs to be evacuated
-							read_sub_state <= read_L2_st;
+							sub_state <= read_L2_st;
 						end else begin
-							read_sub_state <= read_Main_st;
+							sub_state <= read_Main_st;
 						end
 
 							// we read L1 either if it hit or if it needs to be evacuated, 
@@ -296,77 +292,78 @@ always @(posedge i_clk) begin
 							// will go to later read stages from there!
 					end
 					read_L1_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 								op 			   <= `read_op;
 								mem_operation[1]  <= 1'b1;
 								valid_bytes_L1 <= {(4*L1_b){1'b1}}; // how about all valid? while reading that it
 
-								sub_state		<= busy;
+								cache_sub_state		<= busy;
 							end
 							busy: begin
 								if (mem_operation_done[1]) begin
 									mem_operation[1] <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!mem_operation_done[1]) begin
-									o_read_data <= read_data_L1;
+									// o_read_data <= read_data_L1; // why did I do
+									// this?
 
-									read_sub_state		  <= read_needed_L2 ? read_L2_st : read_needed_Main? read_Main_st : read_done_st;
-									sub_state  <= init;
+									sub_state		  <= read_needed_L2 ? read_L2_st : read_needed_Main? read_Main_st : read_done_st;
+									cache_sub_state  <= init;
 								end
 							end
 						endcase
 					end
 
 					read_L2_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 								op 			   <= `read_op;
 								mem_operation[2]  <= 1'b1;
 								valid_bytes_L2 <= {(4*L2_b){1'b1}}; // how about all valid? while reading that it
 
-								sub_state		<= busy;
+								cache_sub_state		<= busy;
 							end
 							busy: begin
 								if (mem_operation_done[2]) begin
 									mem_operation[2] <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									read_sub_state		  <= read_needed_Main ? read_Main_st : read_done_st;
-									sub_state  <= init;
+									sub_state		  <= read_needed_Main ? read_Main_st : read_done_st;
+									cache_sub_state  <= init;
 								end
 							end
 						endcase
 					end
 
 					read_Main_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 								o_op 			   <= `read_op;
 								o_mem_operation  <= 1'b1;
 								o_valid_bytes <= {(4*L2_b){1'b1}}; // how about all valid? while reading that it
 
-								sub_state		<= busy;
+								cache_sub_state		<= busy;
 							end
 							busy: begin
 								if (i_mem_operation_done) begin
 									o_mem_operation <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!i_mem_operation_done) begin
-									read_sub_state		  <= read_done_st;
-									sub_state  <= init;
+									sub_state		  <= read_done_st;
+									cache_sub_state  <= init;
 								end
 							end
 						endcase
@@ -382,15 +379,15 @@ always @(posedge i_clk) begin
 									o_read_data <= read_data_L1;
 									state <= done_st;
 								end else if (hit_occurred[2]) begin
-									o_read_data <= read_data_L2;
+									o_read_data <= read_data_L2[i_address[3]*64 +: 64]; // half data read from L2
 									state <= write_st;
 								end else begin
-									o_read_data <= i_read_data; // data read from main memory
+									o_read_data <= i_read_data[i_address[3]*64 +: 64]; // data read from main memory
 									state <= write_st;
 								end
 							end
 						endcase
-						read_sub_state <= 0;
+						sub_state <= 0;
 					end
 				endcase
 				
@@ -401,26 +398,29 @@ always @(posedge i_clk) begin
 
 
 			write_st: begin
-			   case (write_sub_state)
+			   case (sub_state)
 					
 					write_L1_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 
 								if (hit_occurred[1]) begin
+									// only happens if write_op and hit
 									write_data_L1  <= i_write_data; // write directly
 									valid_bytes_L1 <= i_valid_bytes; // write only some bytes not all
 									// note: no need to differentiate betrween read_op
 									// and write_op in the case where a hit occurred on
-									// L1, because if a hit had occurred on L1 we
-									// wouldn't have entered the write state to begin
-									// with
+									// L1, because if a hit had occurred on L1 and it
+									// is a read_op then we wouldn't have entered the 
+									// write state to begin with, if it was a write_op
+									// then we directly write which is what we are
+									// doing here
 
 								end else if (hit_occurred[2]) begin
 									valid_bytes_L1 <= {(4*L1_b){1'b1}}; // overwrite all bytes
 									case (i_op)
 										`read_op: begin
-											write_data_L1 <= read_data_L2[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b];
+											write_data_L1 <= read_data_L2[i_address[3]*64 +: 64];
 											// todo: check if this works
 											// this complication is because we can't just always use the lower part of the data from L2, 
 											// because what if the data we want isn't in the lower part but the middle one or upper one? 
@@ -457,27 +457,27 @@ always @(posedge i_clk) begin
 								set_use	  	<= 1'b1;
 								set_tag 		<= 1'b1;
 
-								sub_state   <= busy;
+								cache_sub_state   <= busy;
 							end
 							busy: begin
 								if (mem_operation_done[1]) begin
 									mem_operation[1] <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!mem_operation_done[1]) begin
-									write_sub_state <= write_needed_L2 ? write_L2_st : write_done_st;
+									sub_state <= write_needed_L2 ? write_L2_st : write_done_st;
 
-									sub_state <= init;
+									cache_sub_state <= init;
 								end
 							end
 						endcase
 					end
 
 					write_L2_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 
 								// in second cache we write in only two cases:
@@ -508,27 +508,27 @@ always @(posedge i_clk) begin
 								set_use			  <= 1'b1;
 								set_valid	<= 1'b1;
 
-								sub_state	     <= busy;
+								cache_sub_state	     <= busy;
 							end
 							busy: begin
 								if (mem_operation_done[2]) begin
 									mem_operation[2] <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									write_sub_state <= write_needed_main ? write_Main_st : write_done_st;
+									sub_state <= write_needed_main ? write_Main_st : write_done_st;
 
-									sub_state <= init;
+									cache_sub_state <= init;
 								end
 							end
 						endcase
 					end
 
 					write_Main_st: begin
-						case (sub_state)
+						case (cache_sub_state)
 							init: begin
 
 								// we only write back to main mem, meaning it only gets evacuations
@@ -546,27 +546,27 @@ always @(posedge i_clk) begin
 								op 			     <= `write_op;
 								o_mem_operation  <= 1'b1;
 
-								sub_state	     <= busy;
+								cache_sub_state	     <= busy;
 							end
 							busy: begin
 								if (i_mem_operation_done) begin
 									o_mem_operation <= 1'b0;
 
-									sub_state 	  <= finish;
+									cache_sub_state 	  <= finish;
 								end
 							end
 							finish: begin
 								if (!i_mem_operation_done) begin
-									write_sub_state <= write_done_st;
+									sub_state <= write_done_st;
 
-									sub_state <= init;
+									cache_sub_state <= init;
 								end
 							end
 						endcase
 					end
 
 					write_done_st: begin
-						write_sub_state <= 0;
+						sub_state <= 0;
 						state <= done_st;
 					end
 
