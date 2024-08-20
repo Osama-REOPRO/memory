@@ -28,6 +28,7 @@ module cache
 
 	input 	  [(32*b)-1:0] 	  i_write_data,
 	output reg [(32*b)-1:0] 	  o_read_data,
+	output reg [31:0]				  o_read_adrs, // the address we just read
 
 	output reg				   	  o_mem_operation_done
 );
@@ -163,6 +164,7 @@ module cache
 		
 			o_mem_operation_done <= 1'b0;
 			delay_started <= 1'b0;
+			o_read_adrs 		 <= 0;
 
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
@@ -171,6 +173,7 @@ module cache
 					valid_mem [i0][i1] <= 0;
 					dirty_mem [i0][i1] <= 0;
 					use_mem       [i1] <= 0;
+
 
 					for (i2=0; i2<b; i2=i2+1) begin
 						for (i3=0; i3<4; i3=i3+1) begin
@@ -218,6 +221,8 @@ module cache
 						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
 						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ]);
 						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ];
+						// o_read_adrs <= {tag_mem[target_N][set_adrs], set_adrs, {$clog2(b){1'b0}}, 2'b00};
+						o_read_adrs <= {tag_mem[target_N][set_adrs], i_address[32-Tag_nbytes:0]};
 					end
 				end
 				

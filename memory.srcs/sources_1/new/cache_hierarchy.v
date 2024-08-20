@@ -479,25 +479,26 @@ always @(posedge i_clk) begin
 					write_L2_st: begin
 						case (cache_sub_state)
 							init: begin
-
-								// in second cache we write in only two cases:
+							
+								// in second cache we write in these cases:
 								// - evac dirty from below
 								// 		happens on both reads and writes
 								// - fill missing from above
-								// 		could only happen on read miss both
+								// 		happens on both reads and writes on miss both
 
-								if (both_missed) begin
-									// if both missed, aint no other place the data
-									// could be coming from but above!
+								if (hit_occurred[2]) begin
+									// if L2 did hit, then this must be an evacuation from L1
+									write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
+									valid_bytes_L2[i_address[3]*8 +: 8] <= {8'hff};
+									valid_bytes_L2[!i_address[3]*8 +: 8] <= {8'h00};
+									set_dirty		  <= 1'b1;
+								end else begin
+									// if we missed, then the data must come from above,
+									// but we might need to do an evacuation from below
+									// to a different N
 									write_data_L2 <= i_read_data;
 									valid_bytes_L2 <= {(4*L2_b){1'b1}}; // write all bytes
 									set_dirty		  <= 1'b0;
-								end else begin
-									// the only other case is an evac from below
-									write_data_L2[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b] <= read_data_L1; // todo: this is iffy, test it
-									valid_bytes_L2 <= {(4*L2_b){1'b0}};
-									valid_bytes_L2[(block_offset_in_adrs_L2*4) +: 4*L1_b] <= {(4*L2_b){1'b1}}; // todo: test this
-									set_dirty		  <= 1'b1; // an evac from below only happens if dirty
 								end
 
 								// todo: bookmark
@@ -532,8 +533,21 @@ always @(posedge i_clk) begin
 							init: begin
 
 								// we only write back to main mem, meaning it only gets evacuations
-
-								if (evac_needed_L2) begin
+								// question: what if both need evacuation?
+								// answer: remember that we are using inclusive policy, meaning that we can't have two different
+								// 			pieces of data that need to be evacuated, we know that if a piece of data exists in 
+								// 			lower cache then it must also exist in higher cache, so if we need an evacuation from
+								// 			both then we have two cases: if the lower is dirty then we combine it's data with the 
+								//				upper data and write the combination to main, if clean we only write higher cache data
+								// 			and ignore the lower, there is not situation in which we need 2 write operations
+								// todo: check that inclusivity is satisfied
+								
+								if (evac_needed_L1 && evac_needed_L2) begin
+									// combine dirty data from lower with dirty data from upper
+									o_write_data <= read_data_L2;
+									o_write_data[i_address[3]*64 +: 64] <= read_data_L1;
+									o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
+								end else if (evac_needed_L2) begin
 									o_write_data <= read_data_L2;
 									o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
 								end else begin

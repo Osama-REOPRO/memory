@@ -11,20 +11,22 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="1,464.538755 us"></ZoomStartTime>
-      <ZoomEndTime time="1,520.558072 us"></ZoomEndTime>
-      <Cursor1Time time="1,530.000000 us"></Cursor1Time>
+      <ZoomStartTime time="2,506.693333 us"></ZoomStartTime>
+      <ZoomEndTime time="6,266.733334 us"></ZoomEndTime>
+      <Cursor1Time time="4,354.020000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="222"></NameColumnWidth>
-      <ValueColumnWidth column_width="103"></ValueColumnWidth>
+      <NameColumnWidth column_width="204"></NameColumnWidth>
+      <ValueColumnWidth column_width="320"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="60" />
+   <WVObjectSize size="62" />
    <wave_markers>
       <marker time="1918020000" label="" />
       <marker time="1536020000" label="" />
       <marker time="1478000000" label="" />
       <marker time="1558000000" label="" />
+      <marker time="1542000000" label="" />
+      <marker time="1554000000" label="" />
    </wave_markers>
    <wvobject type="divider" fp_name="divider33">
       <obj_property name="label">TB</obj_property>
@@ -47,7 +49,7 @@
    <wvobject fp_name="/tb_hierarchy/adrs" type="array">
       <obj_property name="ElementShortName">adrs[31:0]</obj_property>
       <obj_property name="ObjectShortName">adrs[31:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
@@ -295,9 +297,20 @@
       <obj_property name="ElementShortName">o_read_data[63:0]</obj_property>
       <obj_property name="ObjectShortName">o_read_data[63:0]</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/i_address" type="array">
+      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/o_read_adrs" type="array">
+      <obj_property name="ElementShortName">o_read_adrs[31:0]</obj_property>
+      <obj_property name="ObjectShortName">o_read_adrs[31:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
    <wvobject fp_name="group133" type="group">
       <obj_property name="label">data mem L1</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][3]" type="array">
          <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -392,6 +405,7 @@
    <wvobject fp_name="group115" type="group">
       <obj_property name="label">data mem l2</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/data_mem[1][1]" type="array">
          <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
