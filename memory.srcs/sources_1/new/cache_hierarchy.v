@@ -66,6 +66,12 @@ reg  [(32*L2_b)-1:0] write_data_L2;
 wire [(32*L1_b)-1:0] read_data_L1;
 wire [(32*L2_b)-1:0] read_data_L2;
 
+wire [31:0] read_adrs_L1;
+wire [31:0] read_adrs_L2;
+
+reg use_manual_adrs;
+reg [31:0] adrs_manual;
+
 reg [(32*L1_b)-1:0] val_evac_L1;
 reg [(32*L2_b)-1:0] val_evac_L2;
 
@@ -127,9 +133,10 @@ localparam read_begin_st = 0,
 			  read_done_st  = 4;
 
 localparam write_L1_st   = 0,
-			  write_L2_st	 = 1,
-			  write_Main_st = 2,
-			  write_done_st = 3;
+			  write_L2_from_main_st	 = 1,
+			  write_L2_from_L1_st = 2,
+			  write_Main_st = 3,
+			  write_done_st = 4;
 
 integer cache_sub_state;
 localparam init   = 0,
@@ -165,7 +172,11 @@ always @(posedge i_clk) begin
 			o_address,
 			o_valid_bytes,
 			o_write_data,
-			o_mem_operation } = 0;
+			o_mem_operation,
+
+			use_manual_adrs,
+			adrs_manual
+			} = 0;
 
 	end else begin
 		case (state)
@@ -230,6 +241,7 @@ always @(posedge i_clk) begin
 								if (!mem_operation_done[2]) begin
 									sub_state <= lookup_done_st; // whether we hit or not
 									cache_sub_state <= init;
+									L2_second_lookup_occurred <= 1'b0;
 								end
 							end
 						endcase
@@ -468,7 +480,20 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[1]) begin
-									sub_state <= write_needed_L2 ? write_L2_st : write_done_st;
+									// todo: verify this
+
+									// in second cache we write in these cases:
+									// - evac dirty from below
+									// 		happens on both reads and writes
+									// - fill missing from above
+									// 		happens on both reads and writes on miss both
+
+									sub_state <= 
+										!write_needed_L2 ? write_done_st :
+										hit_occurred[2] ? write_L2_from_L1_st :  // if L2 did hit, then this must be an evacuation from L1
+																write_L2_from_main_st; // if we missed, then the data must come from above,
+																							  // but we might need to do an evacuation later from below
+																							  // to a different N (determined at end)
 
 									cache_sub_state <= init;
 								end
@@ -476,32 +501,15 @@ always @(posedge i_clk) begin
 						endcase
 					end
 
-					write_L2_st: begin
+					write_L2_from_main_st: begin
 						case (cache_sub_state)
 							init: begin
 							
-								// in second cache we write in these cases:
-								// - evac dirty from below
-								// 		happens on both reads and writes
-								// - fill missing from above
-								// 		happens on both reads and writes on miss both
+								use_manual_adrs <= 1'b0;
 
-								if (hit_occurred[2]) begin
-									// if L2 did hit, then this must be an evacuation from L1
-									write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
-									valid_bytes_L2[i_address[3]*8 +: 8] <= {8'hff};
-									valid_bytes_L2[!i_address[3]*8 +: 8] <= {8'h00};
-									set_dirty		  <= 1'b1;
-								end else begin
-									// if we missed, then the data must come from above,
-									// but we might need to do an evacuation from below
-									// to a different N
-									write_data_L2 <= i_read_data;
-									valid_bytes_L2 <= {(4*L2_b){1'b1}}; // write all bytes
-									set_dirty		  <= 1'b0;
-								end
-
-								// todo: bookmark
+								write_data_L2 <= i_read_data;
+								valid_bytes_L2 <= {(4*L2_b){1'b1}}; // write all bytes
+								set_dirty		  <= 1'b0;
 
 								op 			     <= `write_op;
 								mem_operation[2]    <= 1'b1;
@@ -520,7 +528,60 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									sub_state <= write_needed_main ? write_Main_st : write_done_st;
+									// todo: bookmark
+
+									sub_state <= evac_needed_L1? L2_second_lookup_st : write_needed_main ? write_Main_st : write_done_st;
+
+									cache_sub_state <= init;
+								end
+							end
+						endcase
+					end
+
+					L2_second_lookup_st: begin
+						L2_second_lookup_occurred <= 1'b1;
+						// todo: bookmark
+						// todo: figure out this mess
+						// this might ruin so many things oh my god
+					end
+
+					write_L2_from_L1_st: begin
+						case (cache_sub_state)
+							init: begin
+
+								if (L2_second_lookup_occurred) begin 
+									use_manual_adrs <= 1'b1;
+									adrs_manual <= read_adrs_L1;
+								end else begin
+									use_manual_adrs <= 1'b0;
+								end
+							
+								write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
+								valid_bytes_L2[i_address[3]*8 +: 8]  <= {8'hff};
+								valid_bytes_L2[!i_address[3]*8 +: 8] <= {8'h00};
+								set_dirty		  <= 1'b1;
+
+								op 			     <= `write_op;
+								mem_operation[2]    <= 1'b1;
+
+								set_use			  <= 1'b1;
+								set_valid	<= 1'b1;
+
+								cache_sub_state	     <= busy;
+							end
+							busy: begin
+								if (mem_operation_done[2]) begin
+									mem_operation[2] <= 1'b0;
+
+									cache_sub_state 	  <= finish;
+								end
+							end
+							finish: begin
+								if (!mem_operation_done[2]) begin
+									// todo: bookmark
+									use_manual_adrs <= 1'b0;
+
+									sub_state <= evac_needed_L1? write_L2_evac_L1_st : write_needed_main ? write_Main_st : write_done_st;
 
 									cache_sub_state <= init;
 								end
@@ -605,7 +666,7 @@ l1_cache
 
 	.i_op(op),
 
-	.i_address(i_address),
+	.i_address(use_manual_adrs? adrs_manual : i_address),
 
 	.i_set_valid(set_valid),
 	.i_set_tag(set_tag),
@@ -622,6 +683,7 @@ l1_cache
 
 	.i_write_data(write_data_L1),
 	.o_read_data(read_data_L1),
+	.o_read_adrs(read_adrs_L1),
 
 	.o_mem_operation_done(mem_operation_done[1])
 );
@@ -639,7 +701,7 @@ l2_cache
 
 	.i_op(op),
 
-	.i_address(i_address),
+	.i_address(use_manual_adrs? adrs_manual : i_address),
 
 	.i_set_valid(set_valid),
 	.i_set_tag(set_tag),
@@ -656,6 +718,7 @@ l2_cache
 
 	.i_write_data(write_data_L2),
 	.o_read_data(read_data_L2),
+	.o_read_adrs(read_adrs_L2),
 
 	.o_mem_operation_done(mem_operation_done[2])
 );
