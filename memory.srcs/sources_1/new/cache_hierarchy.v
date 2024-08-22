@@ -136,7 +136,8 @@ localparam write_L1_st   = 0,
 			  write_L2_from_main_st	 = 1,
 			  write_L2_from_L1_st = 2,
 			  write_Main_st = 3,
-			  write_done_st = 4;
+			  L2_second_lookup_st = 4,
+			  write_done_st = 5;
 
 integer cache_sub_state;
 localparam init   = 0,
@@ -145,6 +146,7 @@ localparam init   = 0,
 
 
 integer i;
+reg L2_second_lookup_occurred;
 
 always @(posedge i_clk) begin
 	if(i_rst) begin
