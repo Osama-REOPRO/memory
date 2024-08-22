@@ -105,7 +105,7 @@ wire read_needed_Main = both_missed;
 wire write_needed_main = evac_needed_L2;
 
 wire evac_needed_both = evac_needed_L1 && evac_needed_L2;
-
+wire write_needed_L2_second = conflict_occurred_L2 && evac_needed_L1 && both_missed; // todo: verify
 
 wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
 		(L2_b <= 1) ? 1'b0 : 
@@ -175,7 +175,9 @@ always @(posedge i_clk) begin
 			o_mem_operation,
 
 			use_manual_adrs,
-			adrs_manual
+			adrs_manual,
+
+			L2_second_lookup_occurred
 			} = 0;
 
 	end else begin
@@ -338,6 +340,14 @@ always @(posedge i_clk) begin
 								mem_operation[2]  <= 1'b1;
 								valid_bytes_L2 <= {(4*L2_b){1'b1}}; // how about all valid? while reading that it
 
+								if (evac_needed_L1 && evac_needed_L2) begin
+									use_manual_adrs <= 1'b1;
+									adrs_manual <= read_adrs_L1;
+								end else begin
+									use_manual_adrs <= 1'b0;
+									adrs_manual <= read_adrs_L1; // so we don't get a latch
+								end
+
 								cache_sub_state		<= busy;
 							end
 							busy: begin
@@ -349,6 +359,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
+									use_manual_adrs <= 1'b0;
 									sub_state		  <= read_needed_Main ? read_Main_st : read_done_st;
 									cache_sub_state  <= init;
 								end
@@ -528,9 +539,10 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									// todo: bookmark
 
-									sub_state <= evac_needed_L1? L2_second_lookup_st : write_needed_main ? write_Main_st : write_done_st;
+									sub_state <= write_needed_main ? write_Main_st : 
+													 evac_needed_L1 ? L2_second_lookup_st : 
+													 write_done_st;
 
 									cache_sub_state <= init;
 								end
@@ -565,7 +577,6 @@ always @(posedge i_clk) begin
 								end
 							end
 						endcase
-						// this might ruin so many things oh my god
 					end
 
 					write_L2_from_L1_st: begin
@@ -577,6 +588,7 @@ always @(posedge i_clk) begin
 									adrs_manual <= read_adrs_L1;
 								end else begin
 									use_manual_adrs <= 1'b0;
+									adrs_manual <= read_adrs_L1; // anti-latch
 								end
 							
 								write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
@@ -601,10 +613,13 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									// todo: bookmark
 									use_manual_adrs <= 1'b0;
 
-									sub_state <= evac_needed_L1? write_L2_evac_L1_st : write_needed_main ? write_Main_st : write_done_st;
+									if (L2_second_lookup_occurred) begin 
+										sub_state <= write_done_st;
+									end else begin
+										sub_state <= write_needed_main ? write_Main_st : write_done_st;
+									end
 
 									cache_sub_state <= init;
 								end
@@ -655,7 +670,12 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!i_mem_operation_done) begin
-									sub_state <= write_done_st;
+									// todo: bookmark, how do we go from here to second L2 write
+									if (write_needed_L2_second) begin
+										sub_state <= L2_second_lookup_st;
+									end else begin
+										sub_state <= write_done_st;
+									end
 
 									cache_sub_state <= init;
 								end
