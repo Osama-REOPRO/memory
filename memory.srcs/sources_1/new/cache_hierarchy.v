@@ -540,8 +540,31 @@ always @(posedge i_clk) begin
 
 					L2_second_lookup_st: begin
 						L2_second_lookup_occurred <= 1'b1;
-						// todo: bookmark
-						// todo: figure out this mess
+
+						case (cache_sub_state)
+							init: begin
+								use_manual_adrs <= 1'b1;
+								adrs_manual <= read_adrs_L1;
+								op			  <= `lookup_op;
+								mem_operation[2] <= 1'b1;
+
+								cache_sub_state 	  <= busy;
+							end
+							busy: begin
+								if (mem_operation_done[2]) begin
+									mem_operation[2] <= 1'b0;
+
+									cache_sub_state 	  <= finish;
+								end
+							end
+							finish: begin
+								if (!mem_operation_done[2]) begin
+									use_manual_adrs <= 1'b1;
+									sub_state <= write_L2_from_L1_st; // whether we hit or not
+									cache_sub_state <= init;
+								end
+							end
+						endcase
 						// this might ruin so many things oh my god
 					end
 
