@@ -7,6 +7,7 @@
 solved (I think)
 
 -------------------
+- [ ] L1 not reading missing data from above
 - [ ] L2 never getting filled
 - [ ] L2 wierd behavior as we progress
 - [ ] main mem never getting written evacuated data from L2
