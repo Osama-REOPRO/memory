@@ -31,7 +31,7 @@ module cache_hierarchy
 	
 	// interface with higher memory, same as level 2 cache
 	output reg [`op_N:0]	      o_op,
-	output reg [31:0]		   	o_address,
+	output 	  [31:0]		   	o_address,
 
 	output reg [(4*L2_b)-1:0]  o_valid_bytes,
 
@@ -41,6 +41,8 @@ module cache_hierarchy
 	output reg			   	   o_mem_operation,
 	input								i_mem_operation_done
 );
+
+assign o_address = i_address;
 
 reg [`op_N:0] op;
 
@@ -171,7 +173,6 @@ always @(posedge i_clk) begin
 			mem_operation[1],
 			mem_operation[2],
 			o_op,
-			o_address,
 			o_valid_bytes,
 			o_write_data,
 			o_mem_operation,
@@ -503,7 +504,9 @@ always @(posedge i_clk) begin
 
 									sub_state <= 
 										!write_needed_L2 ? write_done_st :
-										hit_occurred[2] ? write_L2_from_L1_st :  // if L2 did hit, then this must be an evacuation from L1
+										hit_occurred[2] ? L2_second_lookup_st :  // if L2 did hit, then this must be an evacuation from L1
+																							  // we always do a second lookup to get the 
+																							  // correct N to write to
 																write_L2_from_main_st; // if we missed, then the data must come from above,
 																							  // but we might need to do an evacuation later from below
 																							  // to a different N (determined at end)
@@ -573,7 +576,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									use_manual_adrs <= 1'b1;
+									use_manual_adrs <= 1'b0;
 									sub_state <= write_L2_from_L1_st; // whether we hit or not
 									cache_sub_state <= init;
 								end
@@ -585,13 +588,15 @@ always @(posedge i_clk) begin
 						case (cache_sub_state)
 							init: begin
 
-								if (L2_second_lookup_occurred) begin 
-									use_manual_adrs <= 1'b1;
-									adrs_manual <= read_adrs_L1;
-								end else begin
-									use_manual_adrs <= 1'b0;
-									adrs_manual <= read_adrs_L1; // anti-latch
-								end
+								use_manual_adrs <= 1'b1;
+								adrs_manual <= read_adrs_L1;
+//								if (L2_second_lookup_occurred) begin 
+//									use_manual_adrs <= 1'b1;
+//									adrs_manual <= read_adrs_L1;
+//								end else begin
+//									use_manual_adrs <= 1'b0;
+//									adrs_manual <= read_adrs_L1; // anti-latch
+//								end
 							
 								write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
 								valid_bytes_L2[i_address[3]*8 +: 8]  <= {8'hff};
@@ -658,7 +663,7 @@ always @(posedge i_clk) begin
 									o_valid_bytes[(block_offset_in_adrs_L2*4) +: 4*L1_b] <= {(4*L2_b){1'b1}}; // todo: test this
 								end
 
-								op 			     <= `write_op;
+								o_op 			     <= `write_op;
 								o_mem_operation  <= 1'b1;
 
 								cache_sub_state	     <= busy;

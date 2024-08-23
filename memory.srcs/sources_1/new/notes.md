@@ -7,7 +7,23 @@
 solved (I think)
 
 -------------------
-- [ ] L1 not reading missing data from above
-- [ ] L2 never getting filled
-- [ ] L2 wierd behavior as we progress
+- [x] L1 not reading missing data from above
+- [ ] test filling L2 to see how it evacuates
 - [ ] main mem never getting written evacuated data from L2
+- [ ] L1 getting wrong and jittery address at first of read phase of testbench
+- [ ] L2 not getting hit even though data there
+    - [ ] tag mem is written the wrong value for some reason
+    - [ ] the address we read with data to evacuate is wrong
+- [ ] contiguous data across different evacuations evacuated to wrong blocks in L2
+    - because it is writing to the wrong N
+    - we hit one N then read, the when we write we write to a different N, why is that?
+    - it is getting the wrong hit N
+- [x] after some repetitions, L1 seems to fetch the wrong data from above
+- [x] use manual address must be set IN THE LOOKUP STAGE, not just in the write stage!, so the correct N is obtained
+- [ ] wierd evacuation behavior: at a certain point, while the correct data does get evacuated, it seems to fetch data from main when it shouldn't and to the wrong N I think
+    - happens when whole thing is full (L2)
+    - new data is brought from main, written to L1, but is never written to L2, and data in L2 isn't evacuated to main even through it should, but in the next operation, that does happen, data read from main is indeed written to L2 and evicted data is written to main, but here is another problem: the data written to main is half correct, it writes the lower half correctly but the upper half is from a different block, the one that is being evacuated from L1 at the same time
+    - [ ] don't know what to do when something is clean, seems like that breaks things, investigate, that might have been the problem
+    - [x] when evac from L1 to L2, set L2 dirty
+- [ ] problem with target N again
+    - finding clean N but probably the clean should not have been detected, investigate at 3092.02 us

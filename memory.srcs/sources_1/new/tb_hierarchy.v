@@ -149,7 +149,7 @@ always @(posedge clk) begin
 					finish: begin
 						if (!done) begin
 							sub_state <= init;
-							if (test_val < L2_C*4) begin
+							if (test_val < L2_C*4*10) begin
 								test_val <= test_val+1;
 								adrs <= adrs+1;
 							end else begin

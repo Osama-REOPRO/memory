@@ -11,17 +11,19 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="3,856.040001 us"></ZoomEndTime>
-      <Cursor1Time time="1,928.020000 us"></Cursor1Time>
+      <ZoomStartTime time="3,082.254076 us"></ZoomStartTime>
+      <ZoomEndTime time="3,103.129743 us"></ZoomEndTime>
+      <Cursor1Time time="3,092.020000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="190"></NameColumnWidth>
-      <ValueColumnWidth column_width="377"></ValueColumnWidth>
+      <NameColumnWidth column_width="206"></NameColumnWidth>
+      <ValueColumnWidth column_width="364"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="62" />
+   <WVObjectSize size="69" />
    <wave_markers>
-      <marker time="1928020000" label="" />
+      <marker time="3072879007" label="" />
+      <marker time="3086000000" label="" />
+      <marker time="3098000000" label="" />
    </wave_markers>
    <wvobject type="divider" fp_name="divider33">
       <obj_property name="label">TB</obj_property>
@@ -44,7 +46,7 @@
    <wvobject fp_name="/tb_hierarchy/adrs" type="array">
       <obj_property name="ElementShortName">adrs[31:0]</obj_property>
       <obj_property name="ObjectShortName">adrs[31:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
@@ -107,6 +109,11 @@
       <obj_property name="label">Hierarchy</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="BkColor">#808080</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/i_address" type="array">
+      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/i_mem_operation" type="logic">
       <obj_property name="ElementShortName">i_mem_operation</obj_property>
@@ -175,6 +182,7 @@
    <wvobject fp_name="group118" type="group">
       <obj_property name="label">neededs</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/write_needed_L1" type="logic">
          <obj_property name="ElementShortName">write_needed_L1</obj_property>
          <obj_property name="ObjectShortName">write_needed_L1</obj_property>
@@ -220,6 +228,7 @@
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/i_address" type="array">
       <obj_property name="ElementShortName">i_address[31:0]</obj_property>
       <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/i_op" type="array">
       <obj_property name="ElementShortName">i_op[2:0]</obj_property>
@@ -302,6 +311,12 @@
       <obj_property name="ObjectShortName">o_read_adrs[31:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/use_manual_adrs" type="logic">
+      <obj_property name="ElementShortName">use_manual_adrs</obj_property>
+      <obj_property name="ObjectShortName">use_manual_adrs</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
    <wvobject fp_name="group133" type="group">
       <obj_property name="label">data mem L1</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -309,18 +324,22 @@
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][3]" type="array">
          <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[3][1:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][2]" type="array">
          <obj_property name="ElementShortName">[2][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[2][1:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][1]" type="array">
          <obj_property name="ElementShortName">[1][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][1:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][0]" type="array">
          <obj_property name="ElementShortName">[0][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][1:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
    </wvobject>
    <wvobject fp_name="group103" type="group">
@@ -350,6 +369,16 @@
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/i_address" type="array">
       <obj_property name="ElementShortName">i_address[31:0]</obj_property>
       <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/i_address" type="array">
+      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/i_address" type="array">
+      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/i_op" type="array">
       <obj_property name="ElementShortName">i_op[2:0]</obj_property>
@@ -389,6 +418,12 @@
       <obj_property name="CustomSignalColor">#FFA500</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/target_N" type="array">
+      <obj_property name="ElementShortName">target_N[0:0]</obj_property>
+      <obj_property name="ObjectShortName">target_N[0:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/i_write_data" type="array">
       <obj_property name="ElementShortName">i_write_data[127:0]</obj_property>
       <obj_property name="ObjectShortName">i_write_data[127:0]</obj_property>
@@ -397,6 +432,10 @@
       <obj_property name="ElementShortName">o_read_data[127:0]</obj_property>
       <obj_property name="ObjectShortName">o_read_data[127:0]</obj_property>
    </wvobject>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/data_mem" type="array">
+      <obj_property name="ElementShortName">data_mem[1:0][1:0][3:0][3:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_mem[1:0][1:0][3:0][3:0][7:0]</obj_property>
+   </wvobject>
    <wvobject fp_name="group115" type="group">
       <obj_property name="label">data mem l2</obj_property>
       <obj_property name="DisplayName">label</obj_property>
@@ -404,18 +443,42 @@
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/data_mem[1][1]" type="array">
          <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/data_mem[1][0]" type="array">
          <obj_property name="ElementShortName">[0][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/data_mem[0][1]" type="array">
          <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/data_mem[0][0]" type="array">
          <obj_property name="ElementShortName">[0][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group101" type="group">
+      <obj_property name="label">mem flags</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/tag_mem" type="array">
+         <obj_property name="ElementShortName">tag_mem[1:0][1:0][26:0]</obj_property>
+         <obj_property name="ObjectShortName">tag_mem[1:0][1:0][26:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/valid_mem" type="array">
+         <obj_property name="ElementShortName">valid_mem[1:0][1:0]</obj_property>
+         <obj_property name="ObjectShortName">valid_mem[1:0][1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/dirty_mem" type="array">
+         <obj_property name="ElementShortName">dirty_mem[1:0][1:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_mem[1:0][1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/use_mem" type="array">
+         <obj_property name="ElementShortName">use_mem[1:0]</obj_property>
+         <obj_property name="ObjectShortName">use_mem[1:0]</obj_property>
       </wvobject>
    </wvobject>
    <wvobject type="divider" fp_name="divider329">
@@ -466,20 +529,29 @@
       <obj_property name="CustomSignalColor">#808080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_hierarchy/main_mem/data_mem" type="array">
-      <obj_property name="ElementShortName">data_mem[0:0][3:0][3:0][3:0][7:0]</obj_property>
-      <obj_property name="ObjectShortName">data_mem[0:0][3:0][3:0][3:0][7:0]</obj_property>
-      <obj_property name="CustomSignalColor">#808080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
+   <wvobject fp_name="group125" type="group">
+      <obj_property name="label">data mem</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
-      <wvobject fp_name="/tb_hierarchy/main_mem/data_mem[0]" type="array">
-         <obj_property name="ElementShortName">[0][3:0][3:0][3:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">[0][3:0][3:0][3:0][7:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_hierarchy/main_mem/data_mem[0][3]" type="array">
+         <obj_property name="ElementShortName">[3][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[3][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
-      <wvobject fp_name="/tb_hierarchy/main_mem/data_mem[0]" type="array">
-         <obj_property name="ElementShortName">[0][3:0][3:0][3:0][7:0]</obj_property>
-         <obj_property name="ObjectShortName">[0][3:0][3:0][3:0][7:0]</obj_property>
+      <wvobject fp_name="/tb_hierarchy/main_mem/data_mem[0][2]" type="array">
+         <obj_property name="ElementShortName">[2][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[2][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/data_mem[0][1]" type="array">
+         <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/data_mem[0][0]" type="array">
+         <obj_property name="ElementShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

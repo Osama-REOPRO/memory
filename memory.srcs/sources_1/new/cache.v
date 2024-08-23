@@ -222,7 +222,7 @@ module cache
 						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ]);
 						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ];
 						// o_read_adrs <= {tag_mem[target_N][set_adrs], set_adrs, {$clog2(b){1'b0}}, 2'b00};
-						o_read_adrs <= {tag_mem[target_N][set_adrs], i_address[32-Tag_nbytes:0]};
+						o_read_adrs <= {tag_mem[target_N][set_adrs], i_address[31-Tag_nbytes:0]};
 					end
 				end
 				
