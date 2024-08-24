@@ -26,4 +26,44 @@ solved (I think)
     - [ ] don't know what to do when something is clean, seems like that breaks things, investigate, that might have been the problem
     - [x] when evac from L1 to L2, set L2 dirty
 - [ ] problem with target N again
-    - finding clean N but probably the clean should not have been detected, investigate at 3092.02 us
+    - [x] finding clean N but probably the clean should not have been detected, investigate at 3092.02 us
+        - actually this is the intended behavior, it found clean and overwrote that, makes plenty of sense and even the numbers continue naturally, the actual problem is that it didn't fetch the new data to L2 from main
+
+- [ ] new data not fetched to L2, only written to L1, later gets written to L2
+    - it appears something nasty is happening, as if data DOES get fetched but later gets overwritten with evacuated data, because I see the tag mem change twice in the same place, that shouldn't happen
+    - theory: we fetch from main, then when we evacuate, we evacuate to the same location because it is clean, and the other location is dirty, and it seem we always prefer writing to clean rathe than evacate which is more costly, but that only works between DIFFERENT operations, not within the same operation, the place where we fetch new data must be different than the place we evacuate old data to
+    - the whole evacuation process doesn't appear to be happening, I don't see the old data in o_read_data
+    - why doesn't evacuation happen? check read state
+    - indeed we aren't reading L2 at all
+    - Now L2 is being read but still we are evacing and fetching to the same place
+    - maybe when we get to write the evacuated data, that location should have already been clean? maybe when we read from that location it should then be set to invalid and clean?
+    - L1 should NEVER need an evacuation becuse L1 is writing to it, beucase of inclusive, policy, if L1 evacuations always hit in L2. The only reason L2 might need an evac is if we are fetching data from main and there is a conflict and no clean
+        - but shouldn't we account for the clean/dirty dichotomy? that is, if L1 needs an evac, that will make it's L2 equivalent dirty, and so if there wasn't a conflict already (because that evac target is clean) then now we will have a conflict
+
+- [ ] to keep inclusivity, we must NEVER remove data from L2 that exists in L1, there is no mechanism for that right now!
+
+# Potential Solutions:
+- Cache Lock N
+    - you set a specific N to be locked, so on lookup operations, we never choose that locked N
+    - so that we lock N in L2 with data in L1 so inclusivity is maintained
+    - that lock allows only writes only to the same address in that N, we can release that lock whenever we want using a read/write to that same locked address
+- always evacuate from L1 to L2 before writing new data
+    - the issue is that when we write new data first, we might write it to the N that contains address we would later evacuate to, because it happens to be clean, we don't want that
+    - and so if we evacuate first, then the evacuation will set that N to dirty, so later when we write the new data we shouldn't write it there, because that would be dirty and the most recently written, so we should end up choosing the other way
+    - but that requires that when we do the first lookup, that we lookup the evac address rather than the new address, but that requires knowing the evac address to begin with, that isn't possible right now because we only know the evac address once we've done a READ operation, but we need to know it at the lookup stage, which is before the read operation
+        - and so we should do the already more sensible thing which is to get the conflicting address on lookup, not on read
+
+## Action items:
+- [ ] in cache module: get conflicting address on lookup instead of on read
+- [ ] if an evac is required, then lookup the evac address in the evac stage rather than the new address
+- [ ] if an evac is required, always do the evac first then write the new data
+
+
+
+# Later
+    - [ ] inexplicably the other N get's set to fetched data from main while the current N has the data already!
+        - the actual data from below gets evacuated to the correct place, but then this happens
+        - hit didn't occur on L2 when it should have
+    - [ ] main get's written the wrong data
+
+

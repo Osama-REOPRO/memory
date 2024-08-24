@@ -95,7 +95,10 @@ wire evac_needed_L1 = conflict_occurred_L1 && !clean_found[1];
 
 wire write_needed_L2 = evac_needed_L1 || both_missed;
 wire conflict_occurred_L2 = write_needed_L2 && !hit_occurred[2] && !empty_found[2];
-wire evac_needed_L2 = conflict_occurred_L2 && !clean_found[2];
+wire evac_needed_L2 = conflict_occurred_L2 && (!clean_found[2] || evac_needed_L1);
+	// if a conflict occurs and either clean not found or L1 needs an evac, because if
+	// L1 needs an evac it doesn't matter that a clean was found because we need to
+	// write twice, one clean isn't enough
 
 wire read_needed_L1 = is_read_op || evac_needed_L1;
 wire read_needed_L2 = only_second_hit || evac_needed_L2;
