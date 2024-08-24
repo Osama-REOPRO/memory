@@ -47,6 +47,7 @@ solved (I think)
     - you set a specific N to be locked, so on lookup operations, we never choose that locked N
     - so that we lock N in L2 with data in L1 so inclusivity is maintained
     - that lock allows only writes only to the same address in that N, we can release that lock whenever we want using a read/write to that same locked address
+    - this simply prevents choosing that N on lookups even if it is clean
 - always evacuate from L1 to L2 before writing new data
     - the issue is that when we write new data first, we might write it to the N that contains address we would later evacuate to, because it happens to be clean, we don't want that
     - and so if we evacuate first, then the evacuation will set that N to dirty, so later when we write the new data we shouldn't write it there, because that would be dirty and the most recently written, so we should end up choosing the other way
@@ -55,6 +56,7 @@ solved (I think)
 
 ## Action items:
 - [ ] in cache module: get conflicting address on lookup instead of on read
+    - this shouldn't be a problem, when we read, we already read from target_N which is determined on Lookup, so we can simply on lookup set the address output to that conflicting N address, same thing we do right now with the read operation, but it genuinely makes more sense to do on lookup
 - [ ] if an evac is required, then lookup the evac address in the evac stage rather than the new address
 - [ ] if an evac is required, always do the evac first then write the new data
 

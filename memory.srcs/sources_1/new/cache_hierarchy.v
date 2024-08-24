@@ -731,12 +731,12 @@ l1_cache
 	.o_hit_occurred(hit_occurred[1]),
 	.o_empty_found(empty_found[1]),
 	.o_clean_found(clean_found[1]),
+	.o_adrs(read_adrs_L1),
 
 	.i_valid_bytes(valid_bytes_L1),
 
 	.i_write_data(write_data_L1),
 	.o_read_data(read_data_L1),
-	.o_read_adrs(read_adrs_L1),
 
 	.o_mem_operation_done(mem_operation_done[1])
 );
@@ -766,12 +766,12 @@ l2_cache
 	.o_hit_occurred(hit_occurred[2]),
 	.o_empty_found(empty_found[2]),
 	.o_clean_found(clean_found[2]),
+	.o_adrs(read_adrs_L2),
 
 	.i_valid_bytes(valid_bytes_L2),
 
 	.i_write_data(write_data_L2),
 	.o_read_data(read_data_L2),
-	.o_read_adrs(read_adrs_L2),
 
 	.o_mem_operation_done(mem_operation_done[2])
 );
