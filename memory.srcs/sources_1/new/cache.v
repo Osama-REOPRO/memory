@@ -113,7 +113,7 @@ module cache
 	
 	reg delay_started;
 
-	// hit check
+	// lookup
 	always @(*) begin
 		if (i_rst) begin
 
@@ -127,6 +127,7 @@ module cache
 			
 			get_new_random_num = 1'b0;
 
+			o_adrs 		 = 0;
 			i = 0;
 
 		end else if (state == busy_st && i_op == `lookup_op && !o_mem_operation_done) begin
@@ -150,6 +151,9 @@ module cache
 					empty_N = i;
 				end
 			end
+
+			o_adrs = {tag_mem[target_N][set_adrs], i_address[31-Tag_nbytes:0]};
+
 		end
 	end
 
@@ -164,7 +168,6 @@ module cache
 		
 			o_mem_operation_done <= 1'b0;
 			delay_started <= 1'b0;
-			o_adrs 		 <= 0;
 
 			for (i0=0; i0<N; i0=i0+1) begin
 				for (i1=0; i1<S; i1=i1+1) begin
@@ -221,8 +224,6 @@ module cache
 						$write("		o_read_data[%0d -:8] <= %b", ((ib+1)*8)-1, data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ][ ib[1:0] ]);
 						$write(" = %0d\n", data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ]);
 						o_read_data[((ib+1)*8)-1 -:8] <= data_mem[target_N][set_adrs][ ($clog2(4*b)-1) >= 2 ? ib[$clog2(4*b)-1:2] : 0 ] [ ib[1:0] ];
-						// o_adrs <= {tag_mem[target_N][set_adrs], set_adrs, {$clog2(b){1'b0}}, 2'b00};
-						o_adrs <= {tag_mem[target_N][set_adrs], i_address[31-Tag_nbytes:0]};
 					end
 				end
 				

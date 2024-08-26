@@ -55,10 +55,13 @@ solved (I think)
         - and so we should do the already more sensible thing which is to get the conflicting address on lookup, not on read
 
 ## Action items:
-- [ ] in cache module: get conflicting address on lookup instead of on read
+- [x] in cache module: get conflicting address on lookup instead of on read
     - this shouldn't be a problem, when we read, we already read from target_N which is determined on Lookup, so we can simply on lookup set the address output to that conflicting N address, same thing we do right now with the read operation, but it genuinely makes more sense to do on lookup
-- [ ] if an evac is required, then lookup the evac address in the evac stage rather than the new address
-- [ ] if an evac is required, always do the evac first then write the new data
+- [x] if an evac is required, then lookup the evac address in the evac stage rather than the new address
+- [x] if an evac is required, always do the evac first then write the new data
+- [x] now in the second lookup we instead lookup the original address if we had previously looked up address from L1
+- [ ] revise all the "neededs" the are critically important
+- [ ] test all these
 
 
 

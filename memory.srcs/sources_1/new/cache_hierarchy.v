@@ -68,8 +68,10 @@ reg  [(32*L2_b)-1:0] write_data_L2;
 wire [(32*L1_b)-1:0] read_data_L1;
 wire [(32*L2_b)-1:0] read_data_L2;
 
-wire [31:0] read_adrs_L1;
-wire [31:0] read_adrs_L2;
+// address we get when we lookup (conflicting address)
+// this is the address that later read/write operations will target
+wire [31:0] adrs_target_N_L1; 
+wire [31:0] adrs_target_N_L2;
 
 reg use_manual_adrs;
 reg [31:0] adrs_manual;
@@ -236,6 +238,11 @@ always @(posedge i_clk) begin
 								op			  <= `lookup_op;
 								mem_operation[2] <= 1'b1;
 
+								if (evac_needed_L1) begin
+									use_manual_adrs <= 1'b1;
+									adrs_manual <= adrs_target_N_L1;
+								end
+
 								cache_sub_state 	  <= busy;
 							end
 							busy: begin
@@ -250,6 +257,7 @@ always @(posedge i_clk) begin
 									sub_state <= lookup_done_st; // whether we hit or not
 									cache_sub_state <= init;
 									L2_second_lookup_occurred <= 1'b0;
+									use_manual_adrs <= 1'b0;
 								end
 							end
 						endcase
@@ -311,6 +319,7 @@ always @(posedge i_clk) begin
 							// Answer: here we are only determining the beginning, we
 							// will go to later read stages from there!
 					end
+
 					read_L1_st: begin
 						case (cache_sub_state)
 							init: begin
@@ -348,10 +357,10 @@ always @(posedge i_clk) begin
 
 								if (evac_needed_L1 && evac_needed_L2) begin
 									use_manual_adrs <= 1'b1;
-									adrs_manual <= read_adrs_L1;
+									adrs_manual <= adrs_target_N_L1;
 								end else begin
 									use_manual_adrs <= 1'b0;
-									adrs_manual <= read_adrs_L1; // so we don't get a latch
+									adrs_manual <= adrs_target_N_L1; // so we don't get a latch
 								end
 
 								cache_sub_state		<= busy;
@@ -505,14 +514,19 @@ always @(posedge i_clk) begin
 									// - fill missing from above
 									// 		happens on both reads and writes on miss both
 
+									// sub_state <= 
+										// !write_needed_L2 ? write_done_st :
+										// hit_occurred[2] ? L2_second_lookup_st :  // if L2 did hit, then this must be an evacuation from L1
+										// 													  // we always do a second lookup to get the 
+										// 													  // correct N to write to
+										// 						write_L2_from_main_st; // if we missed, then the data must come from above,
+										// 													  // but we might need to do an evacuation later from below
+										// 													  // to a different N (determined at end)
+
 									sub_state <= 
 										!write_needed_L2 ? write_done_st :
-										hit_occurred[2] ? L2_second_lookup_st :  // if L2 did hit, then this must be an evacuation from L1
-																							  // we always do a second lookup to get the 
-																							  // correct N to write to
-																write_L2_from_main_st; // if we missed, then the data must come from above,
-																							  // but we might need to do an evacuation later from below
-																							  // to a different N (determined at end)
+										evac_needed_L1 ? write_L2_from_L1_st :
+										write_L2_from_main_st;
 
 									cache_sub_state <= init;
 								end
@@ -548,9 +562,7 @@ always @(posedge i_clk) begin
 							finish: begin
 								if (!mem_operation_done[2]) begin
 
-									sub_state <= write_needed_main ? write_Main_st : 
-													 evac_needed_L1 ? L2_second_lookup_st : 
-													 write_done_st;
+									sub_state <= write_needed_main ? write_Main_st : write_done_st;
 
 									cache_sub_state <= init;
 								end
@@ -563,8 +575,7 @@ always @(posedge i_clk) begin
 
 						case (cache_sub_state)
 							init: begin
-								use_manual_adrs <= 1'b1;
-								adrs_manual <= read_adrs_L1;
+								use_manual_adrs <= 1'b0;
 								op			  <= `lookup_op;
 								mem_operation[2] <= 1'b1;
 
@@ -579,8 +590,7 @@ always @(posedge i_clk) begin
 							end
 							finish: begin
 								if (!mem_operation_done[2]) begin
-									use_manual_adrs <= 1'b0;
-									sub_state <= write_L2_from_L1_st; // whether we hit or not
+									sub_state <= write_L2_from_main_st;
 									cache_sub_state <= init;
 								end
 							end
@@ -592,14 +602,7 @@ always @(posedge i_clk) begin
 							init: begin
 
 								use_manual_adrs <= 1'b1;
-								adrs_manual <= read_adrs_L1;
-//								if (L2_second_lookup_occurred) begin 
-//									use_manual_adrs <= 1'b1;
-//									adrs_manual <= read_adrs_L1;
-//								end else begin
-//									use_manual_adrs <= 1'b0;
-//									adrs_manual <= read_adrs_L1; // anti-latch
-//								end
+								adrs_manual <= adrs_target_N_L1;
 							
 								write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
 								valid_bytes_L2[i_address[3]*8 +: 8]  <= {8'hff};
@@ -625,11 +628,10 @@ always @(posedge i_clk) begin
 								if (!mem_operation_done[2]) begin
 									use_manual_adrs <= 1'b0;
 
-									if (L2_second_lookup_occurred) begin 
-										sub_state <= write_done_st;
-									end else begin
-										sub_state <= write_needed_main ? write_Main_st : write_done_st;
-									end
+									sub_state <= 
+										!hit_occurred[2] ? L2_second_lookup_st :  // if we missed, then the data must come from above
+										write_needed_main ? write_Main_st : 
+										write_done_st;
 
 									cache_sub_state <= init;
 								end
@@ -719,7 +721,7 @@ l1_cache
 
 	.i_op(op),
 
-	.i_address(use_manual_adrs? adrs_manual : i_address),
+	.i_address(use_manual_adrs ? adrs_manual : i_address),
 
 	.i_set_valid(set_valid),
 	.i_set_tag(set_tag),
@@ -731,7 +733,7 @@ l1_cache
 	.o_hit_occurred(hit_occurred[1]),
 	.o_empty_found(empty_found[1]),
 	.o_clean_found(clean_found[1]),
-	.o_adrs(read_adrs_L1),
+	.o_adrs(adrs_target_N_L1),
 
 	.i_valid_bytes(valid_bytes_L1),
 
@@ -754,7 +756,7 @@ l2_cache
 
 	.i_op(op),
 
-	.i_address(use_manual_adrs? adrs_manual : i_address),
+	.i_address(use_manual_adrs ? adrs_manual : i_address),
 
 	.i_set_valid(set_valid),
 	.i_set_tag(set_tag),
@@ -766,7 +768,7 @@ l2_cache
 	.o_hit_occurred(hit_occurred[2]),
 	.o_empty_found(empty_found[2]),
 	.o_clean_found(clean_found[2]),
-	.o_adrs(read_adrs_L2),
+	.o_adrs(adrs_target_N_L2),
 
 	.i_valid_bytes(valid_bytes_L2),
 
