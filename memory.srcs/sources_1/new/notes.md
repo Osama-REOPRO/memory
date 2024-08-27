@@ -60,7 +60,7 @@ solved (I think)
 - [x] if an evac is required, then lookup the evac address in the evac stage rather than the new address
 - [x] if an evac is required, always do the evac first then write the new data
 - [x] now in the second lookup we instead lookup the original address if we had previously looked up address from L1
-- [ ] revise all the "neededs" the are critically important
+- [ ] revise all the "neededs" they are critically important
 - [ ] test all these
 
 
