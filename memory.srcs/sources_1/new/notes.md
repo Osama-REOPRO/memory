@@ -87,6 +87,14 @@ solved (I think)
 # Main writing
 - [ ] main gets written the wrong data
     - [ ] wrong data evacuated to main, we seem to be evacuating the data we read from L1 instead of L2
+- [ ] wrong data is being read, from wrong N
+    - getting wrong N on first lookup, then after we write the evac data, we flip the use bit (which we shouldn't do) that's when we are in the correct N
+    - [o] why does it get wrong N?
+    - [ ] get correct N on first lookup
+    - [ ] don't flip "use bit" when writing evac data, only when writing new data
+        - right now when evacuating to main I mix data from L1 (if dirty) and data from L2 (if dirty), but I think now there is no situation in which that is necessary, we seem to always engage with different N, so we evacuate to one N (in L2) then writing the new data to a different N, we never simply wipeout data from both L1 and L2 in one go, that makes no sense, we should be get rid of data oldest to newest, data evacced from L1 must be newer than data in L2 but not in L1, all of this must be determined by the "use mem"
+        - the first lookup will always return the wrong N because the last place evacuated to is going to be dirty whereas the other way is clean and clean always trumps "use mem" bit.
+        - we desparately need a way to do manual N reads/writes
 
 
 --------

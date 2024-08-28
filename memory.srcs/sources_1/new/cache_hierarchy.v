@@ -574,7 +574,7 @@ always @(posedge i_clk) begin
 								op 			     <= `write_op;
 								mem_operation[2]    <= 1'b1;
 
-								set_use			  <= 1'b1;
+								set_use			  <= 1'b0;
 								set_valid	<= 1'b1;
 
 								cache_sub_state	     <= busy;
