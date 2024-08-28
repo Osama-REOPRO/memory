@@ -89,18 +89,28 @@ solved (I think)
     - [ ] wrong data evacuated to main, we seem to be evacuating the data we read from L1 instead of L2
 - [ ] wrong data is being read, from wrong N
     - getting wrong N on first lookup, then after we write the evac data, we flip the use bit (which we shouldn't do) that's when we are in the correct N
-    - [o] why does it get wrong N?
-    - [ ] get correct N on first lookup
-    - [ ] don't flip "use bit" when writing evac data, only when writing new data
-        - right now when evacuating to main I mix data from L1 (if dirty) and data from L2 (if dirty), but I think now there is no situation in which that is necessary, we seem to always engage with different N, so we evacuate to one N (in L2) then writing the new data to a different N, we never simply wipeout data from both L1 and L2 in one go, that makes no sense, we should be get rid of data oldest to newest, data evacced from L1 must be newer than data in L2 but not in L1, all of this must be determined by the "use mem"
+    - [x] why does it get wrong N?
         - the first lookup will always return the wrong N because the last place evacuated to is going to be dirty whereas the other way is clean and clean always trumps "use mem" bit.
+    - [ ] get correct N on first lookup
+    - [x] don't flip "use bit" when writing evac data, only when writing new data
+        - right now when evacuating to main I mix data from L1 (if dirty) and data from L2 (if dirty), but I think now there is no situation in which that is necessary, we seem to always engage with different N, so we evacuate to one N (in L2) then writing the new data to a different N, we never simply wipeout data from both L1 and L2 in one go, that makes no sense, we should be get rid of data oldest to newest, data evacced from L1 must be newer than data in L2 but not in L1, all of this must be determined by the "use mem"
         - we desparately need a way to do manual N reads/writes
-
+- [x] add manual N to cache module
+- [ ] if L1 needs an evac then we evacuate that to appropriate, matching N, then if after that an L2 evac is needed we should evacuate the opposite N to main, because that would naturally be the least recently accessed one
+    - shouldn't this be automatically handled by the "use mem" system?
+        - answer: this is different, we can't just rely on recency because here we have a specific N that we are evacuating to from L1, in that case we are bound by that, we can only evacuate the opposite N to main
+- [[fact]] both N can't be in L1 at once
+    - because the whole point of having multiple N in L2 is to be able to keep multiple, conflicting addresses in L2 while they won't fit in the directly mapped L1, when one N is in L1, the other must not be there, by definition, these two addresses conflict with each other
+- [ ] examine: once we've evacuated L1 to L2, that N must have become dirty right? in this case both are dirty, so the use mem logic should be functional now right? what we need is another lookup to get the the other N because now either both are dirty, in which case the use mem logic kicks in, or the other one is clean, in which case that will be returned which is what we want
+    - I think the problem is that we are doing the reading first, which is causing this problem, we lookup, get the clean N, but we specifically want the one that won't get the evac
+- [ ] implement cache transparency, a single lookup (or even none) should be enough to get the info we need, we should never need the multiple lookup mess
+    - so in a single lookup you get all the N and all the addresses in them and their use mem etc., all decision making should be done in the controller not the cache
 
 --------
 # Later
     - [ ] revise all the "neededs" they are critically important
     - [ ] check on the main, it got very little attention
     - [ ] move on to validate reading
+    - [ ] connect the new signals I created inside the cache module
 
 

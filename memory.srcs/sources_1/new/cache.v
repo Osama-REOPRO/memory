@@ -4,7 +4,9 @@ module cache
 #(
 	parameter C = 8,   // capacity (total words)
 	parameter b = 2,   // block size (words per block)
-	parameter N = 2    // degree of associativity (blocks per set)
+	parameter N = 2,    // degree of associativity (blocks per set)
+
+	localparam size_N = ($clog2(N)>0)? $clog2(N): 1
 )
 (
 	input       			   	  i_clk, 
@@ -18,12 +20,16 @@ module cache
 	input 							  i_set_dirty,
 	input 							  i_set_use,
 
+	input								  i_use_manual_N,
+	input 	  [size_N-1 : 0] 	  i_manual_N,
+
 	input 					   	  i_mem_operation,
 
 	output reg 						  o_hit_occurred,
 	output reg 						  o_empty_found,
 	output reg  			   	  o_clean_found,
 	output reg [31:0]				  o_adrs, // conflicting address
+	output 	  [size_N-1 : 0] 	  o_target_N,
 
 	input 	  [(4*b)-1:0]	     i_valid_bytes, 	// valid bytes in read/write data, 1 for each valid byte
 
@@ -61,7 +67,6 @@ module cache
 
 	// N operations
 	integer i;
-	localparam size_N = ($clog2(N)>0)? $clog2(N): 1;
 
 	reg [size_N-1:0] hit_N; // which of the N-ways the hit occurred in
 	reg [size_N-1:0] empty_N; // which of the N-ways is empty
@@ -80,12 +85,15 @@ module cache
 			rand_gen_clk 		 	<= 1'b0;
 	end
 	LFSR #(.size(size_N)) rand_gen (.i_clk(i_rst ? i_clk : rand_gen_clk), .i_rst(i_rst), .o_num(random_N));
-	wire [size_N-1:0] target_N = Direct_mapped ? 0       : 
+	wire [size_N-1:0] target_N = 
+						 i_use_manual_N ? i_manual_N :
+						 Direct_mapped ? 0       : 
 						 o_hit_occurred  ? hit_N 	 :
 						 o_empty_found   ? empty_N :
 						 o_clean_found   ? clean_N :
 						 size_N >= 2	  ? {random_N[size_N-1:1], !use_mem [set_adrs]} : // N to evacuate then replace #note0001
 						 !use_mem [set_adrs];
+	assign o_target_N = target_N;
 
 	wire write_would_conflict = !o_hit_occurred && !o_empty_found && !o_clean_found;
 
