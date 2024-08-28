@@ -103,8 +103,13 @@ solved (I think)
     - because the whole point of having multiple N in L2 is to be able to keep multiple, conflicting addresses in L2 while they won't fit in the directly mapped L1, when one N is in L1, the other must not be there, by definition, these two addresses conflict with each other
 - [ ] examine: once we've evacuated L1 to L2, that N must have become dirty right? in this case both are dirty, so the use mem logic should be functional now right? what we need is another lookup to get the the other N because now either both are dirty, in which case the use mem logic kicks in, or the other one is clean, in which case that will be returned which is what we want
     - I think the problem is that we are doing the reading first, which is causing this problem, we lookup, get the clean N, but we specifically want the one that won't get the evac
-- [ ] implement cache transparency, a single lookup (or even none) should be enough to get the info we need, we should never need the multiple lookup mess
+- [o] implement cache transparency, a single lookup (or even none) should be enough to get the info we need, we should never need the multiple lookup mess
     - so in a single lookup you get all the N and all the addresses in them and their use mem etc., all decision making should be done in the controller not the cache
+    - we get:
+        - all tags in tag mem
+        - all valid mems
+        - dirty mems
+        - use mem
 
 --------
 # Later
