@@ -53,22 +53,46 @@ solved (I think)
     - and so if we evacuate first, then the evacuation will set that N to dirty, so later when we write the new data we shouldn't write it there, because that would be dirty and the most recently written, so we should end up choosing the other way
     - but that requires that when we do the first lookup, that we lookup the evac address rather than the new address, but that requires knowing the evac address to begin with, that isn't possible right now because we only know the evac address once we've done a READ operation, but we need to know it at the lookup stage, which is before the read operation
         - and so we should do the already more sensible thing which is to get the conflicting address on lookup, not on read
+- [x] inexplicably the other N get's set to fetched data from main while the current N has the data already!
+        - the actual data from below gets evacuated to the correct place, but then this happens
+        - hit didn't occur on L2 when it should have
 
 ## Action items:
 - [x] in cache module: get conflicting address on lookup instead of on read
     - this shouldn't be a problem, when we read, we already read from target_N which is determined on Lookup, so we can simply on lookup set the address output to that conflicting N address, same thing we do right now with the read operation, but it genuinely makes more sense to do on lookup
 - [x] if an evac is required, then lookup the evac address in the evac stage rather than the new address
+    - but how would we know that evac is required before we even do a lookup!
 - [x] if an evac is required, always do the evac first then write the new data
 - [x] now in the second lookup we instead lookup the original address if we had previously looked up address from L1
-- [ ] revise all the "neededs" they are critically important
-- [ ] test all these
+---- repeat
+- [x] reverse this: "if an evac is required, then lookup the evac address in the evac stage rather than the new address"
+    - first lookups must always be to the current address, otherwise we mess up subsequent states, read and write transitions all depend on hit/miss states to the current address
+- [x] "if an evac is required, always do the evac first then write the new data" add yet another lookup before this
+- [x] now in the second lookup we instead lookup the original address if we had previously looked up address from L1
+- [x] change what happens after evac to L2, what state to we go to from there? cache_hierarchy.v ln:656
+- [x] look at all the transistions between states
 
 
 
+- [x] test all these
+- [x] new data block not written to L2, only to L1
+    - after first fill, evac data written to L2 but not data from Main
+- [x] 1,906.02 us when fetching missing data from L2 (hit) to L1 (miss) we fetch the wrong part of L2, we fetch the first part when we should have fetched the second part
+- [x] restore lookup to original behavior
+    - the new behavior is messing with the states, because they all assume that the last lookup had been to the current address
+- [x] we are stuck
+
+- L1 and L2 writing seems to be pretty solid, can't see any problems
+--------
+# Main writing
+- [ ] main gets written the wrong data
+    - [ ] wrong data evacuated to main, we seem to be evacuating the data we read from L1 instead of L2
+
+
+--------
 # Later
-    - [ ] inexplicably the other N get's set to fetched data from main while the current N has the data already!
-        - the actual data from below gets evacuated to the correct place, but then this happens
-        - hit didn't occur on L2 when it should have
-    - [ ] main get's written the wrong data
+    - [ ] revise all the "neededs" they are critically important
+    - [ ] check on the main, it got very little attention
+    - [ ] move on to validate reading
 
 
