@@ -112,7 +112,12 @@ solved (I think)
         - use mem
 
 - [x] write cache testbench
-- [o] test turn everything to task in cache controller
+- [x] test turn everything to task in cache controller
+
+- [o] fix the actual states, you should now essentially treat them like functions or tasks that run sequentially
+    - that is absolutely what the state machine does, it allows us to run things sequentially like in programming (just like that guy on quora said)
+    - I can now run any state I want to run in any order, no problem, that is essentially what I wanted
+- [ ] read L2 has questionable conditions
 
 --------
 # Later
@@ -120,5 +125,6 @@ solved (I think)
     - [ ] check on the main, it got very little attention
     - [ ] move on to validate reading
     - [ ] connect the new signals I created inside the cache module
+    - [ ] o_read_data is literally never assigned
 
 
