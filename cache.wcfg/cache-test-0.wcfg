@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_cache_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_cache" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="34.210 ns"></ZoomStartTime>
+      <ZoomEndTime time="84.211 ns"></ZoomEndTime>
+      <Cursor1Time time="50.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="187"></NameColumnWidth>
+      <ValueColumnWidth column_width="480"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="10" />
+   <wvobject fp_name="/tb_cache/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/rst" type="logic">
+      <obj_property name="ElementShortName">rst</obj_property>
+      <obj_property name="ObjectShortName">rst</obj_property>
+   </wvobject>
+   <wvobject type="divider" fp_name="divider85">
+      <obj_property name="label">write op</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/mem_operation" type="logic">
+      <obj_property name="ElementShortName">mem_operation</obj_property>
+      <obj_property name="ObjectShortName">mem_operation</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/mem_operation_done" type="logic">
+      <obj_property name="ElementShortName">mem_operation_done</obj_property>
+      <obj_property name="ObjectShortName">mem_operation_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/op" type="array">
+      <obj_property name="ElementShortName">op[2:0]</obj_property>
+      <obj_property name="ObjectShortName">op[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/adrs" type="array">
+      <obj_property name="ElementShortName">adrs[31:0]</obj_property>
+      <obj_property name="ObjectShortName">adrs[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/valid_bytes" type="array">
+      <obj_property name="ElementShortName">valid_bytes[15:0]</obj_property>
+      <obj_property name="ObjectShortName">valid_bytes[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/write_data" type="array">
+      <obj_property name="ElementShortName">write_data[127:0]</obj_property>
+      <obj_property name="ObjectShortName">write_data[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_cache/cache/data_mem" type="array">
+      <obj_property name="ElementShortName">data_mem[1:0][1:0][3:0][3:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_mem[1:0][1:0][3:0][3:0][7:0]</obj_property>
+   </wvobject>
+</wave_config>

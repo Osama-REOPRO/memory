@@ -31,6 +31,11 @@ module cache
 	output reg [31:0]				  o_adrs, // conflicting address
 	output 	  [size_N-1 : 0] 	  o_target_N,
 
+	output reg [(N*32)-1:0] 	  o_adrs_N_tags, // it contains the full addresses, not just the tags, for ease of use outside
+	output reg [N-1:0] 			  o_adrs_N_valids,
+	output reg [N-1:0] 			  o_adrs_N_dirtys,
+	output reg			 			  o_adrs_N_use,
+
 	input 	  [(4*b)-1:0]	     i_valid_bytes, 	// valid bytes in read/write data, 1 for each valid byte
 
 	input 	  [(32*b)-1:0] 	  i_write_data,
@@ -66,7 +71,23 @@ module cache
 	wire [Tag_nbytes-1:0] 			 											 tag_adrs 			 =										 i_address[0 +  Byte_offset_nbytes +  Block_offset_nbytes	+	Set_nbytes +: Tag_nbytes ];
 
 	// N operations
-	integer i;
+	always @(*) begin : set_N_info
+		integer i;
+		if (i_rst) begin
+			i = 0;
+			o_adrs_N_tags 	= {N{32'b0}};
+			o_adrs_N_valids 	= {N{1'b0}};
+			o_adrs_N_dirtys 	= {N{1'b0}};
+			o_adrs_N_use 		= 1'b0;
+		end else begin
+			for (i = 0; i<N; i=i+1) begin
+				o_adrs_N_tags[(i*32)-1 +:32] = {tag_mem[i][set_adrs], i_address[31-Tag_nbytes:0]};
+				o_adrs_N_valids[i] 				= valid_mem[i][set_adrs];
+				o_adrs_N_dirtys[i] 				= dirty_mem[i][set_adrs];
+				o_adrs_N_use 						= use_mem[set_adrs];
+			end
+		end
+	end
 
 	reg [size_N-1:0] hit_N; // which of the N-ways the hit occurred in
 	reg [size_N-1:0] empty_N; // which of the N-ways is empty
@@ -122,7 +143,8 @@ module cache
 	reg delay_started;
 
 	// lookup
-	always @(*) begin
+	always @(*) begin : lookup_operation
+		integer i;
 		if (i_rst) begin
 
 			o_hit_occurred = 1'b0;

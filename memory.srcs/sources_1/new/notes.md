@@ -111,6 +111,8 @@ solved (I think)
         - dirty mems
         - use mem
 
+- [ ] write cache testbench
+
 --------
 # Later
     - [ ] revise all the "neededs" they are critically important
