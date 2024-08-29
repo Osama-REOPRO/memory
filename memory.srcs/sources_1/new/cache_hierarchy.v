@@ -351,13 +351,11 @@ always @(posedge i_clk) begin
 						mem_operation[2]  <= 1'b1;
 						valid_bytes_L2 <= {(4*L2_b){1'b1}}; // how about all valid? while reading that it
 
-						// todo: why both need evac?
-						if (evac_needed_L1 && evac_needed_L2) begin
+						if (evac_needed_L1) begin
 							use_manual_adrs <= 1'b1;
 							adrs_manual <= adrs_target_N_L1;
 						end else begin
 							use_manual_adrs <= 1'b0;
-							adrs_manual <= adrs_target_N_L1; // so we don't get a latch
 						end
 
 						cache_sub_state		<= busy;
@@ -405,6 +403,7 @@ always @(posedge i_clk) begin
 			end
 
 
+			// todo: bookmark
 			write_L1_st: begin
 				case (cache_sub_state)
 					init: begin
