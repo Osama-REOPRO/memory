@@ -112,7 +112,7 @@ wire read_needed_Main = both_missed;
 wire write_needed_main = evac_needed_L2;
 
 wire evac_needed_both = evac_needed_L1 && evac_needed_L2;
-wire write_needed_L2_second = conflict_occurred_L2 && evac_needed_L1 && both_missed; // todo: verify
+wire write_needed_L2_evac = conflict_occurred_L2 && evac_needed_L1 && both_missed; // todo: verify
 
 wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
 		(L2_b <= 1) ? 1'b0 : 
@@ -121,6 +121,7 @@ wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 =
 
 // state machine
 integer state;
+integer next_state;
 localparam idle_st	= 0,
 			  lookup_st	= 1,
 			  read_st	= 2,
@@ -151,6 +152,40 @@ integer cache_sub_state;
 localparam init   = 0,
 			  busy   = 1,
 			  finish = 2;
+
+always @(*) begin
+	if (i_rst) begin
+		next_state = 0;
+	end else begin
+		case (state)
+			idle_st: begin
+				if (i_mem_operation) next_state = lookup_st;
+			end
+			lookup_L1_st: begin
+				if (hit_occurred[1]) next_state = is_read_op ? read_L1_st : write_L1_st; 
+				else next_state = lookup_L2_st;
+			end
+			lookup_L2_st: begin
+				next_state = 
+					read_needed_L1 	? read_L1_st :
+					read_needed_L2 	? read_L2_st :
+					read_needed_Main 	? read_Main_st :
+					write_needed_L1 		? write_L1_st :
+					write_needed_L2 		? write_L2_from_main_st :
+					write_needed_L2_evac ? write_L2_from_L1_st :
+					write_needed_main 	? write_Main_st :
+						done_st;
+			end
+			read_st: begin
+			end
+			write_st: begin
+			end
+			done_st: begin
+				if (!i_mem_operation) next_state = idle_st;
+			end
+		endcase
+	end
+end
 
 
 integer i;
@@ -194,87 +229,60 @@ always @(posedge i_clk) begin
 
 			idle_st: begin
 				o_mem_operation_done <= 1'b0;
-				if (i_mem_operation) begin
-					state <= lookup_st;
-				end
+				state <= next_st;
 			end
 
 			done_st: begin
 				o_mem_operation_done = 1'b1;
-				if (!i_mem_operation) state = idle_st;
+				state <= next_st;
 			end
 
-			lookup_st: begin
-				case (sub_state)
+			lookup_L1_st: begin
+				case (cache_sub_state)
+					init: begin
+						op			  <= `lookup_op;
+						mem_operation[1] <= 1'b1;
 
-					lookup_L1_st: begin
-						case (cache_sub_state)
-							init: begin
-								op			  <= `lookup_op;
-								mem_operation[1] <= 1'b1;
-
-								cache_sub_state 	  <= busy;
-							end
-							busy: begin
-								if (mem_operation_done[1]) begin
-									mem_operation[1] <= 1'b0;
-
-									cache_sub_state 	  <= finish;
-								end
-							end
-							finish: begin
-								if (!mem_operation_done[1]) begin
-									if (hit_occurred[1]) sub_state <= lookup_done_st;
-									else 						sub_state <= lookup_L2_st;
-
-									cache_sub_state <= init;
-								end
-							end
-						endcase
+						cache_sub_state 	  <= busy;
 					end
+					busy: begin
+						if (mem_operation_done[1]) begin
+							mem_operation[1] <= 1'b0;
 
-					lookup_L2_st: begin
-						case (cache_sub_state)
-							init: begin
-								op			  <= `lookup_op;
-								mem_operation[2] <= 1'b1;
-
-								use_manual_adrs <= 1'b0; // always lookup current address
-
-								cache_sub_state 	  <= busy;
-							end
-							busy: begin
-								if (mem_operation_done[2]) begin
-									mem_operation[2] <= 1'b0;
-
-									cache_sub_state 	  <= finish;
-								end
-							end
-							finish: begin
-								if (!mem_operation_done[2]) begin
-									sub_state <= lookup_done_st; // whether we hit or not
-									cache_sub_state <= init;
-									// non_current_adrs_lookup_occurred_L2 <= 1'b0;
-								end
-							end
-						endcase
+							cache_sub_state 	  <= finish;
+						end
 					end
-
-
-					lookup_done_st: begin
-						case (i_op)
-							`write_op: begin
-								if (hit_occurred[1]) state <= write_st;
-								else state <= read_st;
-							end
-							`read_op: begin
-								state <= read_st;
-							end
-						endcase
-
-						sub_state <= 0;
+					finish: begin
+						if (!mem_operation_done[1]) begin
+							state <= next_state;
+							cache_sub_state <= init;
+						end
 					end
+				endcase
+			end
 
+			lookup_L2_st: begin
+				case (cache_sub_state)
+					init: begin
+						op			  <= `lookup_op;
+						mem_operation[2] <= 1'b1;
+
+						use_manual_adrs <= 1'b0; // always lookup current address
+
+						cache_sub_state 	  <= busy;
+					end
+					busy: begin
+						if (mem_operation_done[2]) begin
+							mem_operation[2] <= 1'b0;
+
+							cache_sub_state 	  <= finish;
+						end
+					end
+					finish: begin
+						if (!mem_operation_done[2]) begin
+							state <= next_state;
+						end
+					end
 				endcase
 			end
 
@@ -716,7 +724,7 @@ always @(posedge i_clk) begin
 							finish: begin
 								if (!i_mem_operation_done) begin
 									// todo: bookmark, how do we go from here to second L2 write
-									if (write_needed_L2_second) begin
+									if (write_needed_L2_evac) begin
 										sub_state <= lookup_L2_second_st;
 									end else begin
 										sub_state <= write_done_st;
