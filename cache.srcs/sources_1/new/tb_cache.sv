@@ -75,35 +75,57 @@ initial begin
 	#4;
 	rst = 0;
 	#4
-	send_word(32'd0, 32'd0);
-	send_word(32'd0, 32'd4);
-	send_word(32'd0, 32'd8);
-	send_word(32'd0, 32'd12);
+	count_up();
+	//fill_with_conseq_nums();
 
-	send_byte(8'd0, 32'd0);
-	send_byte(8'd1, 32'd1);
-	send_byte(8'd2, 32'd2);
-	send_byte(8'd3, 32'd3);
+	//send_block(128'b0, 32'd0);
+
+	//send_word(32'd0, 32'd0);
+	//send_word(32'd0, 32'd4);
+	//send_word(32'd0, 32'd8);
+	//send_word(32'd0, 32'd12);
+
+	//send_byte(8'd0, 32'd0);
+	//send_byte(8'd1, 32'd1);
+	//send_byte(8'd2, 32'd2);
+	//send_byte(8'd3, 32'd3);
 end
 
-// tasks
-task send_byte(input [7:0] byte_to_send, input [31:0] adrs);
+// tasks and functions
+task count_up;
+begin
+	integer i = 0;
+	while (1) begin
+		send_byte(i, i);
+		i = i+1;
+	end
+end
+endtask
+
+task fill_with_conseq_nums;
+begin
+	integer i;
+	for (i=0; i<(C*4); i=i+1) begin
+		send_byte(i, i);
+	end
+end
+endtask
+
+task send_block(input [128:0] block_to_send, input [31:0] i_adrs);
 begin
 
-	lookup(adrs);
+	lookup(i_adrs);
 
 	op = `write_op;
-	adrs = adrs;
+	adrs = i_adrs;
 
 	set_valid = 1'b1;
 	set_tag = 1'b1;
 	set_dirty = 1'b1;
 	set_use = 1'b1;
 
-	valid_bytes = 16'b0;
-	valid_bytes[adrs[3:0]] = 1'b1;
-	write_data = 128'b0;
-	write_data[adrs[3:0]*8 +: 8] = byte_to_send;
+	valid_bytes = 16'hffff;
+	write_data = block_to_send;
 
 	mem_operation = 1;
 	@(posedge mem_operation_done) mem_operation = 0;
@@ -112,13 +134,13 @@ begin
 end
 endtask
 
-task send_word(input [31:0] word_to_send, input [31:0] adrs);
+task send_word(input [31:0] word_to_send, input [31:0] i_adrs);
 begin
 
-	lookup(adrs);
+	lookup(i_adrs);
 
 	op = `write_op;
-	adrs = adrs;
+	adrs = i_adrs;
 
 	set_valid = 1'b1;
 	set_tag = 1'b1;
@@ -137,10 +159,35 @@ begin
 end
 endtask
 
-task lookup(input [31:0] adrs);
+task send_byte(input [7:0] byte_to_send, input [31:0] i_adrs);
+begin
+
+	lookup(i_adrs);
+
+	op = `write_op;
+	adrs = i_adrs;
+
+	set_valid = 1'b1;
+	set_tag = 1'b1;
+	set_dirty = 1'b1;
+	set_use = 1'b1;
+
+	valid_bytes = 16'b0;
+	valid_bytes[adrs[3:0]] = 1'b1;
+	write_data = 128'b0;
+	write_data[adrs[3:0]*8 +: 8] = byte_to_send;
+
+	mem_operation = 1;
+	@(posedge mem_operation_done) mem_operation = 0;
+	@(negedge mem_operation_done);
+
+end
+endtask
+
+task lookup(input [31:0] i_adrs);
 begin
 	op = `lookup_op;
-	adrs = adrs;
+	adrs = i_adrs;
 
 	mem_operation = 1;
 	@(posedge mem_operation_done) mem_operation = 0;

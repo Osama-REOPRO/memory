@@ -81,7 +81,8 @@ module cache
 			o_adrs_N_use 		= 1'b0;
 		end else begin
 			for (i = 0; i<N; i=i+1) begin
-				o_adrs_N_tags[(i*32)-1 +:32] = {tag_mem[i][set_adrs], i_address[31-Tag_nbytes:0]};
+				//o_adrs_N_tags[(i*32) +:32] = {tag_mem[i][set_adrs], i_address[31-Tag_nbytes:0]};
+				o_adrs_N_tags[(i*32) +:32] = {tag_mem[i][set_adrs], {(32-Tag_nbytes){1'b0}}};
 				o_adrs_N_valids[i] 				= valid_mem[i][set_adrs];
 				o_adrs_N_dirtys[i] 				= dirty_mem[i][set_adrs];
 				o_adrs_N_use 						= use_mem[set_adrs];

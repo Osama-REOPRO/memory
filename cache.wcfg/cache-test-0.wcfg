@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="34.210 ns"></ZoomStartTime>
-      <ZoomEndTime time="84.211 ns"></ZoomEndTime>
-      <Cursor1Time time="50.000 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="6.000001 us"></ZoomEndTime>
+      <Cursor1Time time="1.750218 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="187"></NameColumnWidth>
-      <ValueColumnWidth column_width="480"></ValueColumnWidth>
+      <ValueColumnWidth column_width="475"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="10" />
+   <WVObjectSize size="11" />
    <wvobject fp_name="/tb_cache/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -47,6 +47,7 @@
    <wvobject fp_name="/tb_cache/adrs" type="array">
       <obj_property name="ElementShortName">adrs[31:0]</obj_property>
       <obj_property name="ObjectShortName">adrs[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_cache/valid_bytes" type="array">
       <obj_property name="ElementShortName">valid_bytes[15:0]</obj_property>
@@ -56,8 +57,327 @@
       <obj_property name="ElementShortName">write_data[127:0]</obj_property>
       <obj_property name="ObjectShortName">write_data[127:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_cache/cache/data_mem" type="array">
-      <obj_property name="ElementShortName">data_mem[1:0][1:0][3:0][3:0][7:0]</obj_property>
-      <obj_property name="ObjectShortName">data_mem[1:0][1:0][3:0][3:0][7:0]</obj_property>
+   <wvobject fp_name="group50" type="group">
+      <obj_property name="label">cache mem</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_cache/cache/data_mem[1][1]" type="array">
+         <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cache/cache/data_mem[1][0]" type="array">
+         <obj_property name="ElementShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cache/cache/data_mem[0][1]" type="array">
+         <obj_property name="ElementShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[1][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cache/cache/data_mem[0][0]" type="array">
+         <obj_property name="ElementShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[0][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group122" type="group">
+      <obj_property name="label">flags</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_cache/adrs_target_N" type="array">
+         <obj_property name="ElementShortName">adrs_target_N[31:0]</obj_property>
+         <obj_property name="ObjectShortName">adrs_target_N[31:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cache/target_N" type="array">
+         <obj_property name="ElementShortName">target_N[0:0]</obj_property>
+         <obj_property name="ObjectShortName">target_N[0:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="group254" type="group">
+         <obj_property name="label">adrs_N_tags</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject fp_name="vbus220" type="vbus">
+            <obj_property name="label">1</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[63]" type="logic">
+               <obj_property name="ElementShortName">[63]</obj_property>
+               <obj_property name="ObjectShortName">[63]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[62]" type="logic">
+               <obj_property name="ElementShortName">[62]</obj_property>
+               <obj_property name="ObjectShortName">[62]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[61]" type="logic">
+               <obj_property name="ElementShortName">[61]</obj_property>
+               <obj_property name="ObjectShortName">[61]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[60]" type="logic">
+               <obj_property name="ElementShortName">[60]</obj_property>
+               <obj_property name="ObjectShortName">[60]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[59]" type="logic">
+               <obj_property name="ElementShortName">[59]</obj_property>
+               <obj_property name="ObjectShortName">[59]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[58]" type="logic">
+               <obj_property name="ElementShortName">[58]</obj_property>
+               <obj_property name="ObjectShortName">[58]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[57]" type="logic">
+               <obj_property name="ElementShortName">[57]</obj_property>
+               <obj_property name="ObjectShortName">[57]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[56]" type="logic">
+               <obj_property name="ElementShortName">[56]</obj_property>
+               <obj_property name="ObjectShortName">[56]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[55]" type="logic">
+               <obj_property name="ElementShortName">[55]</obj_property>
+               <obj_property name="ObjectShortName">[55]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[54]" type="logic">
+               <obj_property name="ElementShortName">[54]</obj_property>
+               <obj_property name="ObjectShortName">[54]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[53]" type="logic">
+               <obj_property name="ElementShortName">[53]</obj_property>
+               <obj_property name="ObjectShortName">[53]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[52]" type="logic">
+               <obj_property name="ElementShortName">[52]</obj_property>
+               <obj_property name="ObjectShortName">[52]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[51]" type="logic">
+               <obj_property name="ElementShortName">[51]</obj_property>
+               <obj_property name="ObjectShortName">[51]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[50]" type="logic">
+               <obj_property name="ElementShortName">[50]</obj_property>
+               <obj_property name="ObjectShortName">[50]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[49]" type="logic">
+               <obj_property name="ElementShortName">[49]</obj_property>
+               <obj_property name="ObjectShortName">[49]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[48]" type="logic">
+               <obj_property name="ElementShortName">[48]</obj_property>
+               <obj_property name="ObjectShortName">[48]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[47]" type="logic">
+               <obj_property name="ElementShortName">[47]</obj_property>
+               <obj_property name="ObjectShortName">[47]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[46]" type="logic">
+               <obj_property name="ElementShortName">[46]</obj_property>
+               <obj_property name="ObjectShortName">[46]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[45]" type="logic">
+               <obj_property name="ElementShortName">[45]</obj_property>
+               <obj_property name="ObjectShortName">[45]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[44]" type="logic">
+               <obj_property name="ElementShortName">[44]</obj_property>
+               <obj_property name="ObjectShortName">[44]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[43]" type="logic">
+               <obj_property name="ElementShortName">[43]</obj_property>
+               <obj_property name="ObjectShortName">[43]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[42]" type="logic">
+               <obj_property name="ElementShortName">[42]</obj_property>
+               <obj_property name="ObjectShortName">[42]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[41]" type="logic">
+               <obj_property name="ElementShortName">[41]</obj_property>
+               <obj_property name="ObjectShortName">[41]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[40]" type="logic">
+               <obj_property name="ElementShortName">[40]</obj_property>
+               <obj_property name="ObjectShortName">[40]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[39]" type="logic">
+               <obj_property name="ElementShortName">[39]</obj_property>
+               <obj_property name="ObjectShortName">[39]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[38]" type="logic">
+               <obj_property name="ElementShortName">[38]</obj_property>
+               <obj_property name="ObjectShortName">[38]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[37]" type="logic">
+               <obj_property name="ElementShortName">[37]</obj_property>
+               <obj_property name="ObjectShortName">[37]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[36]" type="logic">
+               <obj_property name="ElementShortName">[36]</obj_property>
+               <obj_property name="ObjectShortName">[36]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[35]" type="logic">
+               <obj_property name="ElementShortName">[35]</obj_property>
+               <obj_property name="ObjectShortName">[35]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[34]" type="logic">
+               <obj_property name="ElementShortName">[34]</obj_property>
+               <obj_property name="ObjectShortName">[34]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[33]" type="logic">
+               <obj_property name="ElementShortName">[33]</obj_property>
+               <obj_property name="ObjectShortName">[33]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[32]" type="logic">
+               <obj_property name="ElementShortName">[32]</obj_property>
+               <obj_property name="ObjectShortName">[32]</obj_property>
+            </wvobject>
+         </wvobject>
+         <wvobject fp_name="vbus221" type="vbus">
+            <obj_property name="label">0</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="Radix">HEXRADIX</obj_property>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[31]" type="logic">
+               <obj_property name="ElementShortName">[31]</obj_property>
+               <obj_property name="ObjectShortName">[31]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[30]" type="logic">
+               <obj_property name="ElementShortName">[30]</obj_property>
+               <obj_property name="ObjectShortName">[30]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[29]" type="logic">
+               <obj_property name="ElementShortName">[29]</obj_property>
+               <obj_property name="ObjectShortName">[29]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[28]" type="logic">
+               <obj_property name="ElementShortName">[28]</obj_property>
+               <obj_property name="ObjectShortName">[28]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[27]" type="logic">
+               <obj_property name="ElementShortName">[27]</obj_property>
+               <obj_property name="ObjectShortName">[27]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[26]" type="logic">
+               <obj_property name="ElementShortName">[26]</obj_property>
+               <obj_property name="ObjectShortName">[26]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[25]" type="logic">
+               <obj_property name="ElementShortName">[25]</obj_property>
+               <obj_property name="ObjectShortName">[25]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[24]" type="logic">
+               <obj_property name="ElementShortName">[24]</obj_property>
+               <obj_property name="ObjectShortName">[24]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[23]" type="logic">
+               <obj_property name="ElementShortName">[23]</obj_property>
+               <obj_property name="ObjectShortName">[23]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[22]" type="logic">
+               <obj_property name="ElementShortName">[22]</obj_property>
+               <obj_property name="ObjectShortName">[22]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[21]" type="logic">
+               <obj_property name="ElementShortName">[21]</obj_property>
+               <obj_property name="ObjectShortName">[21]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[20]" type="logic">
+               <obj_property name="ElementShortName">[20]</obj_property>
+               <obj_property name="ObjectShortName">[20]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[19]" type="logic">
+               <obj_property name="ElementShortName">[19]</obj_property>
+               <obj_property name="ObjectShortName">[19]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[18]" type="logic">
+               <obj_property name="ElementShortName">[18]</obj_property>
+               <obj_property name="ObjectShortName">[18]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[17]" type="logic">
+               <obj_property name="ElementShortName">[17]</obj_property>
+               <obj_property name="ObjectShortName">[17]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[16]" type="logic">
+               <obj_property name="ElementShortName">[16]</obj_property>
+               <obj_property name="ObjectShortName">[16]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[15]" type="logic">
+               <obj_property name="ElementShortName">[15]</obj_property>
+               <obj_property name="ObjectShortName">[15]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[14]" type="logic">
+               <obj_property name="ElementShortName">[14]</obj_property>
+               <obj_property name="ObjectShortName">[14]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[13]" type="logic">
+               <obj_property name="ElementShortName">[13]</obj_property>
+               <obj_property name="ObjectShortName">[13]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[12]" type="logic">
+               <obj_property name="ElementShortName">[12]</obj_property>
+               <obj_property name="ObjectShortName">[12]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[11]" type="logic">
+               <obj_property name="ElementShortName">[11]</obj_property>
+               <obj_property name="ObjectShortName">[11]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[10]" type="logic">
+               <obj_property name="ElementShortName">[10]</obj_property>
+               <obj_property name="ObjectShortName">[10]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[9]" type="logic">
+               <obj_property name="ElementShortName">[9]</obj_property>
+               <obj_property name="ObjectShortName">[9]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[8]" type="logic">
+               <obj_property name="ElementShortName">[8]</obj_property>
+               <obj_property name="ObjectShortName">[8]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[7]" type="logic">
+               <obj_property name="ElementShortName">[7]</obj_property>
+               <obj_property name="ObjectShortName">[7]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[6]" type="logic">
+               <obj_property name="ElementShortName">[6]</obj_property>
+               <obj_property name="ObjectShortName">[6]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[5]" type="logic">
+               <obj_property name="ElementShortName">[5]</obj_property>
+               <obj_property name="ObjectShortName">[5]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[4]" type="logic">
+               <obj_property name="ElementShortName">[4]</obj_property>
+               <obj_property name="ObjectShortName">[4]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[3]" type="logic">
+               <obj_property name="ElementShortName">[3]</obj_property>
+               <obj_property name="ObjectShortName">[3]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[2]" type="logic">
+               <obj_property name="ElementShortName">[2]</obj_property>
+               <obj_property name="ObjectShortName">[2]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[1]" type="logic">
+               <obj_property name="ElementShortName">[1]</obj_property>
+               <obj_property name="ObjectShortName">[1]</obj_property>
+            </wvobject>
+            <wvobject fp_name="/tb_cache/adrs_N_tags[0]" type="logic">
+               <obj_property name="ElementShortName">[0]</obj_property>
+               <obj_property name="ObjectShortName">[0]</obj_property>
+            </wvobject>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/tb_cache/adrs_N_valids" type="array">
+         <obj_property name="ElementShortName">adrs_N_valids[1:0]</obj_property>
+         <obj_property name="ObjectShortName">adrs_N_valids[1:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cache/adrs_N_dirtys" type="array">
+         <obj_property name="ElementShortName">adrs_N_dirtys[1:0]</obj_property>
+         <obj_property name="ObjectShortName">adrs_N_dirtys[1:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_cache/adrs_N_use" type="logic">
+         <obj_property name="ElementShortName">adrs_N_use</obj_property>
+         <obj_property name="ObjectShortName">adrs_N_use</obj_property>
+      </wvobject>
    </wvobject>
 </wave_config>
