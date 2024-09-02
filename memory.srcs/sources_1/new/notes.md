@@ -140,15 +140,18 @@ solved (I think)
     - [x] second set not evacced
         - [x] why write L2 from main? why is main here?
 
-- [o] second layer of evacs is to wrong N
-    - [ ] both write_L2_from_main_st (7) and write_L2_from_L1_st (8) go to the wrong N
+- [x] second layer of evacs is to wrong N
+    - [x] both write_L2_from_main_st (7) and write_L2_from_L1_st (8) go to the wrong N
         - problem is that it found a clean N and is writing to it, but that is not the one we want to be writing to
         - this is where I am supposed to use the new signals I extracted from cache
         - use mem points in the correct direction, so why the problem?
         - [x] bring over the new signals from L1 and L2
-        - [ ] when writing, determine manually which N in L2 to write to
-            - [ ] problems with first evac from L1 to L2, data in wrong N again
-            - [ ] when writing from below, always write to N that matches address read from L1
+        - [x] when writing, determine manually which N in L2 to write to
+            - [x] problems with first evac from L1 to L2, data in wrong N again
+            - [x] when writing from below, always write to N that matches address read from L1
+
+- [o] new problem even later on
+    - [ ] describe the issue
 
 --------
 # Later
