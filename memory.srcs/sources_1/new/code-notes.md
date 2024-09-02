@@ -109,3 +109,21 @@ notes evacuated from cache_hierarchy read start state, we were deciding which re
 			end
 
 
+    // from write_Main_st
+    if (evac_needed_L1 && evac_needed_L2) begin
+        // combine dirty data from lower with dirty data from upper
+        // but what if we are evacuating L1 to one address and L2
+        // to a different address? which is what always occurrs!?
+        o_write_data <= read_data_L2;
+        o_write_data[i_address[3]*64 +: 64] <= read_data_L1;
+        o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
+    end else if (evac_needed_L2) begin
+        o_write_data <= read_data_L2;
+        o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
+    end else begin
+        // the only other case is an evac from L1 right up to Main
+        // wait we have inclusive policy, that just isn't a thing
+        o_write_data[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b] <= read_data_L1; // todo: this is iffy, test it
+        o_valid_bytes <= {(4*L2_b){1'b0}};
+        o_valid_bytes[(block_offset_in_adrs_L2*4) +: 4*L1_b] <= {(4*L2_b){1'b1}}; // todo: test this
+    end

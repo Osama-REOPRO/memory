@@ -11,21 +11,23 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="2,950.225588 us"></ZoomStartTime>
-      <ZoomEndTime time="3,191.625589 us"></ZoomEndTime>
-      <Cursor1Time time="3,048.425588 us"></Cursor1Time>
+      <ZoomStartTime time="2,591.547070 us"></ZoomStartTime>
+      <ZoomEndTime time="2,740.890587 us"></ZoomEndTime>
+      <Cursor1Time time="2,716.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="222"></NameColumnWidth>
-      <ValueColumnWidth column_width="378"></ValueColumnWidth>
+      <NameColumnWidth column_width="290"></NameColumnWidth>
+      <ValueColumnWidth column_width="300"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="69" />
    <wave_markers>
-      <marker time="3188020000" label="" />
-      <marker time="3100000000" label="" />
-      <marker time="3112000000" label="" />
-      <marker time="3074000000" label="" />
-      <marker time="3084000000" label="" />
+      <marker time="2688000000" label="" />
+      <marker time="2806000000" label="" />
+      <marker time="2764000000" label="" />
+      <marker time="2788000000" label="" />
+      <marker time="2776000000" label="" />
+      <marker time="2716000000" label="" />
+      <marker time="2706000000" label="" />
    </wave_markers>
    <wvobject type="divider" fp_name="divider33">
       <obj_property name="label">TB</obj_property>
@@ -174,13 +176,6 @@
       <obj_property name="CustomSignalColor">#FF00FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/sub_state" type="array">
-      <obj_property name="ElementShortName">sub_state[31:0]</obj_property>
-      <obj_property name="ObjectShortName">sub_state[31:0]</obj_property>
-      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-   </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/cache_sub_state" type="array">
       <obj_property name="ElementShortName">cache_sub_state[31:0]</obj_property>
       <obj_property name="ObjectShortName">cache_sub_state[31:0]</obj_property>
@@ -198,10 +193,6 @@
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/evac_needed_L1" type="logic">
          <obj_property name="ElementShortName">evac_needed_L1</obj_property>
          <obj_property name="ObjectShortName">evac_needed_L1</obj_property>
-      </wvobject>
-      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/write_needed_L2" type="logic">
-         <obj_property name="ElementShortName">write_needed_L2</obj_property>
-         <obj_property name="ObjectShortName">write_needed_L2</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/evac_needed_L2" type="logic">
          <obj_property name="ElementShortName">evac_needed_L2</obj_property>
@@ -226,6 +217,10 @@
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/evac_needed_both" type="logic">
          <obj_property name="ElementShortName">evac_needed_both</obj_property>
          <obj_property name="ObjectShortName">evac_needed_both</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/write_needed_L2_evac" type="logic">
+         <obj_property name="ElementShortName">write_needed_L2_evac</obj_property>
+         <obj_property name="ObjectShortName">write_needed_L2_evac</obj_property>
       </wvobject>
    </wvobject>
    <wvobject type="divider" fp_name="divider152">
@@ -309,10 +304,10 @@
       <obj_property name="ElementShortName">o_read_data[63:0]</obj_property>
       <obj_property name="ObjectShortName">o_read_data[63:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/i_address" type="array">
-      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
-      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
+   <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/o_adrs" type="array">
+      <obj_property name="ElementShortName">o_adrs[31:0]</obj_property>
+      <obj_property name="ObjectShortName">o_adrs[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_hierarchy/cache_hierarchy/use_manual_adrs" type="logic">
       <obj_property name="ElementShortName">use_manual_adrs</obj_property>
@@ -323,6 +318,7 @@
    <wvobject fp_name="group133" type="group">
       <obj_property name="label">data mem L1</obj_property>
       <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l1_cache/data_mem[0][3]" type="array">
          <obj_property name="ElementShortName">[3][1:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[3][1:0][3:0][7:0]</obj_property>
@@ -469,7 +465,6 @@
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/tag_mem" type="array">
          <obj_property name="ElementShortName">tag_mem[1:0][1:0][26:0]</obj_property>
          <obj_property name="ObjectShortName">tag_mem[1:0][1:0][26:0]</obj_property>
-         <obj_property name="isExpanded"></obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/valid_mem" type="array">
          <obj_property name="ElementShortName">valid_mem[1:0][1:0]</obj_property>
@@ -482,6 +477,293 @@
       <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/use_mem" type="array">
          <obj_property name="ElementShortName">use_mem[1:0]</obj_property>
          <obj_property name="ObjectShortName">use_mem[1:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="group343" type="group">
+      <obj_property name="label">N info</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_target_N" type="array">
+         <obj_property name="ElementShortName">o_target_N[0:0]</obj_property>
+         <obj_property name="ObjectShortName">o_target_N[0:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="vbus480" type="vbus">
+         <obj_property name="label">adrs N = 2</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[63]" type="logic">
+            <obj_property name="ElementShortName">[63]</obj_property>
+            <obj_property name="ObjectShortName">[63]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[62]" type="logic">
+            <obj_property name="ElementShortName">[62]</obj_property>
+            <obj_property name="ObjectShortName">[62]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[61]" type="logic">
+            <obj_property name="ElementShortName">[61]</obj_property>
+            <obj_property name="ObjectShortName">[61]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[60]" type="logic">
+            <obj_property name="ElementShortName">[60]</obj_property>
+            <obj_property name="ObjectShortName">[60]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[59]" type="logic">
+            <obj_property name="ElementShortName">[59]</obj_property>
+            <obj_property name="ObjectShortName">[59]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[58]" type="logic">
+            <obj_property name="ElementShortName">[58]</obj_property>
+            <obj_property name="ObjectShortName">[58]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[57]" type="logic">
+            <obj_property name="ElementShortName">[57]</obj_property>
+            <obj_property name="ObjectShortName">[57]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[56]" type="logic">
+            <obj_property name="ElementShortName">[56]</obj_property>
+            <obj_property name="ObjectShortName">[56]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[55]" type="logic">
+            <obj_property name="ElementShortName">[55]</obj_property>
+            <obj_property name="ObjectShortName">[55]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[54]" type="logic">
+            <obj_property name="ElementShortName">[54]</obj_property>
+            <obj_property name="ObjectShortName">[54]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[53]" type="logic">
+            <obj_property name="ElementShortName">[53]</obj_property>
+            <obj_property name="ObjectShortName">[53]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[52]" type="logic">
+            <obj_property name="ElementShortName">[52]</obj_property>
+            <obj_property name="ObjectShortName">[52]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[51]" type="logic">
+            <obj_property name="ElementShortName">[51]</obj_property>
+            <obj_property name="ObjectShortName">[51]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[50]" type="logic">
+            <obj_property name="ElementShortName">[50]</obj_property>
+            <obj_property name="ObjectShortName">[50]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[49]" type="logic">
+            <obj_property name="ElementShortName">[49]</obj_property>
+            <obj_property name="ObjectShortName">[49]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[48]" type="logic">
+            <obj_property name="ElementShortName">[48]</obj_property>
+            <obj_property name="ObjectShortName">[48]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[47]" type="logic">
+            <obj_property name="ElementShortName">[47]</obj_property>
+            <obj_property name="ObjectShortName">[47]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[46]" type="logic">
+            <obj_property name="ElementShortName">[46]</obj_property>
+            <obj_property name="ObjectShortName">[46]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[45]" type="logic">
+            <obj_property name="ElementShortName">[45]</obj_property>
+            <obj_property name="ObjectShortName">[45]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[44]" type="logic">
+            <obj_property name="ElementShortName">[44]</obj_property>
+            <obj_property name="ObjectShortName">[44]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[43]" type="logic">
+            <obj_property name="ElementShortName">[43]</obj_property>
+            <obj_property name="ObjectShortName">[43]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[42]" type="logic">
+            <obj_property name="ElementShortName">[42]</obj_property>
+            <obj_property name="ObjectShortName">[42]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[41]" type="logic">
+            <obj_property name="ElementShortName">[41]</obj_property>
+            <obj_property name="ObjectShortName">[41]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[40]" type="logic">
+            <obj_property name="ElementShortName">[40]</obj_property>
+            <obj_property name="ObjectShortName">[40]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[39]" type="logic">
+            <obj_property name="ElementShortName">[39]</obj_property>
+            <obj_property name="ObjectShortName">[39]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[38]" type="logic">
+            <obj_property name="ElementShortName">[38]</obj_property>
+            <obj_property name="ObjectShortName">[38]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[37]" type="logic">
+            <obj_property name="ElementShortName">[37]</obj_property>
+            <obj_property name="ObjectShortName">[37]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[36]" type="logic">
+            <obj_property name="ElementShortName">[36]</obj_property>
+            <obj_property name="ObjectShortName">[36]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[35]" type="logic">
+            <obj_property name="ElementShortName">[35]</obj_property>
+            <obj_property name="ObjectShortName">[35]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[34]" type="logic">
+            <obj_property name="ElementShortName">[34]</obj_property>
+            <obj_property name="ObjectShortName">[34]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[33]" type="logic">
+            <obj_property name="ElementShortName">[33]</obj_property>
+            <obj_property name="ObjectShortName">[33]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[32]" type="logic">
+            <obj_property name="ElementShortName">[32]</obj_property>
+            <obj_property name="ObjectShortName">[32]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="vbus446" type="vbus">
+         <obj_property name="label">adrs N = 1</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[31]" type="logic">
+            <obj_property name="ElementShortName">[31]</obj_property>
+            <obj_property name="ObjectShortName">[31]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[30]" type="logic">
+            <obj_property name="ElementShortName">[30]</obj_property>
+            <obj_property name="ObjectShortName">[30]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[29]" type="logic">
+            <obj_property name="ElementShortName">[29]</obj_property>
+            <obj_property name="ObjectShortName">[29]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[28]" type="logic">
+            <obj_property name="ElementShortName">[28]</obj_property>
+            <obj_property name="ObjectShortName">[28]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[27]" type="logic">
+            <obj_property name="ElementShortName">[27]</obj_property>
+            <obj_property name="ObjectShortName">[27]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[26]" type="logic">
+            <obj_property name="ElementShortName">[26]</obj_property>
+            <obj_property name="ObjectShortName">[26]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[25]" type="logic">
+            <obj_property name="ElementShortName">[25]</obj_property>
+            <obj_property name="ObjectShortName">[25]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[24]" type="logic">
+            <obj_property name="ElementShortName">[24]</obj_property>
+            <obj_property name="ObjectShortName">[24]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[23]" type="logic">
+            <obj_property name="ElementShortName">[23]</obj_property>
+            <obj_property name="ObjectShortName">[23]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[22]" type="logic">
+            <obj_property name="ElementShortName">[22]</obj_property>
+            <obj_property name="ObjectShortName">[22]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[21]" type="logic">
+            <obj_property name="ElementShortName">[21]</obj_property>
+            <obj_property name="ObjectShortName">[21]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[20]" type="logic">
+            <obj_property name="ElementShortName">[20]</obj_property>
+            <obj_property name="ObjectShortName">[20]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[19]" type="logic">
+            <obj_property name="ElementShortName">[19]</obj_property>
+            <obj_property name="ObjectShortName">[19]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[18]" type="logic">
+            <obj_property name="ElementShortName">[18]</obj_property>
+            <obj_property name="ObjectShortName">[18]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[17]" type="logic">
+            <obj_property name="ElementShortName">[17]</obj_property>
+            <obj_property name="ObjectShortName">[17]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[16]" type="logic">
+            <obj_property name="ElementShortName">[16]</obj_property>
+            <obj_property name="ObjectShortName">[16]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[15]" type="logic">
+            <obj_property name="ElementShortName">[15]</obj_property>
+            <obj_property name="ObjectShortName">[15]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[14]" type="logic">
+            <obj_property name="ElementShortName">[14]</obj_property>
+            <obj_property name="ObjectShortName">[14]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[13]" type="logic">
+            <obj_property name="ElementShortName">[13]</obj_property>
+            <obj_property name="ObjectShortName">[13]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[12]" type="logic">
+            <obj_property name="ElementShortName">[12]</obj_property>
+            <obj_property name="ObjectShortName">[12]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[11]" type="logic">
+            <obj_property name="ElementShortName">[11]</obj_property>
+            <obj_property name="ObjectShortName">[11]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[10]" type="logic">
+            <obj_property name="ElementShortName">[10]</obj_property>
+            <obj_property name="ObjectShortName">[10]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[9]" type="logic">
+            <obj_property name="ElementShortName">[9]</obj_property>
+            <obj_property name="ObjectShortName">[9]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[8]" type="logic">
+            <obj_property name="ElementShortName">[8]</obj_property>
+            <obj_property name="ObjectShortName">[8]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[7]" type="logic">
+            <obj_property name="ElementShortName">[7]</obj_property>
+            <obj_property name="ObjectShortName">[7]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[6]" type="logic">
+            <obj_property name="ElementShortName">[6]</obj_property>
+            <obj_property name="ObjectShortName">[6]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[5]" type="logic">
+            <obj_property name="ElementShortName">[5]</obj_property>
+            <obj_property name="ObjectShortName">[5]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[4]" type="logic">
+            <obj_property name="ElementShortName">[4]</obj_property>
+            <obj_property name="ObjectShortName">[4]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[3]" type="logic">
+            <obj_property name="ElementShortName">[3]</obj_property>
+            <obj_property name="ObjectShortName">[3]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[2]" type="logic">
+            <obj_property name="ElementShortName">[2]</obj_property>
+            <obj_property name="ObjectShortName">[2]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[1]" type="logic">
+            <obj_property name="ElementShortName">[1]</obj_property>
+            <obj_property name="ObjectShortName">[1]</obj_property>
+         </wvobject>
+         <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_tags[0]" type="logic">
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">[0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_valids" type="array">
+         <obj_property name="ElementShortName">o_adrs_N_valids[1:0]</obj_property>
+         <obj_property name="ObjectShortName">o_adrs_N_valids[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_dirtys" type="array">
+         <obj_property name="ElementShortName">o_adrs_N_dirtys[1:0]</obj_property>
+         <obj_property name="ObjectShortName">o_adrs_N_dirtys[1:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/cache_hierarchy/l2_cache/o_adrs_N_use" type="logic">
+         <obj_property name="ElementShortName">o_adrs_N_use</obj_property>
+         <obj_property name="ObjectShortName">o_adrs_N_use</obj_property>
       </wvobject>
    </wvobject>
    <wvobject type="divider" fp_name="divider329">

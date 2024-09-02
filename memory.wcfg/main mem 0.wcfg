@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_hierarchy_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_hierarchy" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="89.120159 us"></ZoomStartTime>
+      <ZoomEndTime time="96.144792 us"></ZoomEndTime>
+      <Cursor1Time time="95.453581 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="187"></NameColumnWidth>
+      <ValueColumnWidth column_width="475"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="11" />
+   <wave_markers>
+      <marker time="100000000" label="" />
+   </wave_markers>
+   <wvobject fp_name="/tb_hierarchy/main_mem/i_op" type="array">
+      <obj_property name="ElementShortName">i_op[2:0]</obj_property>
+      <obj_property name="ObjectShortName">i_op[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/i_address" type="array">
+      <obj_property name="ElementShortName">i_address[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i_address[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/i_valid_bytes" type="array">
+      <obj_property name="ElementShortName">i_valid_bytes[15:0]</obj_property>
+      <obj_property name="ObjectShortName">i_valid_bytes[15:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/i_write_data" type="array">
+      <obj_property name="ElementShortName">i_write_data[127:0]</obj_property>
+      <obj_property name="ObjectShortName">i_write_data[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/o_read_data" type="array">
+      <obj_property name="ElementShortName">o_read_data[127:0]</obj_property>
+      <obj_property name="ObjectShortName">o_read_data[127:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="group140" type="group">
+      <obj_property name="label">sets</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject fp_name="/tb_hierarchy/main_mem/i_set_valid" type="logic">
+         <obj_property name="ElementShortName">i_set_valid</obj_property>
+         <obj_property name="ObjectShortName">i_set_valid</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/i_set_tag" type="logic">
+         <obj_property name="ElementShortName">i_set_tag</obj_property>
+         <obj_property name="ObjectShortName">i_set_tag</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/i_set_dirty" type="logic">
+         <obj_property name="ElementShortName">i_set_dirty</obj_property>
+         <obj_property name="ObjectShortName">i_set_dirty</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/i_set_use" type="logic">
+         <obj_property name="ElementShortName">i_set_use</obj_property>
+         <obj_property name="ObjectShortName">i_set_use</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/i_use_manual_N" type="logic">
+         <obj_property name="ElementShortName">i_use_manual_N</obj_property>
+         <obj_property name="ObjectShortName">i_use_manual_N</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/i_manual_N" type="array">
+         <obj_property name="ElementShortName">i_manual_N[0:0]</obj_property>
+         <obj_property name="ObjectShortName">i_manual_N[0:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/i_mem_operation" type="logic">
+      <obj_property name="ElementShortName">i_mem_operation</obj_property>
+      <obj_property name="ObjectShortName">i_mem_operation</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/o_mem_operation_done" type="logic">
+      <obj_property name="ElementShortName">o_mem_operation_done</obj_property>
+      <obj_property name="ObjectShortName">o_mem_operation_done</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/state" type="array">
+      <obj_property name="ElementShortName">state[1:0]</obj_property>
+      <obj_property name="ObjectShortName">state[1:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_hierarchy/main_mem/data_mem" type="array">
+      <obj_property name="ElementShortName">data_mem[0:0][3:0][3:0][3:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_mem[0:0][3:0][3:0][3:0][7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="group154" type="group">
+      <obj_property name="label">flag mems</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_hierarchy/main_mem/tag_mem" type="array">
+         <obj_property name="ElementShortName">tag_mem[0:0][3:0][25:0]</obj_property>
+         <obj_property name="ObjectShortName">tag_mem[0:0][3:0][25:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/valid_mem" type="array">
+         <obj_property name="ElementShortName">valid_mem[0:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">valid_mem[0:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/dirty_mem" type="array">
+         <obj_property name="ElementShortName">dirty_mem[0:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_mem[0:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy/main_mem/use_mem" type="array">
+         <obj_property name="ElementShortName">use_mem[3:0]</obj_property>
+         <obj_property name="ObjectShortName">use_mem[3:0]</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>

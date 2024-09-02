@@ -259,6 +259,9 @@ main_mem
 	.i_set_dirty(1'b0),
 	.i_set_use(1'b0),
 
+	.i_use_manual_N(1'b0),
+	.i_manual_N(),
+
 	.i_mem_operation(m_mem_operation),
 
 	.o_hit_occurred(),

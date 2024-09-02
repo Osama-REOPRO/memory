@@ -114,10 +114,40 @@ solved (I think)
 - [x] write cache testbench
 - [x] test turn everything to task in cache controller
 
-- [o] fix the actual states, you should now essentially treat them like functions or tasks that run sequentially
+- [x] fix the actual states, you should now essentially treat them like functions or tasks that run sequentially
     - that is absolutely what the state machine does, it allows us to run things sequentially like in programming (just like that guy on quora said)
     - I can now run any state I want to run in any order, no problem, that is essentially what I wanted
-- [ ] read L2 has questionable conditions
+
+- [x] write L1 state write data is wrong and the wrong data doesn't even get written
+    - [x] no mem operation on main when reading from main
+        - [x] problem might be that cache sub state isn't reset in the previous state
+    - [x] read data from main mem is undefined
+        - [x] target N is undefined
+            - it is so because i_use_manual is not connected
+    - [x] data not written to any cache
+        - [x] is it because target N is undefined for them as well?
+
+- [x] no evac from L1 to L2
+    - data is read from L1 correctly
+    - [ ] we never go to write_L2_from_L1_st
+        - [x] probably write_needed_L2_evac is wrong
+        - [x] conflict_occurred_L2 is wrong
+            - actually it was right, the problem was with write_L2_from_L1_st which was requiring there to be a conflict in L2, that makes no sense, we only need L1 to need an evac, whether L2 has a conflict or not
+
+- [x] evac first set from L1 correct, second doesn't happen
+    - also second set reads the evacced value from L1! what!
+    - [x] L1 is getting the wrong half from the L2 read block
+    - [x] second set not evacced
+        - [x] why write L2 from main? why is main here?
+
+- [o] second layer of evacs is to wrong N
+    - [ ] both write_L2_from_main_st (7) and write_L2_from_L1_st (8) go to the wrong N
+        - problem is that it found a clean N and is writing to it, but that is not the one we want to be writing to
+        - this is where I am supposed to use the new signals I extracted from cache
+        - use mem points in the correct direction, so why the problem?
+        - [x] bring over the new signals from L1 and L2
+        - [ ] when writing, determine manually which N in L2 to write to
+            - [ ] problems with first evac from L1 to L2, data in wrong N again
 
 --------
 # Later
@@ -126,5 +156,7 @@ solved (I think)
     - [ ] move on to validate reading
     - [ ] connect the new signals I created inside the cache module
     - [ ] o_read_data is literally never assigned
+    - [ ] check that inclusivity is satisfied
+    - [ ] read L2 has questionable conditions
 
 

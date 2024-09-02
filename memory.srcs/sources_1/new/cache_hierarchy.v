@@ -72,9 +72,25 @@ wire [(32*L2_b)-1:0] read_data_L2;
 // this is the address that later read/write operations will target
 wire [31:0] adrs_target_N_L1; 
 wire [31:0] adrs_target_N_L2;
+wire target_N_L2; // one bit because N=2, so only 2 states
+
+//wire [(L1_N*32)-1:0] adrs_N_tags_L1; // same as adrs_target_N_L1
+wire [L1_N-1:0] 		adrs_N_valids_L1;
+wire [L1_N-1:0] 		adrs_N_dirtys_L1;
+wire 						adrs_N_use_L1;
+
+wire [(L2_N*32)-1:0] adrs_N_tags_L2;
+wire [L2_N-1:0] 		adrs_N_valids_L2;
+wire [L2_N-1:0] 		adrs_N_dirtys_L2;
+wire 						adrs_N_use_L2;
+// addresses for each N in L2
+wire [31:0] L2_N1_tag = adrs_N_tags_L2[31:0];
+wire [31:0] L2_N2_tag = adrs_N_tags_L2[63:32];
 
 reg use_manual_adrs;
 reg [31:0] adrs_manual;
+reg use_manual_N;
+reg [1:0] manual_N;
 
 reg [(32*L1_b)-1:0] val_evac_L1;
 reg [(32*L2_b)-1:0] val_evac_L2;
@@ -95,8 +111,8 @@ wire evac_needed_L1 = conflict_occurred_L1 && !clean_found[1];
 // - or it is dirty, in which case we need to read and write it to upper level,
 // and we are confident that it does exist in upper level because inclusive
 
-wire write_needed_L2 = evac_needed_L1 || both_missed;
-wire conflict_occurred_L2 = write_needed_L2 && !hit_occurred[2] && !empty_found[2];
+wire write_needed_L2_from_main = both_missed;
+wire conflict_occurred_L2 = write_needed_L2_from_main && !hit_occurred[2] && !empty_found[2];
 wire evac_needed_L2 = conflict_occurred_L2 && (!clean_found[2] || evac_needed_L1);
 	// if a conflict occurs and either clean not found or L1 needs an evac, because if
 	// L1 needs an evac it doesn't matter that a clean was found because we need to
@@ -112,7 +128,7 @@ wire read_needed_Main = both_missed;
 wire write_needed_main = evac_needed_L2;
 
 wire evac_needed_both = evac_needed_L1 && evac_needed_L2;
-wire write_needed_L2_evac = conflict_occurred_L2 && evac_needed_L1 && both_missed; // todo: verify
+wire write_needed_L2_evac = evac_needed_L1; // todo: verify
 
 wire [($clog2(L2_b) > 0 ? $clog2(L2_b)-1 : 0) :0] block_offset_in_adrs_L2 = 
 		(L2_b <= 1) ? 1'b0 : 
@@ -145,7 +161,7 @@ always @(*) begin
 	end else begin
 		case (state)
 			idle_st: begin
-				if (i_mem_operation) next_state = lookup_st;
+				if (i_mem_operation) next_state = lookup_L1_st;
 				else next_state = idle_st; // latch prevent
 			end
 			lookup_L1_st: begin
@@ -158,7 +174,7 @@ always @(*) begin
 					read_needed_L2 	? read_L2_st :
 					read_needed_Main 	? read_Main_st :
 					write_needed_L1 		? write_L1_st :
-					write_needed_L2 		? write_L2_from_main_st :
+					write_needed_L2_from_main 		? write_L2_from_main_st :
 					write_needed_L2_evac ? write_L2_from_L1_st :
 					write_needed_main 	? write_Main_st :
 						done_st;
@@ -168,7 +184,7 @@ always @(*) begin
 					read_needed_L2 	? read_L2_st :
 					read_needed_Main 	? read_Main_st :
 					write_needed_L1 		? write_L1_st :
-					write_needed_L2 		? write_L2_from_main_st :
+					write_needed_L2_from_main 		? write_L2_from_main_st :
 					write_needed_L2_evac ? write_L2_from_L1_st :
 					write_needed_main 	? write_Main_st :
 						done_st;
@@ -177,7 +193,7 @@ always @(*) begin
 				next_state = 
 					read_needed_Main 	? read_Main_st :
 					write_needed_L1 		? write_L1_st :
-					write_needed_L2 		? write_L2_from_main_st :
+					write_needed_L2_from_main 		? write_L2_from_main_st :
 					write_needed_L2_evac ? write_L2_from_L1_st :
 					write_needed_main 	? write_Main_st :
 						done_st;
@@ -185,14 +201,14 @@ always @(*) begin
 			read_Main_st: begin
 				next_state = 
 					write_needed_L1 		? write_L1_st :
-					write_needed_L2 		? write_L2_from_main_st :
+					write_needed_L2_from_main 		? write_L2_from_main_st :
 					write_needed_L2_evac ? write_L2_from_L1_st :
 					write_needed_main 	? write_Main_st :
 						done_st;
 			end
 			write_L1_st: begin
 				next_state = 
-					write_needed_L2 		? write_L2_from_main_st :
+					write_needed_L2_from_main 		? write_L2_from_main_st :
 					write_needed_L2_evac ? write_L2_from_L1_st :
 					write_needed_main 	? write_Main_st :
 						done_st;
@@ -228,7 +244,6 @@ always @(posedge i_clk) begin
 		i <= 0;
 		state 	 <= 0;
 		cache_sub_state <= 0;
-		sub_state <= 0;
 
 		{ 	valid_bytes_L1,
 			valid_bytes_L2,
@@ -251,7 +266,9 @@ always @(posedge i_clk) begin
 			o_mem_operation,
 
 			use_manual_adrs,
-			adrs_manual
+			adrs_manual,
+			use_manual_N,
+			manual_N
 
 			// non_current_adrs_lookup_occurred_L2
 			} = 0;
@@ -261,12 +278,12 @@ always @(posedge i_clk) begin
 
 			idle_st: begin
 				o_mem_operation_done <= 1'b0;
-				state <= next_st;
+				state <= next_state;
 			end
 
 			done_st: begin
 				o_mem_operation_done = 1'b1;
-				state <= next_st;
+				state <= next_state;
 			end
 
 			lookup_L1_st: begin
@@ -313,6 +330,7 @@ always @(posedge i_clk) begin
 					finish: begin
 						if (!mem_operation_done[2]) begin
 							state <= next_state;
+							cache_sub_state  <= init;
 						end
 					end
 				endcase
@@ -403,7 +421,6 @@ always @(posedge i_clk) begin
 			end
 
 
-			// todo: bookmark
 			write_L1_st: begin
 				case (cache_sub_state)
 					init: begin
@@ -432,9 +449,9 @@ always @(posedge i_clk) begin
 								end
 								`write_op: begin
 									// combine data read from 2nd level with new data coming from input
-									for (i=0; i<(4*L1_b); i=i+1) begin
+									for (i=0; i<(4*L1_b); i=i+1) begin // step through byte by byte
 										write_data_L1[(i*8)-1 +: 8] <= i_valid_bytes[i] ?
-											i_write_data[(i*8)-1 +: 8] : read_data_L2[(i*8)-1 +: 8];
+											i_write_data[(i*8)-1 +: 8] : read_data_L2[((i+(i_address[3]*8))*8)-1 +: 8];
 									end
 								end
 							endcase
@@ -504,7 +521,7 @@ always @(posedge i_clk) begin
 						adrs_manual <= adrs_target_N_L1;
 
 						write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
-						valid_bytes_L2[i_address[3]*8 +: 8]  <= {8'hff};
+						valid_bytes_L2[i_address[3]*8 +: 8]  <= {8'hff}; // this doesn't seem right, not sure why sim is working properly
 						valid_bytes_L2[!i_address[3]*8 +: 8] <= {8'h00};
 						set_dirty		  <= 1'b1;
 
@@ -527,12 +544,7 @@ always @(posedge i_clk) begin
 						if (!mem_operation_done[2]) begin
 							use_manual_adrs <= 1'b0;
 
-							// deciding if we should go to 
-							// - L2 write from main state
-							// - write main state
-							// - done state
-							sub_state <= lookup_L2_second_st;
-
+							state <= next_state;
 							cache_sub_state <= init;
 						end
 					end
@@ -542,6 +554,12 @@ always @(posedge i_clk) begin
 			write_L2_from_main_st: begin
 				case (cache_sub_state)
 					init: begin
+
+						// bookmark
+						if (evac_needed_L2) begin
+							use_manual_N <= 1'b1;
+							manual_N <= (L2_N1_tag == adrs_target_N_L1) ? 1 : 0; // we want to avoid writing to evac target
+						end
 
 						use_manual_adrs <= 1'b0;
 
@@ -566,9 +584,8 @@ always @(posedge i_clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done[2]) begin
-
-							sub_state <= write_needed_main ? write_Main_st : write_done_st;
-
+							use_manual_N <= 1'b0;
+							state <= next_state;
 							cache_sub_state <= init;
 						end
 					end
@@ -588,22 +605,12 @@ always @(posedge i_clk) begin
 						// 			both then we have two cases: if the lower is dirty then we combine it's data with the 
 						//				upper data and write the combination to main, if clean we only write higher cache data
 						// 			and ignore the lower, there is not situation in which we need 2 write operations
-						// todo: check that inclusivity is satisfied
+						// assumption: we never have a situation in which we evacuate the same piece of data from L1 and 
+						// 	from L2, that is because what is in L1 must be more recent that what isn't in L1, so what 
+						// 	is in L1 gets evacced to L2, and what is in L2 but not in L1 gets evacced to main
 
-						if (evac_needed_L1 && evac_needed_L2) begin
-							// combine dirty data from lower with dirty data from upper
-							o_write_data <= read_data_L2;
-							o_write_data[i_address[3]*64 +: 64] <= read_data_L1;
-							o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
-						end else if (evac_needed_L2) begin
-							o_write_data <= read_data_L2;
-							o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
-						end else begin
-							// the only other case is an evac from L1 right up to Main
-							o_write_data[(block_offset_in_adrs_L2*4*8) +: 8*4*L1_b] <= read_data_L1; // todo: this is iffy, test it
-							o_valid_bytes <= {(4*L2_b){1'b0}};
-							o_valid_bytes[(block_offset_in_adrs_L2*4) +: 4*L1_b] <= {(4*L2_b){1'b1}}; // todo: test this
-						end
+						o_write_data <= read_data_L2;
+						o_valid_bytes <= {(4*L2_b){1'b1}}; // write all bytes
 
 						o_op 			     <= `write_op;
 						o_mem_operation  <= 1'b1;
@@ -619,13 +626,7 @@ always @(posedge i_clk) begin
 					end
 					finish: begin
 						if (!i_mem_operation_done) begin
-							// todo: bookmark, how do we go from here to second L2 write
-							if (write_needed_L2_evac) begin
-								sub_state <= lookup_L2_second_st;
-							end else begin
-								sub_state <= write_done_st;
-							end
-
+							state <= next_state;
 							cache_sub_state <= init;
 						end
 					end
@@ -657,12 +658,21 @@ l1_cache
 	.i_set_dirty(set_dirty),
 	.i_set_use(set_use),
 
+	.i_use_manual_N(1'b0),
+	.i_manual_N(1'b0),
+
 	.i_mem_operation(mem_operation[1]),
 
 	.o_hit_occurred(hit_occurred[1]),
 	.o_empty_found(empty_found[1]),
 	.o_clean_found(clean_found[1]),
 	.o_adrs(adrs_target_N_L1),
+	.o_target_N(), // always 0
+
+	.o_adrs_N_tags(), // not connected because single N so same as adrs_target_N_L1
+	.o_adrs_N_valids(adrs_N_valids_L1),
+	.o_adrs_N_dirtys(adrs_N_dirtys_L1),
+	.o_adrs_N_use(adrs_N_use_L1),
 
 	.i_valid_bytes(valid_bytes_L1),
 
@@ -692,12 +702,21 @@ l2_cache
 	.i_set_dirty(set_dirty),
 	.i_set_use(set_use),
 
+	.i_use_manual_N(use_manual_N),
+	.i_manual_N(manual_N),
+
 	.i_mem_operation(mem_operation[2]),
 
 	.o_hit_occurred(hit_occurred[2]),
 	.o_empty_found(empty_found[2]),
 	.o_clean_found(clean_found[2]),
 	.o_adrs(adrs_target_N_L2),
+	.o_target_N(target_N_L2),
+
+	.o_adrs_N_tags(adrs_N_tags_L2),
+	.o_adrs_N_valids(adrs_N_valids_L2),
+	.o_adrs_N_dirtys(adrs_N_dirtys_L2),
+	.o_adrs_N_use(adrs_N_use_L2),
 
 	.i_valid_bytes(valid_bytes_L2),
 
