@@ -86,6 +86,7 @@ wire 						adrs_N_use_L2;
 // addresses for each N in L2
 wire [31:0] L2_N1_tag = adrs_N_tags_L2[31:0];
 wire [31:0] L2_N2_tag = adrs_N_tags_L2[63:32];
+localparam Tag_nbytes = 32 - $clog2((L2_C/L2_b)/L2_N) - $clog2(L2_b) - 2; // used for extracting the tag part
 
 reg use_manual_adrs;
 reg [31:0] adrs_manual;
@@ -519,6 +520,9 @@ always @(posedge i_clk) begin
 
 						use_manual_adrs <= 1'b1;
 						adrs_manual <= adrs_target_N_L1;
+						use_manual_N <= 1'b1;
+						// todo: this comparison could be wrong
+						manual_N <= (L2_N1_tag[31 -:Tag_nbytes] == adrs_target_N_L1[31 -:Tag_nbytes]) ? 0 : 1; // choose N with same address
 
 						write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
 						valid_bytes_L2[i_address[3]*8 +: 8]  <= {8'hff}; // this doesn't seem right, not sure why sim is working properly
@@ -543,6 +547,7 @@ always @(posedge i_clk) begin
 					finish: begin
 						if (!mem_operation_done[2]) begin
 							use_manual_adrs <= 1'b0;
+							use_manual_N <= 1'b0;
 
 							state <= next_state;
 							cache_sub_state <= init;
@@ -555,7 +560,6 @@ always @(posedge i_clk) begin
 				case (cache_sub_state)
 					init: begin
 
-						// bookmark
 						if (evac_needed_L2) begin
 							use_manual_N <= 1'b1;
 							manual_N <= (L2_N1_tag == adrs_target_N_L1) ? 1 : 0; // we want to avoid writing to evac target

@@ -11,23 +11,17 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="2,591.547070 us"></ZoomStartTime>
-      <ZoomEndTime time="2,740.890587 us"></ZoomEndTime>
-      <Cursor1Time time="2,716.000000 us"></Cursor1Time>
+      <ZoomStartTime time="1,196.723966 us"></ZoomStartTime>
+      <ZoomEndTime time="1,843.879207 us"></ZoomEndTime>
+      <Cursor1Time time="1,386.020000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="290"></NameColumnWidth>
-      <ValueColumnWidth column_width="300"></ValueColumnWidth>
+      <ValueColumnWidth column_width="295"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="69" />
    <wave_markers>
-      <marker time="2688000000" label="" />
-      <marker time="2806000000" label="" />
-      <marker time="2764000000" label="" />
-      <marker time="2788000000" label="" />
-      <marker time="2776000000" label="" />
-      <marker time="2716000000" label="" />
-      <marker time="2706000000" label="" />
+      <marker time="1386020000" label="" />
    </wave_markers>
    <wvobject type="divider" fp_name="divider33">
       <obj_property name="label">TB</obj_property>

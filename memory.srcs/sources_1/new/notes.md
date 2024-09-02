@@ -148,6 +148,7 @@ solved (I think)
         - [x] bring over the new signals from L1 and L2
         - [ ] when writing, determine manually which N in L2 to write to
             - [ ] problems with first evac from L1 to L2, data in wrong N again
+            - [ ] when writing from below, always write to N that matches address read from L1
 
 --------
 # Later
