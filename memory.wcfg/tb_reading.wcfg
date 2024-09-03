@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_hierarchy_reading_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="tb_hierarchy_reading" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
+      <ZoomEndTime time="2.708141917 ms"></ZoomEndTime>
+      <Cursor1Time time="2.858020000 ms"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="290"></NameColumnWidth>
+      <ValueColumnWidth column_width="285"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="1" />
+   <wvobject fp_name="/tb_hierarchy_reading/cache_hierarchy/l1_cache/data_mem" type="array">
+      <obj_property name="ElementShortName">data_mem[0:0][3:0][1:0][3:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_mem[0:0][3:0][1:0][3:0][7:0]</obj_property>
+   </wvobject>
+</wave_config>

@@ -29,7 +29,6 @@ reg [(4*L1_b)-1:0] valid_bytes;
 reg [(32*L1_b)-1:0] w_data;
 wire [(32*L1_b)-1:0] r_data;
 wire done;
-reg mem_op = 0;
 
 
 
