@@ -129,7 +129,7 @@ solved (I think)
 
 - [x] no evac from L1 to L2
     - data is read from L1 correctly
-    - [ ] we never go to write_L2_from_L1_st
+    - [x] we never go to write_L2_from_L1_st
         - [x] probably write_needed_L2_evac is wrong
         - [x] conflict_occurred_L2 is wrong
             - actually it was right, the problem was with write_L2_from_L1_st which was requiring there to be a conflict in L2, that makes no sense, we only need L1 to need an evac, whether L2 has a conflict or not
@@ -150,16 +150,24 @@ solved (I think)
             - [x] problems with first evac from L1 to L2, data in wrong N again
             - [x] when writing from below, always write to N that matches address read from L1
 
-- [o] new problem even later on
-    - [ ] describe the issue
+- [x] new problem even later on
+    - [x] main written wrong data
+        - maybe wrong N?
+        - [x] reading from wrong N in L2
+
+- [x] connect the new signals I created inside the cache module
+- [x] check on the main, it got very little attention
+-------- writing seems completely functional!
+
+# Reading
+- [x] move on to validate reading
+- [o] decide on a testbench structure
+    - full the main with consecutive numbers to begin with then read them byte by byte
+- [ ] o_read_data is literally never assigned
 
 --------
 # Later
     - [ ] revise all the "neededs" they are critically important
-    - [ ] check on the main, it got very little attention
-    - [ ] move on to validate reading
-    - [ ] connect the new signals I created inside the cache module
-    - [ ] o_read_data is literally never assigned
     - [ ] check that inclusivity is satisfied
     - [ ] read L2 has questionable conditions
 

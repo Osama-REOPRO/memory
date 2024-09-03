@@ -373,8 +373,11 @@ always @(posedge i_clk) begin
 						if (evac_needed_L1) begin
 							use_manual_adrs <= 1'b1;
 							adrs_manual <= adrs_target_N_L1;
+							use_manual_N <= 1'b1;
+							manual_N <= (L2_N1_tag[31 -:Tag_nbytes] == adrs_target_N_L1[31 -:Tag_nbytes]) ? 1 : 0; // N not evac target
 						end else begin
 							use_manual_adrs <= 1'b0;
+							use_manual_N <= 1'b0;
 						end
 
 						cache_sub_state		<= busy;
@@ -389,6 +392,7 @@ always @(posedge i_clk) begin
 					finish: begin
 						if (!mem_operation_done[2]) begin
 							use_manual_adrs <= 1'b0;
+							use_manual_N <= 1'b0;
 							state <= next_state;
 							cache_sub_state  <= init;
 						end
@@ -521,7 +525,6 @@ always @(posedge i_clk) begin
 						use_manual_adrs <= 1'b1;
 						adrs_manual <= adrs_target_N_L1;
 						use_manual_N <= 1'b1;
-						// todo: this comparison could be wrong
 						manual_N <= (L2_N1_tag[31 -:Tag_nbytes] == adrs_target_N_L1[31 -:Tag_nbytes]) ? 0 : 1; // choose N with same address
 
 						write_data_L2[i_address[3]*64 +: 64] <= read_data_L1;
@@ -562,7 +565,7 @@ always @(posedge i_clk) begin
 
 						if (evac_needed_L2) begin
 							use_manual_N <= 1'b1;
-							manual_N <= (L2_N1_tag == adrs_target_N_L1) ? 1 : 0; // we want to avoid writing to evac target
+							manual_N <= (L2_N1_tag[31 -:Tag_nbytes] == adrs_target_N_L1[31 -:Tag_nbytes]) ? 1 : 0; // we want to avoid writing to evac target
 						end
 
 						use_manual_adrs <= 1'b0;
