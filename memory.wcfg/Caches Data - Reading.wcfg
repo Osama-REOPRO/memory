@@ -11,13 +11,13 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="8.274060001 ms"></ZoomEndTime>
-      <Cursor1Time time="7.659042449 ms"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="100.000000 us"></ZoomEndTime>
+      <Cursor1Time time="39.570815 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="187"></NameColumnWidth>
-      <ValueColumnWidth column_width="460"></ValueColumnWidth>
+      <NameColumnWidth column_width="186"></NameColumnWidth>
+      <ValueColumnWidth column_width="456"></ValueColumnWidth>
    </column_width_setting>
    <WVObjectSize size="9" />
    <wave_markers>
@@ -130,6 +130,66 @@
       <obj_property name="label">Data Mem Main</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][15]" type="array">
+         <obj_property name="ElementShortName">[15][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[15][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][14]" type="array">
+         <obj_property name="ElementShortName">[14][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[14][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][13]" type="array">
+         <obj_property name="ElementShortName">[13][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[13][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][12]" type="array">
+         <obj_property name="ElementShortName">[12][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[12][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][11]" type="array">
+         <obj_property name="ElementShortName">[11][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[11][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][10]" type="array">
+         <obj_property name="ElementShortName">[10][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[10][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][9]" type="array">
+         <obj_property name="ElementShortName">[9][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[9][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][8]" type="array">
+         <obj_property name="ElementShortName">[8][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[8][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][7]" type="array">
+         <obj_property name="ElementShortName">[7][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[7][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][6]" type="array">
+         <obj_property name="ElementShortName">[6][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[6][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][5]" type="array">
+         <obj_property name="ElementShortName">[5][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[5][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][4]" type="array">
+         <obj_property name="ElementShortName">[4][3:0][3:0][7:0]</obj_property>
+         <obj_property name="ObjectShortName">[4][3:0][3:0][7:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
       <wvobject fp_name="/tb_hierarchy_reading/main_mem/data_mem[0][3]" type="array">
          <obj_property name="ElementShortName">[3][3:0][3:0][7:0]</obj_property>
          <obj_property name="ObjectShortName">[3][3:0][3:0][7:0]</obj_property>
@@ -155,20 +215,20 @@
       <obj_property name="label">flags</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <wvobject fp_name="/tb_hierarchy_reading/main_mem/tag_mem" type="array">
-         <obj_property name="ElementShortName">tag_mem[0:0][3:0][25:0]</obj_property>
-         <obj_property name="ObjectShortName">tag_mem[0:0][3:0][25:0]</obj_property>
+         <obj_property name="ElementShortName">tag_mem[0:0][15:0][23:0]</obj_property>
+         <obj_property name="ObjectShortName">tag_mem[0:0][15:0][23:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy_reading/main_mem/valid_mem" type="array">
-         <obj_property name="ElementShortName">valid_mem[0:0][3:0]</obj_property>
-         <obj_property name="ObjectShortName">valid_mem[0:0][3:0]</obj_property>
+         <obj_property name="ElementShortName">valid_mem[0:0][15:0]</obj_property>
+         <obj_property name="ObjectShortName">valid_mem[0:0][15:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy_reading/main_mem/dirty_mem" type="array">
-         <obj_property name="ElementShortName">dirty_mem[0:0][3:0]</obj_property>
-         <obj_property name="ObjectShortName">dirty_mem[0:0][3:0]</obj_property>
+         <obj_property name="ElementShortName">dirty_mem[0:0][15:0]</obj_property>
+         <obj_property name="ObjectShortName">dirty_mem[0:0][15:0]</obj_property>
       </wvobject>
       <wvobject fp_name="/tb_hierarchy_reading/main_mem/use_mem" type="array">
-         <obj_property name="ElementShortName">use_mem[3:0]</obj_property>
-         <obj_property name="ObjectShortName">use_mem[3:0]</obj_property>
+         <obj_property name="ElementShortName">use_mem[15:0]</obj_property>
+         <obj_property name="ObjectShortName">use_mem[15:0]</obj_property>
       </wvobject>
    </wvobject>
 </wave_config>

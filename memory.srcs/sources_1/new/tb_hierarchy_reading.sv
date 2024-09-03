@@ -13,12 +13,15 @@ localparam L2_b  = 4;
 localparam L1_N  = 1;
 localparam L2_N  = 2;
 
+localparam main_C = 64;
+
 reg clk = 0, rst = 0, mem_op = 0;
 reg [2:0] op;
 reg [31:0] adrs;
 reg [(4*L1_b)-1:0] valid_bytes;
 reg [(32*L1_b)-1:0] w_data;
 wire [(32*L1_b)-1:0] r_data;
+reg [7:0] r_byte;
 wire done;
 
 reg manual;
@@ -70,18 +73,37 @@ initial begin
 	rst = 0;
 	#10
 	fill_main_ascending_numbers();
+	for (integer i=0; i<=main_C*4-1; i=i+1) begin
+		read_mem(i);
+	end
 end
 
 // tasks
+task read_mem(input [31:0] adrs_i);
+begin
+	op = `read_op;
+	adrs = adrs_i;
+	mem_op = 1;
+
+	@(posedge done) mem_op = 1'b0;
+	@(negedge done);
+	r_byte = r_data[adrs[2:0]*8 +:8];
+end
+endtask
+
 task fill_main_ascending_numbers;
 begin
-	send_byte_main(8'h00, 32'd0);
+	integer i;
+	for (i=0; i<=main_C*4-1; i=i+1) begin
+		send_byte_main(i, i);
+	end
 end
 endtask
 
 task send_byte_main(input [7:0] byte_to_send, input [31:0] adrs);
 begin
 	manual = 1;
+	m_address_manual = adrs;
 	m_write_data_manual[adrs[3:0]*8 +: 8]    = byte_to_send;
 	m_op_manual	     	     = `write_op;
 	m_mem_operation_manual = 1'b1;
@@ -140,7 +162,7 @@ cache_hierarchy
 
 cache 
 #(
-	.C(L2_C), // capacity (words)
+	.C(main_C), // capacity (words)
 	.b(L2_b), // block size (words in block)
 	.N(1)  // degree of associativity
 ) 

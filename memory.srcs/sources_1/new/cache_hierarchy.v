@@ -355,7 +355,7 @@ always @(posedge i_clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done[1]) begin
-							// o_read_data <= read_data_L1; // todo: assign read_data
+							if (hit_occurred[1]) o_read_data <= read_data_L1;
 							state <= next_state;
 							cache_sub_state  <= init;
 						end
@@ -391,6 +391,7 @@ always @(posedge i_clk) begin
 					end
 					finish: begin
 						if (!mem_operation_done[2]) begin
+							if (only_second_hit && is_read_op) o_read_data <= read_data_L2[i_address[3]*64 +:64];
 							use_manual_adrs <= 1'b0;
 							use_manual_N <= 1'b0;
 							state <= next_state;
@@ -418,6 +419,7 @@ always @(posedge i_clk) begin
 					end
 					finish: begin
 						if (!i_mem_operation_done) begin
+							if (both_missed && is_read_op) o_read_data <= i_read_data[i_address[3]*64 +:64];
 							cache_sub_state  <= init;
 							state <= next_state;
 						end
