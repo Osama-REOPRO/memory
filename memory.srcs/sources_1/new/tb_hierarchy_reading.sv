@@ -49,8 +49,18 @@ wire m_mem_operation = manual? m_mem_operation_manual : m_mem_operation_cache;
 
 wire m_mem_operation_done;
 
+integer test_val = 0;
+
 
 always #1 clk = ~clk;
+
+
+always @(posedge clk) begin
+	if (rst) begin
+		{clk, mem_op, op, adrs, valid_bytes, w_data, test_val} <= 0;
+		{m_op_manual, m_address_manual, m_valid_bytes_manual, m_mem_operation_manual} <= 0;
+	end
+end
 
 initial begin
 	rst = 0;
@@ -58,7 +68,32 @@ initial begin
 	rst = 1;
 	#10
 	rst = 0;
+	#10
+	fill_main_ascending_numbers();
 end
+
+// tasks
+task fill_main_ascending_numbers;
+begin
+	send_byte_main(8'h00, 32'd0);
+end
+endtask
+
+task send_byte_main(input [7:0] byte_to_send, input [31:0] adrs);
+begin
+	manual = 1;
+	m_write_data_manual[adrs[3:0]*8 +: 8]    = byte_to_send;
+	m_op_manual	     	     = `write_op;
+	m_mem_operation_manual = 1'b1;
+	m_valid_bytes_manual	  = {(4*L2_b){1'b0}};
+	m_valid_bytes_manual[adrs[3:0]] = 1'b1;
+	
+	@(posedge m_mem_operation_done) m_mem_operation_manual = 1'b0;
+	@(negedge m_mem_operation_done);	
+	
+	manual = 0;
+end
+endtask
 
 
 cache_hierarchy
